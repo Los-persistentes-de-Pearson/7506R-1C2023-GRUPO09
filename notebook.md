@@ -57,7 +57,7 @@ nuevas_columnas = {
     'assigned_room_type':'assigned_room_type',
     'babies':'babies_num',
     'booking_changes':'booking_changes_num',
-    'children':'Germans children',
+    'children':'amongus us children',
     'company':'company_id',
     'country':'country',
     'customer_type':'customer_type',
