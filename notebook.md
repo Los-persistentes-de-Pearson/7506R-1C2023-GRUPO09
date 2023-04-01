@@ -17,6 +17,10 @@ jupyter:
 
 En este jupyter notebook vamos a explorar un conjunto de datos sobre reservas de hoteles y tratar de hallar un modelo que nos permita predecir si la reserva va a ser cancelada
 
+## Exploracion Inicial
+
+
+### Imports
 
 Importamos todas las librerias que vamos a usar
 
@@ -28,6 +32,8 @@ import seaborn as sns
 from matplotlib import pyplot as plt
 ```
 
+### Cargamos la base de datos como un dataframe
+
 Cargamos los datos en un dataframe de pandas. Creamos una copia del dataframe original y trabajamos encima de la copia
 
 ```python
@@ -37,13 +43,15 @@ hotelsdf = hotelsDfOriginal.copy()
 print("El data frame esta compuesto por "f"{hotelsdf.shape[0]}"" filas y "f"{hotelsdf.shape[1]}"" columnas")
 ```
 
-Un vistaso básico a la información contenida en el dataframe:
+### Vistazo inicial
+
+Un vistazo básico a la información contenida en el dataframe:
 
 ```python
 pd.concat([hotelsdf.head(2), hotelsdf.sample(5), hotelsdf.tail(2)])
 ```
 
-Renombramos las columnas del dataframe con nombres mas claros y en español
+Renombramos las columnas del dataframe con nombres mas claros
 
 ```python
 nuevas_columnas = {
@@ -85,18 +93,29 @@ nuevas_columnas = {
 hotelsdf.rename(columns = nuevas_columnas, inplace = True)
 ```
 
-Vemos el dataset con los nuevos nombres de columnas
-
-```python
-pd.concat([hotelsdf.head(2), hotelsdf.sample(5), hotelsdf.tail(2)])
-```
-
 Por otro lado, podemos observar que tipo de dato almacena cada columna y cuales tienen datos faltantes
 
 ```python
 hotelsdf.info()
 ```
 
+## Resolvemos variables faltantes
+
+Vemos que columnas tienen variables faltantes
+
+```python
+serie_de_nans = hotelsdf.isna().sum()
+serie_de_nans
+```
+Vemos entonces que las columnas con variables faltantes son:
+
+```python
+serie_de_nans[serie_de_nans > 0]
+```
+
+Resolvemos los variables faltantes una columna a la vez
+
+### Resolvemos variables faltantes de children_num
 Aca vemos que la variable children_num esta almacenada como un float. 
 Vamos a ver si hay algun valor de childer con valor decimal distinto a 0.
 
@@ -168,9 +187,6 @@ plt.show()
 hotelsdf[cuantitativas].describe()
 ```
 
-```python
-hotelsdf.isna().sum()
-```
 
 Variables cualitativas
 
