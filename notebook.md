@@ -97,6 +97,15 @@ Por otro lado, podemos observar que tipo de dato almacena cada columna y cuales 
 hotelsdf.info()
 ```
 
+Aca vemos que la variable children_num esta almacenada como un float. 
+Vamos a ver si hay algun valor de childer con valor decimal distinto a 0.
+
+```python
+hotelsdf["children_num"].value_counts()
+```
+Vemos que no hay ningun valor con decimal distinto a 0, podemos castear la columna a int.
+
+
 Segun la clasificacion de las variables podemos establecer lo siguiente sobre los datos extraidos del dataframe
 
 Variables cuantitativas, entre las cuales podemos encontrar:
