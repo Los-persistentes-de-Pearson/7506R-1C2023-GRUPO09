@@ -57,7 +57,7 @@ nuevas_columnas = {
     'assigned_room_type':'assigned_room_type',
     'babies':'babies_num',
     'booking_changes':'booking_changes_num',
-    'children':'cambio para romper a Ger',
+    'children':'commit de Fabri segunda ruptura',
     'company':'company_id',
     'country':'country',
     'customer_type':'customer_type',
