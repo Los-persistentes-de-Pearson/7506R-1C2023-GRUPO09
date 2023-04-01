@@ -57,7 +57,7 @@ nuevas_columnas = {
     'assigned_room_type':'assigned_room_type',
     'babies':'babies_num',
     'booking_changes':'booking_changes_num',
-    'children':'commit_Jose_ignacio',
+    'children':'commit_Jose_ignacio_parte_2',
     'company':'company_id',
     'country':'country',
     'customer_type':'customer_type',
