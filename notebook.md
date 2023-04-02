@@ -17,6 +17,7 @@ jupyter:
 
 En este jupyter notebook vamos a explorar un conjunto de datos sobre reservas de hoteles y tratar de hallar un modelo que nos permita predecir si la reserva va a ser cancelada
 
+
 ## Exploracion Inicial
 
 
@@ -99,7 +100,7 @@ Por otro lado, podemos observar que tipo de dato almacena cada columna y cuales 
 hotelsdf.info()
 ```
 
-## Resolvemos variables faltantes
+## Observamos variables faltantes
 
 Vemos que columnas tienen variables faltantes
 
@@ -115,7 +116,8 @@ serie_de_nans[serie_de_nans > 0]
 
 Resolvemos los variables faltantes una columna a la vez
 
-### Resolvemos variables faltantes de children_num
+
+### Observamos variables faltantes de children_num
 Aca vemos que la variable children_num esta almacenada como un float. 
 Vamos a ver si hay algun valor de childer con valor decimal distinto a 0.
 
@@ -197,4 +199,26 @@ cualitativas = ['hotel_name',"arrival_month", 'meal_type', 'country', 'market_se
 
 for variable in cualitativas:
   print(hotelsdf[variable].value_counts().index.tolist())
+```
+
+
+
+Analizamos si hay algun valor de ID repetido, para tratar de reconocer un patron
+
+
+```python
+ides = hotelsdf["booking_id"].value_counts()
+ides[ides > 1]
+```
+
+Como todos los ID's son unicos y no hay ningun ID vacio; consideramos que es un ID sin ningun analitico.
+
+```python
+# Codigo para borrar la columna de ID
+hotelsdf.drop("booking_id", axis=1, inplace=True)
+```
+
+
+```python
+hotelsdf.info()
 ```
