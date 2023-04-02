@@ -198,7 +198,9 @@ cualitativas = ['hotel_name',"arrival_month", 'meal_type', 'country', 'market_se
 #no tiene sentido imprimir cosas como id, company, deposite_type
 
 for variable in cualitativas:
+  print("Variable: " + variable)
   print(hotelsdf[variable].value_counts().index.tolist())
+  print()
 ```
 
 
@@ -218,7 +220,6 @@ Como todos los ID's son unicos y no hay ningun ID vacio; consideramos que es un 
 hotelsdf.drop("booking_id", axis=1, inplace=True)
 ```
 
-
 ```python
-hotelsdf.info()
+hotelsdf["company_id"].value_counts()
 ```
