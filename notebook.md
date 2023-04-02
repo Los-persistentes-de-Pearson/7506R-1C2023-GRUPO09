@@ -13,15 +13,13 @@ jupyter:
     name: python3
 ---
 
-# Pruebas
-
 En este jupyter notebook vamos a explorar un conjunto de datos sobre reservas de hoteles y tratar de hallar un modelo que nos permita predecir si la reserva va a ser cancelada
 
 
-## Exploracion Inicial
+# Exploracion Inicial
 
 
-### Imports
+## Imports
 
 Importamos todas las librerias que vamos a usar
 
@@ -33,7 +31,7 @@ import seaborn as sns
 from matplotlib import pyplot as plt
 ```
 
-### Cargamos la base de datos como un dataframe
+## Cargamos la base de datos como un dataframe
 
 Cargamos los datos en un dataframe de pandas. Creamos una copia del dataframe original y trabajamos encima de la copia
 
@@ -44,13 +42,14 @@ hotelsdf = hotelsDfOriginal.copy()
 print("El data frame esta compuesto por "f"{hotelsdf.shape[0]}"" filas y "f"{hotelsdf.shape[1]}"" columnas")
 ```
 
-### Vistazo inicial
+## Vistazo inicial
 
 Un vistazo básico a la información contenida en el dataframe:
 
 ```python
 pd.concat([hotelsdf.head(2), hotelsdf.sample(5), hotelsdf.tail(2)])
 ```
+
 
 Renombramos las columnas del dataframe con nombres mas claros
 
@@ -99,8 +98,75 @@ Por otro lado, podemos observar que tipo de dato almacena cada columna y cuales 
 ```python
 hotelsdf.info()
 ```
+### Removemos columnas sin datos a priori
+De este vistazo inicial, vemos que la columna **id** no parece tener un patron distingible.
+Analizamos si hay algun valor de ID repetido, para tratar de reconocer un patron
 
-## Observamos variables faltantes
+```python
+ides = hotelsdf["booking_id"].value_counts()
+ides[ides > 1]
+```
+
+Como todos los ID's son unicos y no hay ningun ID vacio; consideramos que es un ID sin ningun analitico.
+
+```python
+# Codigo para borrar la columna de ID
+hotelsdf.drop("booking_id", axis=1, inplace=True)
+```
+
+# Analisis de variables
+Vamos a dividir las variables en cuantitativas y cualitativas.
+
+|     Nombre de la variable           |       Tipo      |      Descripcion         |
+| ----------------------------------- | --------------- | ------------------------ |  
+| average_daily_rate                  | Cuantitativa    |                               |
+| adult_num                           | Cuantitativa    |           jhnfjknekjhnbf              |
+| agent_id                            | Cualitativa     |                          |
+| arrival_month_day                   | Cuantitativa    |                          |
+| arrival_month                       | Cualitativa     |                          |
+| arrival_week_number                 | Cuantitativa    |                          |
+| arrival_year                        | Cuantitativa    |                          |
+| assigned_room_type                  | Cualitativa     |                          |
+| babies_num                          | Cuantitativa    |                          |
+| booking_changes_num                 | Cuantitativa    |                          |
+| children_num                        | Cuantitativa    |                          |
+| company_id                          | Cualitativa     |                          |
+| country                             | Cualitativa     |                          |
+| customer_type                       | Cualitativa     |                          |
+| days_in_waiting_list                | Cuantitativa    |                          |
+| deposit_type                        | Cualitativa     |                          |
+| distribution_channel                | Cualitativa     |                          |
+| hotel_name                          | Cualitativa     |                          |
+| is_repeated_guest                   | Cualitativa     |                          |
+| lead_time                           | Cuantitativa    |                          |
+| market_segment_type                 | Cualitativa     |                          |
+| meal_type                           | Cualitativa     |                          |
+| previous_bookings_not_canceled_num  | Cuantitativa    |                          |
+| previous_cancellations_num          | Cuantitativa    |                          |
+| required_car_parking_spaces_num     | Cuantitativa    |                          |
+| reservation_status                  | Cualitativa     |                          |
+| reservation_status_date             | Cuantitativa    |                          |
+| reserved_room_type                  | Cualitativa     |                          |
+| weekend_nights_num                  | Cuantitativa    |                          |
+| week_nights_num                     | Cuantitativa    |                          |
+| special_requests_num                | Cuantitativa    |                          |
+
+
+## Cuantitativas
+
+### Average Daily Rate
+
+#### Grafica de distribucion
+
+#### Outliers
+
+#### Variables faltantes
+
+#### Ajustes de valor
+
+
+## Cualitativas
+
 
 Vemos que columnas tienen variables faltantes
 
@@ -117,7 +183,7 @@ serie_de_nans[serie_de_nans > 0]
 Resolvemos los variables faltantes una columna a la vez
 
 
-### Observamos variables faltantes de children_num
+## Observamos variables faltantes de children_num
 Aca vemos que la variable children_num esta almacenada como un float. 
 Vamos a ver si hay algun valor de childer con valor decimal distinto a 0.
 
@@ -154,23 +220,25 @@ Variables cuantitativas, entre las cuales podemos encontrar:
 Creamos una lista con todas las variables cuantitativas
 
 ```python
-cuantitativas = ["lead_time"
-,"arrival_year"
-,"arrival_week_number"
-,"arrival_month_day"
-,"weekend_nights_num"
-,"days_in_waiting_list"
-,"week_nights_num"
-,"adult_num"
-,"children_num"
-,"babies_num"
-,"previous_cancellations_num"
-,"previous_bookings_not_canceled_num"
-,"booking_changes_num"
-,"average_daily_rate"
-,"required_car_parking_spaces_num"
-,"special_requests_num"
-,"reservation_status_date"]
+cuantitativas = [
+"adult_num",
+"arrival_month_day",
+"arrival_week_number",
+"arrival_year",
+"average_daily_rate",
+"babies_num",
+"booking_changes_num",
+"children_num",
+"days_in_waiting_list",
+"lead_time",
+"previous_bookings_not_canceled_num",
+"previous_cancellations_num",
+"required_car_parking_spaces_num",
+"reservation_status_date",
+"special_requests_num",
+"weekend_nights_num",
+"week_nights_num",
+]
 
 # Este if es se usa para evitar problemas de versiones de pandas entre la version local y la presente en Google Collab
 if (pd.__version__) == "1.5.2":
@@ -193,7 +261,22 @@ hotelsdf[cuantitativas].describe()
 Variables cualitativas
 
 ```python
-cualitativas = ['hotel_name',"arrival_month", 'meal_type', 'country', 'market_segment_type', 'distribution_channel', 'is_repeated_guest', 'reserved_room_type', 'assigned_room_type', 'deposit_type', 'customer_type', 'reservation_status']
+cualitativas = [
+"agent_id",
+"arrival_month",
+"assigned_room_type",
+"company_id",
+"country",
+"customer_type",
+"deposit_type",
+"distribution_channel",
+"hotel_name",
+"is_repeated_guest",
+"market_segment_type",
+"meal_type",
+"reservation_status",
+"reserved_room_type",
+]
 
 #no tiene sentido imprimir cosas como id, company, deposite_type
 
@@ -201,25 +284,4 @@ for variable in cualitativas:
   print("Variable: " + variable)
   print(hotelsdf[variable].value_counts().index.tolist())
   print()
-```
-
-
-
-Analizamos si hay algun valor de ID repetido, para tratar de reconocer un patron
-
-
-```python
-ides = hotelsdf["booking_id"].value_counts()
-ides[ides > 1]
-```
-
-Como todos los ID's son unicos y no hay ningun ID vacio; consideramos que es un ID sin ningun analitico.
-
-```python
-# Codigo para borrar la columna de ID
-hotelsdf.drop("booking_id", axis=1, inplace=True)
-```
-
-```python
-hotelsdf["company_id"].value_counts()
 ```
