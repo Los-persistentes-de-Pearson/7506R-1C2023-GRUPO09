@@ -15,13 +15,9 @@ jupyter:
 
 En este jupyter notebook vamos a explorar un conjunto de datos sobre reservas de hoteles y tratar de hallar un modelo que nos permita predecir si la reserva va a ser cancelada
 
-
-# Exploracion Inicial
-
-
-## Imports
-
+# Exploracion Inicial e ingenieria de caracteristicas
 Importamos todas las librerias que vamos a usar
+
 
 ```python
 import pandas as pd 
@@ -31,9 +27,9 @@ import seaborn as sns
 from matplotlib import pyplot as plt
 ```
 
-## Cargamos la base de datos como un dataframe
+## Cargamos de datos a un dataframe
 
-Cargamos los datos en un dataframe de pandas. Creamos una copia del dataframe original y trabajamos encima de la copia
+Se carga la información a un dataframe de pandas, se genera una copia y se trabaja sobre la misma
 
 ```python
 hotelsDfOriginal = pd.read_csv("./hotels_train.csv")
@@ -73,7 +69,7 @@ nuevas_columnas = {
     'deposit_type':'deposit_type',
     'distribution_channel':'distribution_channel',
     'hotel':'hotel_name',
-    'id':'booking_id', #chekear con el profesor
+    'id':'booking_id',
     'is_canceled':'is_canceled',
     'is_repeated_guest':'is_repeated_guest',
     'lead_time':'lead_time',
@@ -98,8 +94,8 @@ Por otro lado, podemos observar que tipo de dato almacena cada columna y cuales 
 ```python
 hotelsdf.info()
 ```
-### Removemos columnas sin datos a priori
-De este vistazo inicial, vemos que la columna **id** no parece tener un patron distingible.
+### Evaluar la remocion de la variable id
+De este vistazo inicial, se observa que la columna **id** no parece tener un patron distingible.
 Analizamos si hay algun valor de ID repetido, para tratar de reconocer un patron
 
 ```python
@@ -119,7 +115,7 @@ Vamos a dividir las variables en cuantitativas y cualitativas.
 
 |     Nombre de la variable           |       Tipo      |      Descripcion         |
 | ----------------------------------- | --------------- | ------------------------ |  
-| average_daily_rate                  | Cuantitativa    |                               |
+| average_daily_rate                  | Cuantitativa    | Promedio de la ganancia diaria, por habitacion                              |
 | adult_num                           | Cuantitativa    |           jhnfjknekjhnbf              |
 | agent_id                            | Cualitativa     |                          |
 | arrival_month_day                   | Cuantitativa    |                          |
@@ -154,13 +150,34 @@ Vamos a dividir las variables en cuantitativas y cualitativas.
 
 ## Cuantitativas
 
+Se trabaja inicialmente sobre las variables que han sido identificadas como númericas, se grafican y se intenta realizar la identificación de outliers, por otro lado, aquellas que de un analisis exploratorio previo arrojaron la existencia de *nulls/nans* se realiza algún tipo de reemplazo por el valor más conveniente
+
 ### Average Daily Rate
+
+Realizamos un analisis sobre la variable average daily rate
+
+#### Valores nulos 
+
+```python 
+adr_nulos = len(hotelsdf[hotelsdf.average_daily_rate.isnull()])/len(hotelsdf.average_daily_rate)
+print("El porcentaje de valores nulos es: "f'{adr_nulos}'" ")
+```
 
 #### Grafica de distribucion
 
+```python 
+data = hotelsdf.average_daily_rate
+sns.histplot(data = data, element = 'step', color = 'Green')
+plt.xlabel(xlabel = 'Average daily rate')
+plt.ylabel(ylabel = 'Frecuencia')
+plt.title('Distribucion de la variable')
+plt.figure(figsize = (15, 10))
+plt.show()
+```
+
 #### Outliers
 
-#### Variables faltantes
+Del grafico anterior se observan registros de adr los cuales tienen asignados 0, se debe estudiar a que se deben esos valores, asi como tambien tratar el valor negativo que aparece como mínimo
 
 #### Ajustes de valor
 
