@@ -150,20 +150,44 @@ Vamos a dividir las variables en cuantitativas y cualitativas.
 
 ## Cuantitativas
 
-Se trabaja inicialmente sobre las variables que han sido identificadas como númericas, se grafican y se intenta realizar la identificación de outliers, por otro lado, aquellas que de un analisis exploratorio previo arrojaron la existencia de *nulls/nans* se realiza algún tipo de reemplazo por el valor más conveniente
+Se trabaja inicialmente sobre las variables que han sido identificadas como cuantitativas, se grafican y se intenta realizar la identificación de outliers, por otro lado, aquellas que de un analisis exploratorio previo arrojaron la existencia de *nulls/nans* se realiza algún tipo de reemplazo por el valor más conveniente
+
+Creamos una lista con todas las variables cuantitativas
+
+```python
+cuantitativas = [
+"adult_num",
+"arrival_month_day",
+"arrival_week_number",
+"arrival_year",
+"average_daily_rate",
+"babies_num",
+"booking_changes_num",
+"children_num",
+"days_in_waiting_list",
+"lead_time",
+"previous_bookings_not_canceled_num",
+"previous_cancellations_num",
+"required_car_parking_spaces_num",
+"reservation_status_date",
+"special_requests_num",
+"weekend_nights_num",
+"week_nights_num",
+]
+```
 
 ### Average Daily Rate
 
 Realizamos un analisis sobre la variable average daily rate
 
-#### Valores nulos 
+##### Valores nulos 
 
 ```python 
 adr_nulos = len(hotelsdf[hotelsdf.average_daily_rate.isnull()])/len(hotelsdf.average_daily_rate)
 print("El porcentaje de valores nulos es: "f'{adr_nulos}'" ")
 ```
 
-#### Grafica de distribucion
+##### Grafica de distribucion
 
 ```python 
 data = hotelsdf.average_daily_rate
@@ -175,11 +199,11 @@ plt.figure(figsize = (15, 10))
 plt.show()
 ```
 
-#### Outliers
+##### Outliers
 
 Del grafico anterior se observan registros de adr los cuales tienen asignados 0, se debe estudiar a que se deben esos valores, asi como tambien tratar el valor negativo que aparece como mínimo
 
-#### Ajustes de valor
+##### Ajustes de valor
 
 
 ## Cualitativas
@@ -233,30 +257,7 @@ Variables cuantitativas, entre las cuales podemos encontrar:
 - total_of_special_requests
 - reservation_status_date
 
-
-Creamos una lista con todas las variables cuantitativas
-
 ```python
-cuantitativas = [
-"adult_num",
-"arrival_month_day",
-"arrival_week_number",
-"arrival_year",
-"average_daily_rate",
-"babies_num",
-"booking_changes_num",
-"children_num",
-"days_in_waiting_list",
-"lead_time",
-"previous_bookings_not_canceled_num",
-"previous_cancellations_num",
-"required_car_parking_spaces_num",
-"reservation_status_date",
-"special_requests_num",
-"weekend_nights_num",
-"week_nights_num",
-]
-
 # Este if es se usa para evitar problemas de versiones de pandas entre la version local y la presente en Google Collab
 if (pd.__version__) == "1.5.2":
     correlaciones = hotelsdf[cuantitativas].corr(numeric_only=True)
