@@ -176,6 +176,48 @@ cuantitativas = [
 ]
 ```
 
+### Adult number 
+
+Realizamos un analisis sobre la variable adult number
+
+##### Valores estadisticos relevantes 
+
+```python 
+hotelsdf.adult_num.describe()
+```
+
+##### Valores nulos/faltantes
+
+```python 
+hotelsdf.adult_num.isna().sum()
+```
+
+##### Grafica de distribucion
+
+```python 
+eje_x = hotelsdf.adult_num.value_counts().index.tolist()
+eje_y = hotelsdf.adult_num.value_counts()
+sns.barplot(x = eje_x, y = eje_y, color = 'Red')
+plt.xlabel(xlabel = 'Cantidad de adultos')
+plt.ylabel(ylabel = 'Cantidad de adulto')
+plt.title('Distribucion de la variable')
+plt.ytick()
+plt.figure(figsize = (15, 10))
+plt.show()
+```
+
+##### Outliers
+
+En el grafico anterior se listan todos las cantidades de adultos de los registro
+
+##### Ajustes de valor
+
+### arrival month day
+
+### arrival week number 
+
+### arrival year 
+
 ### Average Daily Rate
 
 Realizamos un analisis sobre la variable average daily rate
@@ -210,6 +252,29 @@ Del grafico anterior se observan registros de adr los cuales tienen asignados 0,
 
 ##### Ajustes de valor
 
+### babies number 
+
+### booking changes number 
+
+### children number 
+
+### days in the waiting list 
+
+### lead time 
+
+### previous booking not cancelled number
+
+### previous booking cancellation number
+
+### required car space number 
+
+### reservation status date 
+
+### special request number 
+
+### weekend nights number
+
+### week nights number 
 
 ## Cualitativas
 
