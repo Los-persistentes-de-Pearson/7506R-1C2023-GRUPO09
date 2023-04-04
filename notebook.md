@@ -182,19 +182,19 @@ Realizamos un analisis sobre la variable adult number
 
 ##### Valores estadisticos relevantes 
 
-```python 
+```python
 hotelsdf.adult_num.describe()
 ```
 
 ##### Valores nulos/faltantes
 
-```python 
+```python
 hotelsdf.adult_num.isna().sum()
 ```
 
 ##### Grafica de distribucion
 
-```python 
+```python
 eje_x = hotelsdf.adult_num.value_counts().index.tolist()
 eje_y = hotelsdf.adult_num.value_counts()
 grafico = sns.barplot(x = eje_x, y = eje_y, color = 'Green')
@@ -216,7 +216,7 @@ En el grafico anterior se listan todos las cantidades de adultos de los registro
 ##### Valores estadisticos relevantes
 
 ```python
-hotelsdf.arrival_date_day_of_month.describe()
+hotelsdf["arrival_month_day"].describe()
 ```
 
 ##### Valores nulos/faltantes
@@ -243,11 +243,13 @@ plt.title("Misterio")
 ##### Outliers
 
 ```python
+
 ```
 
 ##### Ajustes de valor
 
 ```python
+
 ```
 
 ### arrival week number 
@@ -272,19 +274,19 @@ Realizamos un analisis sobre la variable average daily rate
 
 ##### Valores estadisticos relevantes 
 
-```python 
+```python
 hotelsdf.average_daily_rate.describe()
 ```
 
 ##### Valores nulos/faltantes
 
-```python 
+```python
 hotelsdf.average_daily_rate.isna().sum()
 ```
 
 ##### Grafica de distribucion
 
-```python 
+```python
 data = hotelsdf.average_daily_rate
 sns.histplot(data = data, element = 'step', color = 'Green')
 plt.xlabel(xlabel = 'Average daily rate')
