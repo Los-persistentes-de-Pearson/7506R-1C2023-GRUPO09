@@ -116,7 +116,7 @@ Vamos a dividir las variables en cuantitativas y cualitativas.
 |     Nombre de la variable           |       Tipo      |      Descripcion         |
 | ----------------------------------- | --------------- | ------------------------ |  
 | average_daily_rate                  | Cuantitativa    | Promedio de la ganancia diaria, por habitacion                              |
-| adult_num                           | Cuantitativa    |           jhnfjknekjhnbf              |
+| adult_num                           | Cuantitativa    |           numero de adultos en la reserva              |
 | agent_id                            | Cualitativa     |                          |
 | arrival_month_day                   | Cuantitativa    |                          |
 | arrival_month                       | Cualitativa     |                          |
@@ -197,11 +197,10 @@ hotelsdf.adult_num.isna().sum()
 ```python 
 eje_x = hotelsdf.adult_num.value_counts().index.tolist()
 eje_y = hotelsdf.adult_num.value_counts()
-sns.barplot(x = eje_x, y = eje_y, color = 'Red')
+grafico = sns.barplot(x = eje_x, y = eje_y, color = 'Green')
 plt.xlabel(xlabel = 'Cantidad de adultos')
 plt.ylabel(ylabel = 'Cantidad de adulto')
 plt.title('Distribucion de la variable')
-plt.ytick()
 plt.figure(figsize = (15, 10))
 plt.show()
 ```
@@ -214,9 +213,58 @@ En el grafico anterior se listan todos las cantidades de adultos de los registro
 
 ### arrival month day
 
+##### Valores estadisticos relevantes
+
+```python
+hotelsdf.arrival_date_day_of_month.describe()
+```
+
+##### Valores nulos/faltantes
+
+```python
+hotelsdf.arrival_month_day.isna().sum()
+```
+
+##### Grafica de distribucion
+
+```python
+eje_x = hotelsdf.arrival_month_day.value_counts().index.tolist()
+eje_y = hotelsdf.arrival_month_day.value_counts()
+plt.figure(figsize = (9, 5))
+plt.xlabel(xlabel = 'Dia de llegada')
+plt.ylabel(ylabel = 'Frecuencia')
+sns.barplot(x = eje_x, y = eje_y, palette= 'Set1')
+plt.title("Misterio")
+#Revisar si este grafico es relevante
+#Aca no hay outliers
+#ajustar eje x se ve apiñado
+```
+
+##### Outliers
+
+```python
+```
+
+##### Ajustes de valor
+
+```python
+```
+
 ### arrival week number 
 
+##### Valores estadisticos relevantes
+##### Valores nulos/faltantes
+##### Grafica de distribucion
+##### Outliers
+##### Ajustes de valor
+
 ### arrival year 
+
+##### Valores estadisticos relevantes
+##### Valores nulos/faltantes
+##### Grafica de distribucion
+##### Outliers
+##### Ajustes de valor
 
 ### Average Daily Rate
 
@@ -254,27 +302,99 @@ Del grafico anterior se observan registros de adr los cuales tienen asignados 0,
 
 ### babies number 
 
+##### Valores estadisticos relevantes
+##### Valores nulos/faltantes
+##### Grafica de distribucion
+##### Outliers
+##### Ajustes de valor
+
 ### booking changes number 
+
+##### Valores estadisticos relevantes
+##### Valores nulos/faltantes
+##### Grafica de distribucion
+##### Outliers
+##### Ajustes de valor
 
 ### children number 
 
+##### Valores estadisticos relevantes
+##### Valores nulos/faltantes
+##### Grafica de distribucion
+##### Outliers
+##### Ajustes de valor
+
 ### days in the waiting list 
+
+##### Valores estadisticos relevantes
+##### Valores nulos/faltantes
+##### Grafica de distribucion
+##### Outliers
+##### Ajustes de valor
 
 ### lead time 
 
+##### Valores estadisticos relevantes
+##### Valores nulos/faltantes
+##### Grafica de distribucion
+##### Outliers
+##### Ajustes de valor
+
 ### previous booking not cancelled number
+
+##### Valores estadisticos relevantes
+##### Valores nulos/faltantes
+##### Grafica de distribucion
+##### Outliers
+##### Ajustes de valor
 
 ### previous booking cancellation number
 
+##### Valores estadisticos relevantes
+##### Valores nulos/faltantes
+##### Grafica de distribucion
+##### Outliers
+##### Ajustes de valor
+
 ### required car space number 
+
+##### Valores estadisticos relevantes
+##### Valores nulos/faltantes
+##### Grafica de distribucion
+##### Outliers
+##### Ajustes de valor
 
 ### reservation status date 
 
+##### Valores estadisticos relevantes
+##### Valores nulos/faltantes
+##### Grafica de distribucion
+##### Outliers
+##### Ajustes de valor
+
 ### special request number 
+
+##### Valores estadisticos relevantes
+##### Valores nulos/faltantes
+##### Grafica de distribucion
+##### Outliers
+##### Ajustes de valor
 
 ### weekend nights number
 
+##### Valores estadisticos relevantes
+##### Valores nulos/faltantes
+##### Grafica de distribucion
+##### Outliers
+##### Ajustes de valor
+
 ### week nights number 
+
+##### Valores estadisticos relevantes
+##### Valores nulos/faltantes
+##### Grafica de distribucion
+##### Outliers
+##### Ajustes de valor
 
 ## Cualitativas
 
