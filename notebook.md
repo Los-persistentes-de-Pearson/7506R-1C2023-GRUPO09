@@ -180,11 +180,16 @@ cuantitativas = [
 
 Realizamos un analisis sobre la variable average daily rate
 
-##### Valores nulos 
+##### Valores estadisticos relevantes 
 
 ```python 
-adr_nulos = len(hotelsdf[hotelsdf.average_daily_rate.isnull()])/len(hotelsdf.average_daily_rate)
-print("El porcentaje de valores nulos es: "f'{adr_nulos}'" ")
+hotelsdf.average_daily_rate.describe()
+```
+
+##### Valores nulos/faltantes
+
+```python 
+hotelsdf.average_daily_rate.isna().sum()
 ```
 
 ##### Grafica de distribucion
