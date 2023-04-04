@@ -207,7 +207,13 @@ plt.show()
 
 ##### Outliers
 
-En el grafico anterior se listan todos las cantidades de adultos de los registro
+En el grafico anterior se listan todos las cantidades de adultos de los registro.
+Se puede ver que exiten reservas con 0 adultos, lo cual no tiene mucho sentido.
+Mostramos algunos registros para darnos una idea de cuantos son y ver si podemos obtener informacion adicional
+
+```python
+hotelsdf[hotelsdf["adult_num"]==0]
+```
 
 ##### Ajustes de valor
 
