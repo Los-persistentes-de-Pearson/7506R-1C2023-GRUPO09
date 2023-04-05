@@ -197,12 +197,10 @@ hotelsdf.adult_num.isna().sum()
 ```python
 eje_x = hotelsdf.adult_num.value_counts().index.tolist()
 eje_y = hotelsdf.adult_num.value_counts()
-grafico = sns.barplot(x = eje_x, y = eje_y, color = 'Green')
+sns.barplot(x = eje_x, y = eje_y, palette = 'Set2')
 plt.xlabel(xlabel = 'Cantidad de adultos')
 plt.ylabel(ylabel = 'Cantidad de adulto')
 plt.title('Distribucion de la variable')
-plt.figure(figsize = (15, 10))
-plt.show()
 ```
 
 ##### Outliers
@@ -238,9 +236,9 @@ eje_x = hotelsdf.arrival_month_day.value_counts().index.tolist()
 eje_y = hotelsdf.arrival_month_day.value_counts()
 plt.figure(figsize = (9, 5))
 plt.xlabel(xlabel = 'Dia de llegada')
+sns.barplot(x = eje_x, y = eje_y, palette= 'Set2')
+plt.title("Dia de llegada del mes")
 plt.ylabel(ylabel = 'Frecuencia')
-sns.barplot(x = eje_x, y = eje_y, palette= 'Set1')
-plt.title("Misterio")
 #Revisar si este grafico es relevante
 #Aca no hay outliers
 #ajustar eje x se ve apiñado
@@ -261,18 +259,66 @@ plt.title("Misterio")
 ### arrival week number 
 
 ##### Valores estadisticos relevantes
+
+```python
+hotelsdf.arrival_week_number.describe()
+```
+
 ##### Valores nulos/faltantes
+
+```python
+hotelsdf.arrival_week_number.isnull().sum()
+```
+
 ##### Grafica de distribucion
+
+```python
+eje_y = hotelsdf.arrival_week_number.value_counts()
+eje_x = eje_y.index.tolist()
+plt.figure(figsize=(15, 5))
+plt.xlabel(xlabel='Numero de la semana del año')
+plt.title(label = 'Llegadas por semana del año')
+sns.barplot(x = eje_x, y = eje_y, palette =  'Set2')
+plt.ylabel(ylabel='Frecuencias')
+```
+
 ##### Outliers
 ##### Ajustes de valor
 
 ### arrival year 
 
 ##### Valores estadisticos relevantes
+
+```python
+hotelsdf.arrival_year.describe()
+```
+
 ##### Valores nulos/faltantes
+
+```python
+hotelsdf.arrival_year.isnull().sum()
+```
 ##### Grafica de distribucion
+
+```python
+eje_y = hotelsdf.arrival_year.value_counts()
+eje_x = eje_y.index.tolist()
+sns.barplot(y = eje_y, x= eje_x, palette= 'Set2')
+plt.title('Años de las reservas')
+plt.ylabel(ylabel='Frecuencia')
+plt.xlabel(xlabel='Años')
+```
+
 ##### Outliers
+
+```python
+```
+
 ##### Ajustes de valor
+
+
+```python
+```
 
 ### Average Daily Rate
 
@@ -294,12 +340,10 @@ hotelsdf.average_daily_rate.isna().sum()
 
 ```python
 data = hotelsdf.average_daily_rate
-sns.histplot(data = data, element = 'step', color = 'Green')
+sns.kdeplot(data = data)
 plt.xlabel(xlabel = 'Average daily rate')
 plt.ylabel(ylabel = 'Frecuencia')
-plt.title('Distribucion de la variable')
-plt.figure(figsize = (15, 10))
-plt.show()
+plt.title('Distribucion del average daily rate')
 ```
 
 ##### Outliers
@@ -311,18 +355,73 @@ Del grafico anterior se observan registros de adr los cuales tienen asignados 0,
 ### babies number 
 
 ##### Valores estadisticos relevantes
+
+
+```python
+hotelsdf.babies_num.describe()
+```
+
 ##### Valores nulos/faltantes
+
+```python
+eje_y = hotelsdf.babies_num.value_counts()
+eje_x = eje_y.index.tolist()
+sns.barplot(y = eje_y, x = eje_x, palette='Set2')
+plt.xlabel('Cantidad de bebes')
+plt.ylabel(ylabel='Frecuencia')
+plt.title('Numero de bebes por reserva')
+```
+
 ##### Grafica de distribucion
+
+```python
+```
+
 ##### Outliers
+
+```python
+hotelsdf[hotelsdf.babies_num == 9]
+```
+
 ##### Ajustes de valor
+
+```python
+```
 
 ### booking changes number 
 
 ##### Valores estadisticos relevantes
+
+```python
+hotelsdf.booking_changes_num.describe()
+```
+
 ##### Valores nulos/faltantes
+
+```python
+hotelsdf.booking_changes_num.isna().sum()
+```
+
 ##### Grafica de distribucion
+
+```python
+
+```
 ##### Outliers
+
+```python
+eje_y = hotelsdf.booking_changes_num.value_counts()
+eje_x = eje_y.index.tolist()
+sns.barplot(y = eje_y, x = eje_x, palette='Set2')
+plt.xlabel('Numero de cambios')
+plt.ylabel(ylabel='Frecuencia')
+plt.title('Cantidad de cambios por reserva')
+```
+
 ##### Ajustes de valor
+
+```python
+```
 
 ### children number 
 
