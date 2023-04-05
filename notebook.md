@@ -514,9 +514,20 @@ hotelsdf.required_car_parking_spaces_num.describe()
 
 ##### Grafica de distribucion
 
+```python
+car_spaces_registers = hotelsdf.required_car_parking_spaces_num.value_counts()
+car_sapces_num = car_spaces_registers.index.tolist()
+sns.barplot(y = car_spaces_registers, x = car_sapces_num, palette='Set1')
+plt.xlabel('Numero de espacios de estacionamiento')
+plt.ylabel(ylabel='Frecuencia')
+plt.title('Cantidad de espacios de estacionamiento por reserva')
+```
 
 ##### Valores nulos/faltantes
 
+```python
+print("La cantidad de valores nulos/faltantes es", hotelsdf.required_car_parking_spaces_num.isna().sum())
+```
 
 ##### Outliers
 
