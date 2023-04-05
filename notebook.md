@@ -312,12 +312,14 @@ plt.xlabel(xlabel='Años')
 ##### Outliers
 
 ```python
+
 ```
 
 ##### Ajustes de valor
 
 
 ```python
+
 ```
 
 ### Average Daily Rate
@@ -375,6 +377,7 @@ plt.title('Numero de bebes por reserva')
 ##### Grafica de distribucion
 
 ```python
+
 ```
 
 ##### Outliers
@@ -386,6 +389,7 @@ hotelsdf[hotelsdf.babies_num == 9]
 ##### Ajustes de valor
 
 ```python
+
 ```
 
 ### booking changes number 
@@ -421,6 +425,7 @@ plt.title('Cantidad de cambios por reserva')
 ##### Ajustes de valor
 
 ```python
+
 ```
 
 ### children number 
@@ -463,14 +468,6 @@ plt.title('Cantidad de cambios por reserva')
 ##### Outliers
 ##### Ajustes de valor
 
-### required car space number 
-
-##### Valores estadisticos relevantes
-##### Valores nulos/faltantes
-##### Grafica de distribucion
-##### Outliers
-##### Ajustes de valor
-
 ### reservation status date 
 
 ##### Valores estadisticos relevantes
@@ -504,6 +501,27 @@ plt.title('Cantidad de cambios por reserva')
 ##### Ajustes de valor
 
 ## Cualitativas
+
+
+### required car space number 
+
+
+##### Valores estadisticos relevantes
+
+```python
+hotelsdf.required_car_parking_spaces_num.describe()
+```
+
+##### Grafica de distribucion
+
+
+##### Valores nulos/faltantes
+
+
+##### Outliers
+
+
+##### Ajustes de valor
 
 
 Vemos que columnas tienen variables faltantes
