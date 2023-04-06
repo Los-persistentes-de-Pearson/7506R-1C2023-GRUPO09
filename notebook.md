@@ -508,11 +508,53 @@ hotelsdf.drop((hotelsdf[hotelsdf["children_num"] == 10].index.values),inplace=Tr
 
 ### days in the waiting list 
 
+
 ##### Valores estadisticos relevantes
+
+```python
+hotelsdf["days_in_waiting_list"].describe()
+```
+
+Children number representa la cantidad de dias que la reserva estuvo en la lista de espera antes de serconfirmada.
+Esta variable es **discreta**, porque representa una cantidad discreta de dias.\
+Esta esta alamacenada como int:
+
+```python
+print(hotelsdf["days_in_waiting_list"].dtype)
+```
+
 ##### Valores nulos/faltantes
+
+```python
+hotelsdf.days_in_waiting_list.isna().sum()
+```
+
+No tiene valores vacios
+
+
 ##### Grafica de distribucion
+
+```python
+alo = (hotelsdf["days_in_waiting_list"].unique())
+alo.sort()
+print(alo)
+```
+
+```python
+## TODO: DISCRETIZAR
+```
+
 ##### Outliers
+
+
+Los valores mas llamativos son aquellos por encima de 300; sin embargo no podemos establecer que son outliers porque son cantidades de dias
+
+
 ##### Ajustes de valor
+
+Vamos a aplicar la tecnica de binning para poder aprovechar los datos. Podemos separarlo en 3 grandes grupos: Poco tiempo, mediano tiempo, mucho tiempo.\
+Primero vamos a ver la cantidad de dias que hay en nuestro dataset
+
 
 ### lead time 
 
