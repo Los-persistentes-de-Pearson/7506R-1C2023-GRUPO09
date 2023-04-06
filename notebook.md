@@ -500,7 +500,7 @@ hotelsdf[hotelsdf["children_num"] == 10]
 
 
 
-Considerando que es un valor tanto mas alto que el resto, y considerando que fue hecha con **2 adultos** nada mas; podemos considerar que este outlier y que lo podemos remover. 
+Considerando que es un valor tanto mas alto que el resto, que es un unico caso y considerando que fue hecha con **2 adultos** nada mas; podemos considerar que este outlier y que lo podemos remover. 
 
 ```python
 hotelsdf.drop((hotelsdf[hotelsdf["children_num"] == 10].index.values),inplace=True)
