@@ -469,14 +469,7 @@ plt.title('Cantidad de cambios por reserva')
 ##### Ajustes de valor
 
 ### reservation status date 
-
-##### Valores estadisticos relevantes
-##### Valores nulos/faltantes
-##### Grafica de distribucion
-##### Outliers
-##### Ajustes de valor
-
-### special request number 
+### (ELIMINADA DEL DATASET ORIG)
 
 ##### Valores estadisticos relevantes
 ##### Valores nulos/faltantes
@@ -563,6 +556,36 @@ Con el analisis anteior, tomamos las siguiuentes decisiones:
 ```python
 #codigo para ajustar valores.
 ```
+
+### special requests number 
+
+
+##### Valores estadisticos relevantes
+
+```python
+# describe
+```
+
+##### Valores nulos/faltanteS
+
+```python
+#nulss
+```
+
+##### Grafica de distribucion
+
+```python
+#codigo
+```
+
+##### Outliers
+
+```python
+#Codigo
+```
+
+##### Ajustes de valor
+
 
 Vemos que columnas tienen variables faltantes
 
