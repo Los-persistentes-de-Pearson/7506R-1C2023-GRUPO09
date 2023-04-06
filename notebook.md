@@ -532,6 +532,26 @@ print("La cantidad de valores nulos/faltantes es", hotelsdf.required_car_parking
 ##### Outliers
 
 
+Viendo el grafico podemos identificar que el numero de espacios de estacionamiento mas comun es 0, seguido por 1. 
+Además encontramos algunos pocos casos en los que se reservaron 2, 3 y 8 espacios.
+Mostramos dichos registros junto con las columnas de hotel_name y adult_num para analizarlos más en detalle y determinar si alguno de ellos puede ser Oulier y por que.
+Nuestro criterio para determinar que un valor es adecuado para esta variable es que haya como mucho 1 espacio de estacionamiento por adulto en la reserva.
+
+```python
+registrosDosOMasEspacios = hotelsdf[hotelsdf["required_car_parking_spaces_num"]>=2]
+#PREG deberia hacer un .copy x las dudas?
+display(registrosDosOMasEspacios[['hotel_name', 'adult_num', "required_car_parking_spaces_num"]].sort_values(
+    by = "required_car_parking_spaces_num", 
+    ascending = False
+))
+```
+
+De la tabla anterior se pueden sacar las siguientes conclusiones:
+- En el resgistro n° 8269, el valor de 8 espacios de estacionamiento es claramente un Outlier ya que no es coherente que una habitacion para dos personas haya reservado esa cantidad de espacios de estacionamiento.
+- En el resgistro n° 13713, el valor de 3 espacios de estacionamiento tambien es un Outlier ya que tampoco es coherente que 2 personas hayan reservado 3 espacios de estacionamiento.
+- Los registros restantes NO son Outliers ya que si contienen valores poco freciuentes, son coherentes con el criterio explicado en el parrafo de arriba.
+
+
 ##### Ajustes de valor
 
 
