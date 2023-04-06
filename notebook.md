@@ -563,19 +563,24 @@ Con el analisis anteior, tomamos las siguiuentes decisiones:
 ##### Valores estadisticos relevantes
 
 ```python
-# describe
+hotelsdf.special_requests_num.describe() 
 ```
 
 ##### Valores nulos/faltanteS
 
 ```python
-#nulss
+print("La cantidad de valores nulos/faltantes es", hotelsdf.special_requests_num.isna().sum())
 ```
 
 ##### Grafica de distribucion
 
 ```python
-#codigo
+special_requests_registers = hotelsdf.special_requests_num.value_counts()
+special_requests_nun = special_requests_registers.index.tolist()
+sns.barplot(y = special_requests_registers, x = special_requests_nun, palette='Set1')
+plt.xlabel('Numero de espacios de requisitos especiales')
+plt.ylabel(ylabel='Frecuencia')
+plt.title('Cantidad de requisitos especiales por reserva')
 ```
 
 ##### Outliers
