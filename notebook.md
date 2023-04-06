@@ -312,12 +312,14 @@ plt.xlabel(xlabel='Años')
 ##### Outliers
 
 ```python
+
 ```
 
 ##### Ajustes de valor
 
 
 ```python
+
 ```
 
 ### Average Daily Rate
@@ -375,6 +377,7 @@ plt.title('Numero de bebes por reserva')
 ##### Grafica de distribucion
 
 ```python
+
 ```
 
 ##### Outliers
@@ -386,6 +389,7 @@ hotelsdf[hotelsdf.babies_num == 9]
 ##### Ajustes de valor
 
 ```python
+
 ```
 
 ### booking changes number 
@@ -421,15 +425,65 @@ plt.title('Cantidad de cambios por reserva')
 ##### Ajustes de valor
 
 ```python
+
 ```
 
 ### children number 
 
 ##### Valores estadisticos relevantes
+
+```python
+hotelsdf["children_num"].describe()
+```
+Children number representa la cantidad de niños que fueron registrados en la reserva.\
+Esta variable es **discreta**, porque representa una cantidad discreta de niños.\
+Sin embargo, esta almacenada como float64 porque tiene valores faltantes.
+
+
 ##### Valores nulos/faltantes
+
+```python
+hotelsdf.children_num.isna().sum()
+```
+
+Vemos que tenemos 4 valores faltantes.
+Vamos a ver cuales son
+
+```python
+hotelsdf[hotelsdf["children_num"].isna() == True]
+```
+
+```python
+cantidadFilas = len(hotelsdf.index)
+cantidadDeChildrenNumVacios = hotelsdf.children_num.isna().sum()
+print("Considerando que la cantidad de datos de children_num faltante es " + str((cantidadDeChildrenNumVacios * 100) / cantidadFilas) + "%, lo podemos borrar")
+```
+
+```python
+# Borramos las columnas sin valores
+hotelsdf.drop((hotelsdf[hotelsdf["children_num"].isna() == True].index.values),inplace=True)
+```
+
+```python
+# Casteamos la columna de children number a int, ahora que ya no tiene los valores nana
+hotelsdf = hotelsdf.astype({'children_num':'int'})
+```
+
+```python
+# Corroboramos que el casteo funciono
+print(hotelsdf["children_num"].dtypes)
+```
+
 ##### Grafica de distribucion
+
+
 ##### Outliers
+
+
 ##### Ajustes de valor
+
+
+
 
 ### days in the waiting list 
 
