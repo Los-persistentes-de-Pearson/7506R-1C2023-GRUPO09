@@ -474,16 +474,37 @@ hotelsdf = hotelsdf.astype({'children_num':'int'})
 print(hotelsdf["children_num"].dtypes)
 ```
 
-##### Grafica de distribucion
-
-
 ##### Outliers
 
+```python
+eje_y = hotelsdf["children_num"].value_counts()
+eje_x = eje_y.index.tolist()
+sns.barplot(y = eje_y, x = eje_x, palette='Set2')
+plt.xlabel('Cantidad de ninos')
+plt.ylabel(ylabel='Frecuencia')
+plt.title('Numero de ninos por reserva')
+
+hotelsdf["children_num"].value_counts()
+```
+
+Vemos que la gran mayoria de las reservas fueron hechas con 0 niños.\
+Unos menos con 1 y 2; e incluso menos con 3. \
+Sin embargo, nos figura una fila que reservo con 10 niños. Dicha fila es la siguiente:
+
+```python
+hotelsdf[hotelsdf["children_num"] == 10]
+```
 
 ##### Ajustes de valor
 
 
 
+
+Considerando que es un valor tanto mas alto que el resto, y considerando que fue hecha con **2 adultos** nada mas; podemos considerar que este outlier y que lo podemos remover. 
+
+```python
+hotelsdf.drop((hotelsdf[hotelsdf["children_num"] == 10].index.values),inplace=True)
+```
 
 ### days in the waiting list 
 
