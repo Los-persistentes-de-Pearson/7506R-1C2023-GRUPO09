@@ -555,6 +555,15 @@ De la tabla anterior se pueden sacar las siguientes conclusiones:
 ##### Ajustes de valor
 
 
+Con el analisis anteior, tomamos las siguiuentes decisiones:
+- En el registro n° 8269, cambiamos el valor de required_car_parking_spaces_num por el valor mas frecuente (1) para no eliminar el registro por este simple detalle.
+- En el registro n° 13713, cambiamos el valor de required_car_parking_spaces_num por el valor "2" suponiendo un error de tipeo.
+- Se mantienen sin cambios el resto de los registros restantes listados arriba.
+
+```python
+#codigo para ajustar valores.
+```
+
 Vemos que columnas tienen variables faltantes
 
 ```python
