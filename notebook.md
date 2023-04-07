@@ -496,6 +496,12 @@ plt.title('Cantidad de cambios por reserva')
 hotelsdf.required_car_parking_spaces_num.describe()
 ```
 
+##### Valores nulos/faltantes
+
+```python
+print("La cantidad de valores nulos/faltantes es", hotelsdf.required_car_parking_spaces_num.isna().sum())
+```
+
 ##### Grafica de distribucion
 
 ```python
@@ -505,12 +511,6 @@ sns.barplot(y = car_spaces_registers, x = car_sapces_num, palette='Set1')
 plt.xlabel('Numero de espacios de estacionamiento')
 plt.ylabel(ylabel='Frecuencia')
 plt.title('Cantidad de espacios de estacionamiento por reserva')
-```
-
-##### Valores nulos/faltantes
-
-```python
-print("La cantidad de valores nulos/faltantes es", hotelsdf.required_car_parking_spaces_num.isna().sum())
 ```
 
 ##### Outliers
@@ -547,25 +547,6 @@ Con el analisis anteior, tomamos las siguiuentes decisiones:
 ```python
 #codigo para ajustar valores.
 ```
-
-
-### reservation status date 
-
-
-##### Valores estadisticos relevantes
-
-
-##### Valores nulos/faltantes
-
-
-##### Grafica de distribucion
-
-
-##### Outliers
-
-
-##### Ajustes de valor
-
 
 ### special requests number 
 
@@ -613,9 +594,6 @@ print("hay", hotelsdf[hotelsdf.special_requests_num==4].shape[0] ,"reservas con 
 
 Debido a la la cantidad de reservas para estos casos no parcen ser casos puntuales. 
 Hacemos un Zscore y las normalizamos poniendo valor 1 2 o 3...?
-
-
-
 
 ```python
 # import scipy.stats as st
