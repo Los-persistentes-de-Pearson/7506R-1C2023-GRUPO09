@@ -468,22 +468,6 @@ plt.title('Cantidad de cambios por reserva')
 ##### Outliers
 ##### Ajustes de valor
 
-### weekend nights number
-
-##### Valores estadisticos relevantes
-##### Valores nulos/faltantes
-##### Grafica de distribucion
-##### Outliers
-##### Ajustes de valor
-
-### week nights number 
-
-##### Valores estadisticos relevantes
-##### Valores nulos/faltantes
-##### Grafica de distribucion
-##### Outliers
-##### Ajustes de valor
-
 ## Cualitativas
 
 
@@ -615,11 +599,52 @@ Hacemos un Zscore y las normalizamos poniendo valor 1 2 o 3...?
 # plt.show()
 ```
 
+##### Ajustes de valor
+
+
 Se toman estas decisiones. 
 TODO Se cambian tales registros?????
 No se modifica ningun registros
 
 
+### weekend nights number
+
+
+##### Valores estadisticos relevantes
+
+```python
+hotelsdf.weekend_nights_num.describe() 
+```
+
+##### Valores nulos/faltantes
+
+```python
+print("La cantidad de valores nulos/faltantes es", hotelsdf.weekend_nights_num.isna().sum())
+```
+
+##### Grafica de distribucion
+
+```python
+weekend_nights_registers = hotelsdf.weekend_nights_num.value_counts()
+weekend_nights_nun = weekend_nights_registers.index.tolist()
+sns.barplot(y = weekend_nights_registers, x = weekend_nights_nun, palette='Set1')
+plt.xlabel('weekend_nights_nun')
+plt.ylabel(ylabel='Frecuencia')
+plt.title('Cantidad de dias de fin de semana')
+```
+
+##### Outliers
+
+
+##### Ajustes de valor
+
+
+### week nights number 
+
+##### Valores estadisticos relevantes
+##### Valores nulos/faltantes
+##### Grafica de distribucion
+##### Outliers
 ##### Ajustes de valor
 
 
