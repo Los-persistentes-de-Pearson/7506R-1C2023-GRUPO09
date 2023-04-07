@@ -407,7 +407,17 @@ plt.show()
 ```
 
 ```python
-print("Vamos a eliminar "+ str(x + y) + " valores ya son valores que tienen una desviacion estandar muy marcada con  respecto al resto de los valores. Ademas, estos valores representan un " + str(hotelsdf[(hotelsdf['z_adr'] > 3)].average_daily_rate.count() + hotelsdf[(hotelsdf['z_adr'] < -2)].average_daily_rate.count()) + "% del total)
+desviacion_uno = hotelsdf[(hotelsdf['z_adr'] > 3)]
+desviacion_dos = hotelsdf[(hotelsdf['z_adr'] < -2)].
+hotelsdf.drop(desviacion_uno.index, inplace = True)
+hotelsdf.drop(desviacion_dos.index, inplace = True)
+hotelsdf.reset_index()
+```
+
+```python
+total_valores = len(hotelsdf.average_daily_rate)
+cantidad_a_eliminar = desviacion_uno.average_daily_rate.count() + desviacion_dos.average_daily_rate.count()
+print("Vamos a eliminar " + str(cantidad_a_eliminar)  + " valores ya son valores que tienen una desviacion estandar muy marcada con  respecto al resto de los valores. Ademas, estos valores representan un " +  str(cantidad_a_eliminar/total_valores) + " porcentaje del total")
 ```
 
 Graficamos nuevamente con el proposito de verificar la nueva distribucion adquirida luego de la modificacion 
@@ -422,6 +432,10 @@ plt.ylabel(ylabel = 'Frecuencia')
 plt.title('Distribucion del average daily rate')
 ```
 
+```python
+hotelsdf.drop(label = 'z_adr', inplace = True)
+```
+
 ### babies number 
 
 ##### Valores estadisticos relevantes
@@ -434,6 +448,12 @@ hotelsdf.babies_num.describe()
 ##### Valores nulos/faltantes
 
 ```python
+hotelsdf.babies_num.isnull().sum()
+```
+
+##### Grafica de distribucion
+
+```python
 eje_y = hotelsdf.babies_num.value_counts()
 eje_x = eje_y.index.tolist()
 sns.barplot(y = eje_y, x = eje_x, palette='Set2')
@@ -442,20 +462,17 @@ plt.ylabel(ylabel='Frecuencia')
 plt.title('Numero de bebes por reserva')
 ```
 
-##### Grafica de distribucion
-
-```python
-```
-
 ##### Outliers
 
 ```python
-hotelsdf[hotelsdf.babies_num == 9]
+hotelsdf[(hotelsdf.babies_num >= 1) & (hotelsdf.adult_num < 1)]
 ```
 
 ##### Ajustes de valor
 
 ```python
+hotelsdf.drop(hotelsdf[hotelsdf.babies_num == 9].index, inplace = True)
+hotelsdf.reset_index()
 ```
 
 ### booking changes number 
@@ -475,11 +492,6 @@ hotelsdf.booking_changes_num.isna().sum()
 ##### Grafica de distribucion
 
 ```python
-
-```
-##### Outliers
-
-```python
 eje_y = hotelsdf.booking_changes_num.value_counts()
 eje_x = eje_y.index.tolist()
 sns.barplot(y = eje_y, x = eje_x, palette='Set2')
@@ -487,10 +499,16 @@ plt.xlabel('Numero de cambios')
 plt.ylabel(ylabel='Frecuencia')
 plt.title('Cantidad de cambios por reserva')
 ```
+##### Outliers
+
+```python
+
+```
 
 ##### Ajustes de valor
 
 ```python
+
 ```
 
 ### children number 
