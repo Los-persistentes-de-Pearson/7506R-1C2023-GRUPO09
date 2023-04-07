@@ -641,14 +641,24 @@ plt.show()
 ##### Outliers
 
 
-Podriamos suponer como posibles outliers, reservas con muchos dias de estadia. Sin embargo, analizar solo las noches de estadia no es un buen indicador de la cantidad de dias totales ya que, por ejemplo, 4 dias de fin de semana pueden ser 8 dias. (sabado a sabado + Domingo) o 14 (llega un domingo y se va el sabado de la segunda semana). Por ello, esperamos a graficar dias de semana y a generar una columna con dias de estadia para analizar mejor ambas variables
+Podriamos suponer como posibles outliers, reservas con muchos dias de estadia. Sin embargo, analizar solo las noches de estadia no es un buen indicador de la cantidad de dias totales ya que, por ejemplo, 2 dias de fin de semana pueden ser 2 dias de estadia total (solo el fin de semana) o 7 dias de estadia total (Domingo a Domingo). Por ello, esperamos a graficar dias de semana y a generar una columna con dias de estadia para analizar mejor ambas variables y recien ahi determinar si existen ouliers.
 
 ```python
 mayores_a_cinco = hotelsdf[hotelsdf["weekend_nights_num"]>=9]
 mayores_a_cinco.shape[0]
 ```
 
-Observamos que no haya una incosistencia en la carga de datos. Para ello, compparamos con las noches de semana que se queo. Dberia darnos aproximadamente una recta ya que por cada 2 noches de fin de semana hay 5 de semana.
+Ya que consideramos que la cantidad de dias puede influir, observamos que no haya una inconsistencia en la carga de datos con relacion a la cantidad de dias de semana. Para ello, comparamos la cantidad de noches de fin de semana con las noches de semana que se quedo. Dberiamos obtener varias rectas con las siguientes condiciones:
+- por cada 1 noche de fin de semana puede haber entre 0 y 5 dias de semana.
+- por cada 2 noches de fin de semana puede haber entre 0 y 10 dias de semana.
+Osea si n es el numero de noches de fin de semana con n par, como minimo (n/2)*5 -5  numero de dias de semana y como maximo hay (n/2)*5
+Osea si n es el numero de noches de fin de semana con n impar queda determinado en (n-1/2)*5
+
+
+```python
+hotelsdf[hotelsdf["weekend_nights_num"]==8]
+
+```
 
 ```python
 sns.scatterplot(x=hotelsdf.weekend_nights_num,y=hotelsdf.week_nights_num)
@@ -664,10 +674,66 @@ Nos dio lo esperado. No hay datos incosistentes en cuanto a su comparacion con e
 
 ### week nights number 
 
+
 ##### Valores estadisticos relevantes
+
+```python
+hotelsdf.week_nights_num.describe() 
+```
+
 ##### Valores nulos/faltantes
+
+```python
+print("La cantidad de valores nulos/faltantes es", hotelsdf.week_nights_num.isna().sum())
+```
+
 ##### Grafica de distribucion
+
+```python
+week_nights_registers = hotelsdf.week_nights_num.value_counts()
+week_nights_nun = week_nights_registers.index.tolist()
+sns.barplot(y = weekend_nights_registers, x = weekend_nights_nun, palette='Set1')
+plt.xlabel('week_nights_nun')
+plt.ylabel(ylabel='Frecuencia')
+plt.title('Cantidad de dias de semana')
+```
+
+```python
+sns.boxplot(y=hotelsdf.weekend_nights_num)
+plt.show()
+```
+
+```python
+
+```
+
+Como ya habiamos observado en la cantidad de dias de fin de semana, la mayor cantidad de gente se queda 
+
+
 ##### Outliers
+
+```python
+# ##### Outliers
+
+
+# Podriamos suponer como posibles outliers, reservas con muchos dias de estadia. Sin embargo, analizar solo las noches de estadia no es un buen indicador de la cantidad de dias totales ya que, por ejemplo, 4 dias de fin de semana pueden ser 8 dias. (sabado a sabado + Domingo) o 14 (llega un domingo y se va el sabado de la segunda semana). Por ello, esperamos a graficar dias de semana y a generar una columna con dias de estadia para analizar mejor ambas variables
+
+# ```python
+# mayores_a_cinco = hotelsdf[hotelsdf["weekend_nights_num"]>=9]
+# mayores_a_cinco.shape[0]
+# ```
+
+# Observamos que no haya una incosistencia en la carga de datos. Para ello, compparamos con las noches de semana que se queo. Dberia darnos aproximadamente una recta ya que por cada 2 noches de fin de semana hay 5 de semana.
+
+# ```python
+# sns.scatterplot(x=hotelsdf.weekend_nights_num,y=hotelsdf.week_nights_num)
+# plt.title('Dispersograma noches finde vs noches de semana')
+# plt.show()
+# ```
+
+# Nos dio lo esperado. No hay datos incosistentes en cuanto a su comparacion con el numero de noches de semana.
+```
+
 ##### Ajustes de valor
 
 ```python
