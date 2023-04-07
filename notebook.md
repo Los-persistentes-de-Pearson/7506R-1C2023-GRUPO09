@@ -621,11 +621,25 @@ Primero vamos a ver la cantidad de dias que hay en nuestro dataset
 
 ### previous booking not cancelled number
 
-##### Valores estadisticos relevantes
-##### Valores nulos/faltantes
-##### Grafica de distribucion
-##### Outliers
-##### Ajustes de valor
+
+#### Valores estadisticos relevantes
+
+```python
+hotelsdf["previous_bookings_not_canceled_num"].describe()
+```
+
+#### Valores nulos/faltantes
+
+
+#### Grafica de distribucion
+
+
+
+#### Outliers
+
+
+#### Ajustes de valor
+
 
 ### previous booking cancellation number
 
