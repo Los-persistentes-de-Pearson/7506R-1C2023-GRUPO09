@@ -515,7 +515,7 @@ hotelsdf.drop((hotelsdf[hotelsdf["children_num"] == 10].index.values),inplace=Tr
 hotelsdf["days_in_waiting_list"].describe()
 ```
 
-Children number representa la cantidad de dias que la reserva estuvo en la lista de espera antes de serconfirmada.
+Days in waiting list representa la cantidad de dias que la reserva estuvo en la lista de espera antes de serconfirmada.
 Esta variable es **discreta**, porque representa una cantidad discreta de dias.\
 Esta esta alamacenada como int:
 
@@ -535,9 +535,9 @@ No tiene valores vacios
 ##### Grafica de distribucion
 
 ```python
-alo = (hotelsdf["days_in_waiting_list"].unique())
-alo.sort()
-print(alo)
+daysInWaitingListValores = (hotelsdf["days_in_waiting_list"].unique())
+daysInWaitingListValores.sort()
+print(daysInWaitingListValores)
 ```
 
 ```python
@@ -558,11 +558,66 @@ Primero vamos a ver la cantidad de dias que hay en nuestro dataset
 
 ### lead time 
 
+
 ##### Valores estadisticos relevantes
+
+```python
+hotelsdf["lead_time"].describe()
+```
+
+Lead time representa la cantidad de dias que hubo entre el dia que se realizo la reserva y el dia de llegada.\
+Esta variable es **discreta**, porque representa una cantidad discreta de dias.\
+Esta esta alamacenada como int:
+
+```python
+print(hotelsdf["lead_time"].dtype)
+```
+
 ##### Valores nulos/faltantes
+
+```python
+hotelsdf.days_in_waiting_list.isna().sum()
+```
+
+No tiene valores faltantes
+
+
 ##### Grafica de distribucion
+
+
+Vamos a analizar la frecuencia de los distintos valores que lead time puede tomar
+
+```python
+hotelsdf["lead_time"].value_counts()
+```
+
+Vamos a graficarlos para ver su distribucion
+
+```python
+data = hotelsdf.lead_time
+sns.kdeplot(data = data)
+plt.xlabel(xlabel = 'Average daily rate')
+plt.ylabel(ylabel = 'Frecuencia')
+plt.title('Distribucion del average daily rate') #TODO: Cambiar la Y para ver la frecuencia, no esa numero raro
+```
+
+Vemos que la mayoria de los valores estan por debajo de 300
+
+```python
+leadTimeValores = (hotelsdf["lead_time"].unique())
+leadTimeValores.sort()
+print(leadTimeValores)
+```
+
 ##### Outliers
+Los valores mas llamativos son aquellos por encima de 300; sin embargo no podemos establecer que son outliers porque son cantidades de dias
+
+
 ##### Ajustes de valor
+
+Vamos a aplicar la tecnica de binning para poder aprovechar los datos. Podemos separarlo en 3 grandes grupos: Poco tiempo, mediano tiempo, mucho tiempo.\
+Primero vamos a ver la cantidad de dias que hay en nuestro dataset
+
 
 ### previous booking not cancelled number
 
