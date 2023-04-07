@@ -644,11 +644,11 @@ hotelsdf.previous_bookings_not_canceled_num.isna().sum()
 eje_y = hotelsdf["previous_bookings_not_canceled_num"].value_counts()
 eje_x = eje_y.index.tolist()
 sns.barplot(y = eje_y, x = eje_x, palette='Set2')
-plt.xlabel('Cantidad de ninos')
+plt.xlabel('Cantidad de reservas no canceladas')
 plt.ylabel(ylabel='Frecuencia')
-plt.title('Numero de ninos por reserva')
+plt.title('Numero de reservas no canceladas')
 
-hotelsdf["children_num"].value_counts() #TODO: Corregir cuadro, se ve horrible el cuadro
+hotelsdf["previous_bookings_not_canceled_num"].value_counts() #TODO: Corregir cuadro, se ve horrible el cuadro
 ```
 
 #### Outliers
@@ -657,14 +657,47 @@ No parece haber ningun valor fuera  de lo comun
 
 #### Ajustes de valor
 
+Vamos a aplicar la tecnica de binning para poder aprovechar los datos. Podemos separarlo en 3 grandes grupos: Poco tiempo, mediano tiempo, mucho tiempo.\
+Primero vamos a ver la cantidad de dias que hay en nuestro dataset
+
 
 ### previous booking cancellation number
 
+
 ##### Valores estadisticos relevantes
+```python
+hotelsdf["previous_cancellations_num"].describe()
+```
+
+Esta variable representa la cantidad de reservasa que si fueron canceladas por el usuario antes de la reserva actual
+
+
 ##### Valores nulos/faltantes
+```python
+hotelsdf.previous_cancellations_num.isna().sum()
+```
+
 ##### Grafica de distribucion
+```python
+hotelsdf["previous_cancellations_num"].value_counts() #TODO: Corregir cuadro, se ve horrible el cuadro
+eje_y = hotelsdf["previous_cancellations_num"].value_counts()
+eje_x = eje_y.index.tolist()
+sns.barplot(y = eje_y, x = eje_x, palette='Set2')
+plt.xlabel('Cantidad de reservas canceladas')
+plt.ylabel(ylabel='Frecuencia')
+plt.title('Numero de reservas canceladas')
+
+hotelsdf["previous_cancellations_num"].value_counts() #TODO: Corregir cuadro, se ve horrible el cuadro
+```
 ##### Outliers
+No parece haber ningun valor fuera  de lo comun
+
+
 ##### Ajustes de valor
+
+Vamos a aplicar la tecnica de binning para poder aprovechar los datos. Podemos separarlo en 3 grandes grupos: Poco tiempo, mediano tiempo, mucho tiempo.\
+Primero vamos a ver la cantidad de dias que hay en nuestro dataset
+
 
 ### required car space number 
 
