@@ -541,7 +541,15 @@ print(daysInWaitingListValores)
 ```
 
 ```python
-## TODO: DISCRETIZAR
+#plt.xlabel(xlabel = 'Dia de llegada')
+#sns.boxplot(data = hotelsdf['days_in_waiting_list'])
+#plt.title("Dia de llegada del mes")
+#plt.ylabel(ylabel = 'Frecuencia')
+#data = hotelsdf.days_in_waiting_list
+#sns.kdeplot(data = data)
+#plt.xlabel(xlabel = 'Average daily rate')
+#plt.ylabel(ylabel = 'Frecuencia')
+#plt.title('Distribucion del average daily rate')
 ```
 
 ##### Outliers
