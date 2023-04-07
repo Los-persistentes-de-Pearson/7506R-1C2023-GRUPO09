@@ -207,13 +207,34 @@ plt.title('Distribucion de la variable')
 
 En el grafico anterior se listan todos las cantidades de adultos de los registro.
 Se puede ver que exiten reservas con 0 adultos, lo cual no tiene mucho sentido.
-Mostramos algunos registros para darnos una idea de cuantos son y ver si podemos obtener informacion adicional
+Mostramos algunos registros para darnos una idea de cuantos son y ver si podemos obtener informacion adicional. Por otro lado, valores con una cantidad de adultos mayor a representan apariciones unicas en el data frame, por lo cual eliminamos dichos datos
 
 ```python
-hotelsdf[hotelsdf["adult_num"]==0]
+a_eliminar_con_cero = hotelsdf[hotelsdf['adult_num'] == 0]
+a_eliminar_con_cuatromas = hotelsdf[hotelsdf['adult_num'] > 4]
 ```
 
 ##### Ajustes de valor
+
+
+```python
+hotelsdf.drop(a_eliminar_con_cero.index, inplace = True)
+hotelsdf.drop(a_eliminar_con_cuatromas.index, inplace = True)
+hotelsdf.reset_index()
+hotelsdf[(hotelsdf["adult_num"] > 4) | hotelsdf['adult_num'] == 0]
+```
+
+Por otro lado realizamos de nuevo las graficas de la distribucion para verificar que no cambie significativamente
+
+```python
+eje_x = hotelsdf.adult_num.value_counts().index.tolist()
+eje_y = hotelsdf.adult_num.value_counts()
+sns.barplot(x = eje_x, y = eje_y, palette = 'Set2')
+plt.xlabel(xlabel = 'Cantidad de adultos')
+plt.ylabel(ylabel = 'Cantidad de adulto')
+plt.title('Distribucion de la variable')
+plt.show()
+```
 
 ### arrival month day
 
@@ -239,22 +260,17 @@ plt.xlabel(xlabel = 'Dia de llegada')
 sns.barplot(x = eje_x, y = eje_y, palette= 'Set2')
 plt.title("Dia de llegada del mes")
 plt.ylabel(ylabel = 'Frecuencia')
-#Revisar si este grafico es relevante
-#Aca no hay outliers
-#ajustar eje x se ve apiñado
 ```
 
-##### Outliers
+El analisis univariado de arrival month day no arroja informacion relevante al analisis pero por otro lado, muestra que la variable no presenta ningun valor no esperado y desmuestra que no hay un dia de predilecto 
 
 ```python
-
+plt.xlabel(xlabel = 'Dia de llegada')
+sns.boxplot(data = hotelsdf['arrival_month_day'])
+plt.title("Dia de llegada del mes")
+plt.ylabel(ylabel = 'Frecuencia')
 ```
 
-##### Ajustes de valor
-
-```python
-
-```
 
 ### arrival week number 
 
@@ -348,7 +364,11 @@ plt.title('Distribucion del average daily rate')
 
 ##### Outliers
 
-Del grafico anterior se observan registros de adr los cuales tienen asignados 0, se debe estudiar a que se deben esos valores, asi como tambien tratar el valor negativo que aparece como mínimo
+Del grafico anterior se observan registros de adr los cuales tienen asignados 0, se debe estudiar a que se deben esos valores, asi como tambien tratar el valor negativo que aparece como mínimo, por otro lado, analizamos cuantos de los precios presentes en los registros presentan una desviacion considerable de los valores esperados
+
+```python
+hotelsdf[hotelsdf.average_daily_rate < 20].country.value_counts()
+```
 
 ##### Ajustes de valor
 
@@ -599,4 +619,26 @@ for variable in cualitativas:
   print("Variable: " + variable)
   print(hotelsdf[variable].value_counts().index.tolist())
   print()
+```
+```python
+cuantitativas_nulas = hotelsdf[cualitativas].isnull().sum()
+cuantitativas_nulas = cuantitativas_nulas[cuantitativas_nulas > 0]
+
+cuantitativas_nulas_per = pd.Series()
+
+for indice in cuantitativas_nulas.index:
+    cuantitativas_nulas_per[indice] = cuantitativas_nulas[indice]/len(hotelsdf[indice])*100
+
+sns.barplot(x = cuantitativas_nulas_per.index, y = cuantitativas_nulas_per)
+plt.ylabel(ylabel= 'Porcentaje')
+plt.xlabel(xlabel= 'Nombre columna')
+plt.title(label = 'Porcentaje de valores nulos')
+plt.ylim(0, 100)
+plt.show()
+```
+
+De la observación anterior se concluye que la variable company id, no proporciona información suficiente y al tener mas del 90% de sus valores nulos conviene descartarla
+
+```python 
+hotelsdf.drop("agent_id", axis=1, inplace=True)
 ```
