@@ -633,7 +633,30 @@ plt.ylabel(ylabel='Frecuencia')
 plt.title('Cantidad de dias de fin de semana')
 ```
 
+```python
+sns.boxplot(y=hotelsdf.weekend_nights_num)
+plt.show()
+```
+
 ##### Outliers
+
+
+Podriamos suponer como posibles outliers, reservas con muchos dias de estadia. Sin embargo, analizar solo las noches de estadia no es un buen indicador de la cantidad de dias totales ya que, por ejemplo, 4 dias de fin de semana pueden ser 8 dias. (sabado a sabado + Domingo) o 14 (llega un domingo y se va el sabado de la segunda semana). Por ello, esperamos a graficar dias de semana y a generar una columna con dias de estadia para analizar mejor ambas variables
+
+```python
+mayores_a_cinco = hotelsdf[hotelsdf["weekend_nights_num"]>=9]
+mayores_a_cinco.shape[0]
+```
+
+Observamos que no haya una incosistencia en la carga de datos. Para ello, compparamos con las noches de semana que se queo. Dberia darnos aproximadamente una recta ya que por cada 2 noches de fin de semana hay 5 de semana.
+
+```python
+sns.scatterplot(x=hotelsdf.weekend_nights_num,y=hotelsdf.week_nights_num)
+plt.title('Dispersograma noches finde vs noches de semana')
+plt.show()
+```
+
+Nos dio lo esperado. No hay datos incosistentes en cuanto a su comparacion con el numero de noches de semana.
 
 
 ##### Ajustes de valor
@@ -647,6 +670,14 @@ plt.title('Cantidad de dias de fin de semana')
 ##### Outliers
 ##### Ajustes de valor
 
+```python
+# MasDeunMesYcancelan = (hotelsdf[ (hotelsdf.week_nights_num >= 15) & (hotelsdf.is_canceled ==1) ].shape[0]) #cancelaron y se quedaron 1 mes
+# UnMes = (hotelsdf[ (hotelsdf.week_nights_num >= 15) ].shape[0] ) # se quedaron 1 mes
+# print("un mes y cancelan", MasDeunMesYcancelan)
+# print("un mes", UnMes)
+# print("porcentaje", MasDeunMesYcancelan/UnMes)
+#hotelsdf [hotelsdf["is_canceled"] ==1].shape[0] / hotelsdf.shape[0]
+```
 
 Vemos que columnas tienen variables faltantes
 
