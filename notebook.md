@@ -268,7 +268,7 @@ El analisis univariado de arrival month day no arroja informacion relevante al a
 plt.xlabel(xlabel = 'Dia de llegada')
 sns.boxplot(data = hotelsdf['arrival_month_day'])
 plt.title("Dia de llegada del mes")
-plt.ylabel(ylabel = 'Frecuencia')
+plt.ylabel(ylabel = 'Distribucion')
 ```
 
 
@@ -325,16 +325,6 @@ plt.ylabel(ylabel='Frecuencia')
 plt.xlabel(xlabel='Años')
 ```
 
-##### Outliers
-
-```python
-```
-
-##### Ajustes de valor
-
-
-```python
-```
 
 ### Average Daily Rate
 
@@ -367,10 +357,70 @@ plt.title('Distribucion del average daily rate')
 Del grafico anterior se observan registros de adr los cuales tienen asignados 0, se debe estudiar a que se deben esos valores, asi como tambien tratar el valor negativo que aparece como mínimo, por otro lado, analizamos cuantos de los precios presentes en los registros presentan una desviacion considerable de los valores esperados
 
 ```python
-hotelsdf[hotelsdf.average_daily_rate < 20].country.value_counts()
+sns.boxplot(data = hotelsdf['average_daily_rate'])
+plt.title("Average daily rate")
+```
+
+```python
+
+valores_con_cero = len(hotelsdf[hotelsdf['average_daily_rate'] <= 0])
+total_valores = len(hotelsDfOriginal.adr)
+porcentaje_con_cero = valores_con_cero/total_valores
+print(f" Los de adrs que registran un valor de 0 representa un porcentaje de:{porcentaje_con_cero}' por lo tanto considerando que no son representativos, eliminamos dichos registros inconsistentes ")
+```
+
+eliminar valores con 0
+
+```python
+a_eliminar_con_cero = hotelsdf[hotelsdf['average_daily_rate'] <= 0].index
+hotelsdf.drop(a_eliminar_con_cero, inplace = True)
 ```
 
 ##### Ajustes de valor
+
+
+Utilizamos Z-score para clasificar las desviasiones presentes en los valores
+
+
+```python
+import scipy.stats as st
+
+media_requisitos=np.mean(hotelsdf.average_daily_rate)
+
+std_ard=np.std(hotelsdf.average_daily_rate)
+
+hotelsdf['z_adr']=(hotelsdf.average_daily_rate - media_requisitos)/std_ard
+
+hotelsdf['z_adr']=st.zscore(hotelsdf.average_daily_rate)
+hotelsdf[(hotelsdf['z_adr'] > 3) | (hotelsdf['z_adr'] < -2)]
+```
+
+Graficamos el Z-score del adr
+
+
+```python
+plt.hist(hotelsdf.z_adr)
+plt.title('Histograma Z-Score req')
+plt.xlabel('Z-Score req')
+plt.xticks([-2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8])
+plt.show()
+```
+
+```python
+print("Vamos a eliminar "+ str(x + y) + " valores ya son valores que tienen una desviacion estandar muy marcada con  respecto al resto de los valores. Ademas, estos valores representan un " + str(hotelsdf[(hotelsdf['z_adr'] > 3)].average_daily_rate.count() + hotelsdf[(hotelsdf['z_adr'] < -2)].average_daily_rate.count()) + "% del total)
+```
+
+Graficamos nuevamente con el proposito de verificar la nueva distribucion adquirida luego de la modificacion 
+
+
+
+```python
+data = hotelsdf.average_daily_rate
+sns.kdeplot(data = data)
+plt.xlabel(xlabel = 'Average daily rate')
+plt.ylabel(ylabel = 'Frecuencia')
+plt.title('Distribucion del average daily rate')
+```
 
 ### babies number 
 
