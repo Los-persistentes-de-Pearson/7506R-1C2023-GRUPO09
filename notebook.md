@@ -596,9 +596,9 @@ Vamos a graficarlos para ver su distribucion
 ```python
 data = hotelsdf.lead_time
 sns.kdeplot(data = data)
-plt.xlabel(xlabel = 'Average daily rate')
+plt.xlabel(xlabel = 'Lead time')
 plt.ylabel(ylabel = 'Frecuencia')
-plt.title('Distribucion del average daily rate') #TODO: Cambiar la Y para ver la frecuencia, no esa numero raro
+plt.title('Distribucion del lead time') #TODO: Cambiar la Y para ver la frecuencia, no esa numero raro
 ```
 
 Vemos que la mayoria de los valores estan por debajo de 300
@@ -628,14 +628,31 @@ Primero vamos a ver la cantidad de dias que hay en nuestro dataset
 hotelsdf["previous_bookings_not_canceled_num"].describe()
 ```
 
+Esta variable representa la cantidad de reservasa que no fueron canceladas por el usuario antes de la reserva actual
+
+
 #### Valores nulos/faltantes
 
+```python
+hotelsdf.previous_bookings_not_canceled_num.isna().sum()
+```
 
 #### Grafica de distribucion
 
 
+```python
+eje_y = hotelsdf["previous_bookings_not_canceled_num"].value_counts()
+eje_x = eje_y.index.tolist()
+sns.barplot(y = eje_y, x = eje_x, palette='Set2')
+plt.xlabel('Cantidad de ninos')
+plt.ylabel(ylabel='Frecuencia')
+plt.title('Numero de ninos por reserva')
+
+hotelsdf["children_num"].value_counts() #TODO: Corregir cuadro, se ve horrible el cuadro
+```
 
 #### Outliers
+No parece haber ningun valor fuera  de lo comun
 
 
 #### Ajustes de valor
