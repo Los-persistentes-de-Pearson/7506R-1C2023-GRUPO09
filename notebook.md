@@ -468,15 +468,6 @@ plt.title('Cantidad de cambios por reserva')
 ##### Outliers
 ##### Ajustes de valor
 
-### reservation status date 
-### (ELIMINADA DEL DATASET ORIG)
-
-##### Valores estadisticos relevantes
-##### Valores nulos/faltantes
-##### Grafica de distribucion
-##### Outliers
-##### Ajustes de valor
-
 ### weekend nights number
 
 ##### Valores estadisticos relevantes
@@ -556,6 +547,25 @@ Con el analisis anteior, tomamos las siguiuentes decisiones:
 ```python
 #codigo para ajustar valores.
 ```
+
+
+### reservation status date 
+
+
+##### Valores estadisticos relevantes
+
+
+##### Valores nulos/faltantes
+
+
+##### Grafica de distribucion
+
+
+##### Outliers
+
+
+##### Ajustes de valor
+
 
 ### special requests number 
 
