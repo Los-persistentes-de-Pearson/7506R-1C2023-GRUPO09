@@ -583,11 +583,54 @@ plt.ylabel(ylabel='Frecuencia')
 plt.title('Cantidad de requisitos especiales por reserva')
 ```
 
+```python
+sns.boxplot(y=hotelsdf.special_requests_num)
+plt.show()
+```
+
 ##### Outliers
 
+
+Viendo los graficos vemos que los valores mas frecuentes de equisitos especiales son 0 (ninguno), 1 y 2 y algunos menos con 3. Ademas hay muy pocos con 4 y 5. 
+Los valores que podrian levantar sosppecha son 3, 4 y 5.
+CONSIDERAMOS QUE NO TIENE SENTIDO HACER UN ANALISIS CON Z-Score ya que los valores no son completamente "incoherentes".
+Sin embargo, para los valores 4 y 5 miramos la cantidad de registros de cada uno de ellos para ver que no sean casos puntuales.
+
 ```python
-#Codigo
+print("hay", hotelsdf[hotelsdf.special_requests_num==5].shape[0] ,"reservas con 5 requisitos especiales")
+print("hay", hotelsdf[hotelsdf.special_requests_num==4].shape[0] ,"reservas con 4 requisitos especiales")
 ```
+
+Debido a la la cantidad de reservas para estos casos no parcen ser casos puntuales. 
+Hacemos un Zscore y las normalizamos poniendo valor 1 2 o 3...?
+
+
+
+
+```python
+# import scipy.stats as st
+
+# media_requisitos=np.mean(hotelsdf.special_requests_num)
+# std_req=np.std(hotelsdf.special_requests_num)
+# hotelsdf['z_requisitos']=(hotelsdf.special_requests_num - media_requisitos)/std_req
+
+# #z-score Peso con librería stats
+# hotelsdf['z_requisitos']=st.zscore(hotelsdf.special_requests_num)
+
+# hotelsdf[hotelsdf['z_requisitos']<=3]
+```
+
+```python
+# plt.hist(hotelsdf.z_requisitos)
+# plt.title('Histograma Z-Score req')
+# plt.xlabel('Z-Score req')
+# plt.show()
+```
+
+Se toman estas decisiones. 
+TODO Se cambian tales registros?????
+No se modifica ningun registros
+
 
 ##### Ajustes de valor
 
