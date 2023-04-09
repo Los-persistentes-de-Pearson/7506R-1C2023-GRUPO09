@@ -420,7 +420,7 @@ plt.show()
 
 ```python
 desviacion_uno = hotelsdf[(hotelsdf['z_adr'] > 3)]
-desviacion_dos = hotelsdf[(hotelsdf['z_adr'] < -2)].
+desviacion_dos = hotelsdf[(hotelsdf['z_adr'] < -2)]
 hotelsdf.drop(desviacion_uno.index, inplace = True)
 hotelsdf.drop(desviacion_dos.index, inplace = True)
 hotelsdf.reset_index()
@@ -445,7 +445,7 @@ plt.title('Distribucion del average daily rate')
 ```
 
 ```python
-hotelsdf.drop(label = 'z_adr', inplace = True)
+hotelsdf.drop(labels = 'z_adr', inplace = True, axis = 1)
 ```
 
 ### babies number 
@@ -984,6 +984,6 @@ plt.show()
 
 De la observación anterior se concluye que la variable company id, no proporciona información suficiente y al tener mas del 90% de sus valores nulos conviene descartarla
 
-```python 
+```python
 hotelsdf.drop("agent_id", axis=1, inplace=True)
 ```
