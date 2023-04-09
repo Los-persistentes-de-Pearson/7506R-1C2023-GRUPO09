@@ -535,9 +535,13 @@ No tiene valores vacios
 ##### Grafica de distribucion
 
 ```python
+print("Los valores que toma la variable son los siguientes:")
 daysInWaitingListValores = (hotelsdf["days_in_waiting_list"].unique())
 daysInWaitingListValores.sort()
 print(daysInWaitingListValores)
+print()
+print("Y toma dichos valores con la siguiente frecuencia")
+hotelsdf["days_in_waiting_list"].value_counts()
 ```
 
 ```python
@@ -550,6 +554,9 @@ print(daysInWaitingListValores)
 #plt.xlabel(xlabel = 'Average daily rate')
 #plt.ylabel(ylabel = 'Frecuencia')
 #plt.title('Distribucion del average daily rate')
+
+
+#sns.boxplot(data = hotelsdf, x='days_in_waiting_list', palette='Set1')
 ```
 
 ##### Outliers
@@ -560,7 +567,7 @@ Los valores mas llamativos son aquellos por encima de 300; sin embargo no podemo
 
 ##### Ajustes de valor
 
-Vamos a aplicar la tecnica de binning para poder aprovechar los datos. Podemos separarlo en 3 grandes grupos: Poco tiempo, mediano tiempo, mucho tiempo.\
+Vamos a aplicar la tecnica de normalizar para poder aprovechar los datos. Podemos separarlo en 3 grandes grupos: Poco tiempo, mediano tiempo, mucho tiempo.\
 Primero vamos a ver la cantidad de dias que hay en nuestro dataset
 
 
@@ -617,13 +624,25 @@ leadTimeValores.sort()
 print(leadTimeValores)
 ```
 
+```python
+sns.boxplot(data=hotelsdf.lead_time)
+plt.xlabel("Cantidad de reservas")
+plt.ylabel("Canidad de noches de fin de semana")
+plt.title("Canidad de noches de fin de semana por reserva")
+plt.show()
+```
+
+```python
+hotelsdf[hotelsdf["lead_time"] >= 400]
+```
+
 ##### Outliers
 Los valores mas llamativos son aquellos por encima de 300; sin embargo no podemos establecer que son outliers porque son cantidades de dias
 
 
 ##### Ajustes de valor
 
-Vamos a aplicar la tecnica de binning para poder aprovechar los datos. Podemos separarlo en 3 grandes grupos: Poco tiempo, mediano tiempo, mucho tiempo.\
+Vamos a aplicar la tecnica de normalizado para poder aprovechar los datos. Podemos separarlo en 3 grandes grupos: Poco tiempo, mediano tiempo, mucho tiempo.\
 Primero vamos a ver la cantidad de dias que hay en nuestro dataset
 
 
@@ -665,7 +684,7 @@ No parece haber ningun valor fuera  de lo comun
 
 #### Ajustes de valor
 
-Vamos a aplicar la tecnica de binning para poder aprovechar los datos. Podemos separarlo en 3 grandes grupos: Poco tiempo, mediano tiempo, mucho tiempo.\
+Vamos a aplicar la tecnica de normalizar para poder aprovechar los datos. Podemos separarlo en 3 grandes grupos: Poco tiempo, mediano tiempo, mucho tiempo.\
 Primero vamos a ver la cantidad de dias que hay en nuestro dataset
 
 
@@ -675,6 +694,10 @@ Primero vamos a ver la cantidad de dias que hay en nuestro dataset
 ##### Valores estadisticos relevantes
 ```python
 hotelsdf["previous_cancellations_num"].describe()
+```
+
+```python
+hotelsdf["previous_cancellations_num"].value_counts()
 ```
 
 Esta variable representa la cantidad de reservasa que si fueron canceladas por el usuario antes de la reserva actual
@@ -703,8 +726,11 @@ No parece haber ningun valor fuera  de lo comun
 
 ##### Ajustes de valor
 
-Vamos a aplicar la tecnica de binning para poder aprovechar los datos. Podemos separarlo en 3 grandes grupos: Poco tiempo, mediano tiempo, mucho tiempo.\
+Vamos a aplicar la tecnica de normalizar para poder aprovechar los datos. Podemos separarlo en 3 grandes grupos: Poco tiempo, mediano tiempo, mucho tiempo.\
 Primero vamos a ver la cantidad de dias que hay en nuestro dataset
+
+
+TODO: Normaliza y crear columna Cantidad de viajes
 
 
 ### required car space number 
