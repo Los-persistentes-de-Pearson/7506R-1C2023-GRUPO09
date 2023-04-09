@@ -420,7 +420,7 @@ plt.show()
 
 ```python
 desviacion_uno = hotelsdf[(hotelsdf['z_adr'] > 3)]
-desviacion_dos = hotelsdf[(hotelsdf['z_adr'] < -2)].
+desviacion_dos = hotelsdf[(hotelsdf['z_adr'] < -2)]
 hotelsdf.drop(desviacion_uno.index, inplace = True)
 hotelsdf.drop(desviacion_dos.index, inplace = True)
 hotelsdf.reset_index()
@@ -445,7 +445,7 @@ plt.title('Distribucion del average daily rate')
 ```
 
 ```python
-hotelsdf.drop(label = 'z_adr', inplace = True)
+hotelsdf.drop(labels = 'z_adr', inplace = True, axis = 1)
 ```
 
 ### babies number 
@@ -821,169 +821,268 @@ No parece haber ningun valor fuera  de lo comun
 
 ##### Ajustes de valor
 
-Vamos a aplicar la tecnica de normalizar para poder aprovechar los datos. Podemos separarlo en 3 grandes grupos: Poco tiempo, mediano tiempo, mucho tiempo.\
-Primero vamos a ver la cantidad de dias que hay en nuestro dataset
-
-
-TODO: Normaliza y crear columna Cantidad de viajes
-
-
 ### required car space number 
 
-##### Valores estadisticos relevantes
-##### Valores nulos/faltantes
-##### Grafica de distribucion
-##### Outliers
-##### Ajustes de valor
-
-### reservation status date 
 
 ##### Valores estadisticos relevantes
+
+```python
+hotelsdf.required_car_parking_spaces_num.describe()
+```
+
 ##### Valores nulos/faltantes
+
+```python
+print("La cantidad de valores nulos/faltantes es", hotelsdf.required_car_parking_spaces_num.isna().sum())
+```
+
 ##### Grafica de distribucion
+
+```python
+sns.countplot(data = hotelsdf, x='required_car_parking_spaces_num')
+plt.title("Cantidad de reservas por espacios de estacionamiento")
+```
+
 ##### Outliers
+
+
+Viendo el grafico podemos identificar que el numero de espacios de estacionamiento mas comun es 0, seguido por 1. 
+Además encontramos algunos pocos casos en los que se reservaron 2, 3 y 8 espacios.
+Estos ultimos son posibles Outliers (candidatearr????)
+Sin embargo, esperamos a terminar de hacer todos los analisis univariados y luego al hacer los multivariados, compararemos esta variable contra la variable adult_num para observar si existe alguna incoherencia con la cantidad de adultos alojados en dicha reserva.
+
+#TODO
+#DEJARLO ACA, JUSTIFICAR CON LOS REGISTROS COMO ESTA HECHO
+Mostramos dichos registros junto con las columnas de hotel_name y adult_num para analizarlos más en detalle y determinar si alguno de ellos puede ser Oulier y por que.
+Nuestro criterio para determinar que un valor es adecuado para esta variable es que haya como mucho 1 espacio de estacionamiento por adulto en la reserva.
+
+```python
+registrosDosOMasEspacios = hotelsdf[hotelsdf["required_car_parking_spaces_num"]>=2]
+#PREG deberia hacer un .copy x las dudas?
+display(registrosDosOMasEspacios[['hotel_name', 'adult_num', "required_car_parking_spaces_num"]].sort_values(
+    by = "required_car_parking_spaces_num", 
+    ascending = False
+))
+```
+
+OJO, VER TEMA DE NUMERO DE REGISTROOOOO
+
+De la tabla anterior se pueden sacar las siguientes conclusiones:
+- En el resgistro n° 8269, el valor de 8 espacios de estacionamiento es claramente un Outlier ya que no es coherente que una habitacion para dos personas haya reservado esa cantidad de espacios de estacionamiento.
+- EL resgistros n° 13713 con el valor de 3 espacios de estacionamiento es tambien un Outliers ya que tampoco es coherente que 2 personas hayan reservado 3 espacios de estacionamiento.
+- Los registros restantes NO son Outliers ya que si contienen valores poco freciuentes, son coherentes con el criterio explicado en el parrafo de arriba.
+
+
 ##### Ajustes de valor
 
-### special request number 
+
+Con el analisis anteior, tomamos las siguiuentes decisiones:
+- En el registro n° 8269, cambiamos el valor de required_car_parking_spaces_num por el valor mas frecuente (1) para no eliminar el registro por este simple detalle.
+- En el registro n° 13713, cambiamos el valor de required_car_parking_spaces_num por el valor "2" suponiendo un error de tipeo.
+- Se mantienen sin cambios el resto de los registros restantes listados arriba.
+
+```python
+#codigo para ajustar valores.
+#Dropear aca directamenteeee
+```
+
+### special requests number 
+
 
 ##### Valores estadisticos relevantes
-##### Valores nulos/faltantes
+
+```python
+hotelsdf.special_requests_num.describe() 
+```
+
+##### Valores nulos/faltanteS
+
+```python
+print("La cantidad de valores nulos/faltantes es", hotelsdf.special_requests_num.isna().sum())
+```
+
 ##### Grafica de distribucion
+
+```python
+sns.countplot(data = hotelsdf, x='special_requests_num', palette='Set1')
+plt.title("Reservas por cantidad de requisitos especiales")
+```
+
+```python
+sns.boxplot(data=hotelsdf.special_requests_num)
+plt.xlabel("Cantidad de reservas")
+plt.ylabel("Canidad de requisitos especiales")
+plt.title("Canidad de requisitos especiales por reserva")
+plt.show()
+```
+
 ##### Outliers
+
+
+Viendo los graficos vemos que los valores mas frecuentes de requisitos especiales son 0 (ninguno), 1 y 2 y algunos menos con 3. Ademas hay muy pocos con 4 y 5. 
+Los valores que podrian levantar sosppecha son 4 y 5.
+Miramos la cantidad de registros de cada uno de ellos para ver que no sean casos puntuales.
+
+```python
+print("hay", hotelsdf[hotelsdf.special_requests_num==4].shape[0] ,"reservas con 4 requisitos especiales")
+print("hay", hotelsdf[hotelsdf.special_requests_num==5].shape[0] ,"reservas con 5 requisitos especiales")
+```
+
 ##### Ajustes de valor
+
+
+Debido a la la cantidad de reservas para estos casos y que el rango de valores es relativamente acotado, no parcen ser casos puntuales. 
+Procedemos a cambiar la cantidad de requisitos especiales de dichos registros el valor mas frecuente
+
+```python
+media_special_requests = round(hotelsdf.special_requests_num.mean())
+hotelsdf.loc[hotelsdf['special_requests_num'] >= 4, 'special_requests_num'] = media_special_requests
+```
 
 ### weekend nights number
 
+
 ##### Valores estadisticos relevantes
+
+```python
+hotelsdf.weekend_nights_num.describe() 
+```
+
 ##### Valores nulos/faltantes
+
+```python
+print("La cantidad de valores nulos/faltantes es", hotelsdf.weekend_nights_num.isna().sum())
+```
+
 ##### Grafica de distribucion
+
+```python
+sns.countplot(data = hotelsdf, x='weekend_nights_num', palette='Set1')
+plt.title("Reservas por cantidad de noches de fin de semana")
+```
+
+```python
+sns.boxplot(data=hotelsdf.weekend_nights_num)
+plt.xlabel("Cantidad de reservas")
+plt.ylabel("Canidad de noches de fin de semana")
+plt.title("Canidad de noches de fin de semana por reserva")
+plt.show()
+```
+
 ##### Outliers
+
+
+Podriamos suponer como posibles outliers, reservas con muchos dias de estadia. A simple vista se puede ver que hay pocas reservas con 5 o mas noches de fin de semana de estadia. Comenzamos estudiando los valores de 9 o mas dias de fin de semana ya que equivaldrian a un minimo de 4 semanas de estadia.
+
+```python
+mayores_a_nueve = hotelsdf[hotelsdf["weekend_nights_num"]>=9]
+mayores_a_nueve.shape[0]
+```
+
+```python
+sns.countplot(data = mayores_a_nueve, x='weekend_nights_num', palette='Set1')
+```
+
 ##### Ajustes de valor
+
+
+Son solo 13 registros, es decir, representan muy poca cantidad del total. Tomamos la decision de eliminarlos para evitar que generen ruido al momento de generar el modelo.
+
+```python
+mas_de_nueve_noches_finde = hotelsdf[hotelsdf["weekend_nights_num"]>=9]
+hotelsdf.drop(mas_de_nueve_noches_finde.index, inplace = True)
+hotelsdf.reset_index()
+```
+
+Hasta ahora analizamos las estadias con mas de 9 noches de fin de semana (al menos un mes de esatdia)
+Sin embargo nos resta estudiar, los casos de 5, 6, 7 y 8 dias de fin de semana.
+Vemos cuantos registros son
+
+```python
+mayores_a_5_menores_a_nueve_finde = hotelsdf[hotelsdf["weekend_nights_num"]>=5]
+mayores_a_5_menores_a_nueve_finde.shape[0]
+```
+
+```python
+mayores_a_5_menores_a_nueve_finde = hotelsdf[hotelsdf["weekend_nights_num"]>=5]
+sns.countplot(data = mayores_a_5_menores_a_nueve_finde, x='weekend_nights_num', palette='Set1')
+```
+
+Como son muchos mas registros posponemos su analisis para despues de terminar de estudiar todas las variables cuantitativas pero los dejamos marcados como posibles registros a modificar.
+
 
 ### week nights number 
 
+
 ##### Valores estadisticos relevantes
+
+```python
+hotelsdf.week_nights_num.describe() 
+```
+
 ##### Valores nulos/faltantes
+
+```python
+print("La cantidad de valores nulos/faltantes es", hotelsdf.week_nights_num.isna().sum())
+```
+
 ##### Grafica de distribucion
-##### Outliers
+
+```python
+sns.countplot(data = hotelsdf, x='week_nights_num', palette='Set1')
+plt.title("Reservas por cantidad de noches de de semana")
+```
+
+Se puede ver que la gran mayoria de las reservas son estadias de entre ningna (0) y 5 noches de semana y en menor medida estadias de entre 6 y 10 noches de semana. 
+Como en el grafico no se ven puntualmente los registros con estadias de 11 o mas noches de semana, los graficamos de nuevo para ver como se distribuyen y estudiarlos mejor
+
+```python
+mayores_a_11_noches_semana = hotelsdf[hotelsdf["week_nights_num"]>=11]
+mayores_a_11_noches_semana.shape[0]
+```
+
+```python
+sns.countplot(data = mayores_a_11_noches_semana, x='week_nights_num', palette='Set1')
+```
+
+Como son muchos registros y no contienen valores incoherentes posponemos su tratamiento para estudiarlos con un analisis multivariado en la siguiente seccion.
+
+
+### (lo de abasjo va a multivariadoooo)
+
+<!-- #region -->
+
+
+ Comoanalizar solo las noches de estadia no es un buen indicador de la cantidad de dias totales ya que, por ejemplo, 2 dias de fin de semana pueden ser 2 dias de estadia total (solo el fin de semana) o 7 dias de estadia total (Domingo a Sabado de la siguiente semana). Por ello, esperamos a graficar dias de semana y a generar una columna con dias de estadia para analizar mejor ambas variables y recien ahi determinar si existen ouliers.
+<!-- #endregion -->
+
+Ya que consideramos que la cantidad de dias puede influir, observamos que no haya una inconsistencia en la carga de datos con relacion a la cantidad de dias de semana. Para ello, comparamos la cantidad de noches de fin de semana con las noches de semana que se quedo. Deberiamos obtener varias rectas con las siguientes condiciones:
+- Cuando el numero de noches n de fin de semana es impar, las pendientes de las rectas tienen una variacion de +- 5 noches de semana
+- Cuando el numero de noches n de fin de semana es par, las pendientes de las rectas tienen una variacion de +- 10 noches de semana
+
+```python
+hotelsdf[hotelsdf["weekend_nights_num"]==8]
+```
+
+```python
+sns.scatterplot(x=hotelsdf.weekend_nights_num,y=hotelsdf.week_nights_num)
+plt.title('Dispersograma noches finde vs noches de semana')
+plt.show()
+```
+
+```python
+hotelsdf["dias_totales"] = hotelsdf["week_nights_num"] + hotelsdf["weekend_nights_num"]
+
+sns.countplot(data = hotelsdf, x='dias_totales', hue='is_canceled')
+```
+
+Nos dio lo esperado. No hay datos incosistentes en cuanto a su comparacion con el numero de noches de semana.
+
+
+#Anslisis de Mahalanobis
+
+
 ##### Ajustes de valor
 
-## Cualitativas
 
-
-Vemos que columnas tienen variables faltantes
-
-```python
-serie_de_nans = hotelsdf.isna().sum()
-serie_de_nans
-```
-Vemos entonces que las columnas con variables faltantes son:
-
-```python
-serie_de_nans[serie_de_nans > 0]
-```
-
-Resolvemos los variables faltantes una columna a la vez
-
-
-## Observamos variables faltantes de children_num
-Aca vemos que la variable children_num esta almacenada como un float. 
-Vamos a ver si hay algun valor de childer con valor decimal distinto a 0.
-
-```python
-hotelsdf["children_num"].value_counts()
-```
-Vemos que no hay ningun valor con decimal distinto a 0, podemos castear la columna a int.
-
-
-Segun la clasificacion de las variables podemos establecer lo siguiente sobre los datos extraidos del dataframe
-
-Variables cuantitativas, entre las cuales podemos encontrar:
-
-- lead_time "time beetwen reservation and arrival"
-- arrival_date_year
-- arrival_date_week_number  
-- arrival_date_day_of_month
-- stays_in_weekend_nights
-- days_in_waiting_list
-- stays_in_week_nights
-- adult
-- children
-- babies
-- previous_cancellations
-- previous_bookings_not_canceled
-- booking_changes
-- days_in_waiting_list
-- adr "average day rate"
-- required_car_parking_spaces
-- total_of_special_requests
-- reservation_status_date
-
-```python
-# Este if es se usa para evitar problemas de versiones de pandas entre la version local y la presente en Google Collab
-if (pd.__version__) == "1.5.2":
-    correlaciones = hotelsdf[cuantitativas].corr(numeric_only=True)
-else:
-    correlaciones = hotelsdf[cuantitativas].corr()
-
-sns.set(style = 'darkgrid')
-plt.figure( figsize = (12, 9))
-sns.heatmap(data = correlaciones,annot = True, vmin = -1, vmax =1, fmt='.2f')
-sns.color_palette("mako", as_cmap=True)
-plt.show()
-```
-
-```python
-hotelsdf[cuantitativas].describe()
-```
-
-
-Variables cualitativas
-
-```python
-cualitativas = [
-"agent_id",
-"arrival_month",
-"assigned_room_type",
-"company_id",
-"country",
-"customer_type",
-"deposit_type",
-"distribution_channel",
-"hotel_name",
-"is_repeated_guest",
-"market_segment_type",
-"meal_type",
-"reservation_status",
-"reserved_room_type",
-]
-
-#no tiene sentido imprimir cosas como id, company, deposite_type
-
-for variable in cualitativas:
-  print("Variable: " + variable)
-  print(hotelsdf[variable].value_counts().index.tolist())
-  print()
-```
-```python
-cuantitativas_nulas = hotelsdf[cualitativas].isnull().sum()
-cuantitativas_nulas = cuantitativas_nulas[cuantitativas_nulas > 0]
-
-cuantitativas_nulas_per = pd.Series()
-
-for indice in cuantitativas_nulas.index:
-    cuantitativas_nulas_per[indice] = cuantitativas_nulas[indice]/len(hotelsdf[indice])*100
-
-sns.barplot(x = cuantitativas_nulas_per.index, y = cuantitativas_nulas_per)
-plt.ylabel(ylabel= 'Porcentaje')
-plt.xlabel(xlabel= 'Nombre columna')
-plt.title(label = 'Porcentaje de valores nulos')
-plt.ylim(0, 100)
-plt.show()
-```
-
-De la observación anterior se concluye que la variable company id, no proporciona información suficiente y al tener mas del 90% de sus valores nulos conviene descartarla
-
-```python 
-hotelsdf.drop("agent_id", axis=1, inplace=True)
-```
+Como ya habiamos observado en la cantidad de dias de fin de semana, la mayor cantidad de gente se queda 
