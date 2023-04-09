@@ -95,21 +95,6 @@ Por otro lado, podemos observar que tipo de dato almacena cada columna y cuales 
 ```python
 hotelsdf.info()
 ```
-### Evaluar la remocion de la variable id
-De este vistazo inicial, se observa que la columna **id** no parece tener un patron distingible.
-Analizamos si hay algun valor de ID repetido, para tratar de reconocer un patron
-
-```python
-ides = hotelsdf["booking_id"].value_counts()
-ides[ides > 1]
-```
-
-Como todos los ID's son unicos y no hay ningun ID vacio; consideramos que es un ID sin ningun analitico.
-
-```python
-# Codigo para borrar la columna de ID
-hotelsdf.drop("booking_id", axis=1, inplace=True)
-```
 
 # Analisis de variables
 Vamos a dividir las variables en cuantitativas y cualitativas.
