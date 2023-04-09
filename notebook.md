@@ -25,6 +25,7 @@ import numpy as np
 import sklearn as sk
 import seaborn as sns
 from matplotlib import pyplot as plt
+import scipy.stats as st
 ```
 
 ## Cargamos de datos a un dataframe
@@ -175,6 +176,16 @@ cuantitativas = [
 "week_nights_num",
 ]
 ```
+## Valores null/na
+
+Observamos cuales de las variables cuantitativas poseen valores nulos/faltantes en sus registros
+
+```python
+nulos_cuantitativos = hotelsdf[cuantitativas].isnull().sum()
+nulos_cuantitativos = nulos_cuantitativos[nulos_cuantitativos > 0]
+nulos_cuantitativos
+```
+En un principio solo la variable children_num posee valores nulos, en su propia seccion seran tratados dichas observaciones
 
 ### Adult number 
 
@@ -186,40 +197,44 @@ Realizamos un analisis sobre la variable adult number
 hotelsdf.adult_num.describe()
 ```
 
-##### Valores nulos/faltantes
-
-```python
-hotelsdf.adult_num.isna().sum()
-```
+Dentro de los parametros estadisticos representativos observamos un minimo de 0 adultos y un maximo de 55, ambos representando registros con valores anormales. 
 
 ##### Grafica de distribucion
 
+Para mas informacion sobre la frecuencia de los valores se grafican las frecuencias
+
 ```python
-eje_x = hotelsdf.adult_num.value_counts().index.tolist()
-eje_y = hotelsdf.adult_num.value_counts()
-sns.barplot(x = eje_x, y = eje_y, palette = 'Set2')
-plt.xlabel(xlabel = 'Cantidad de adultos')
-plt.ylabel(ylabel = 'Cantidad de adulto')
-plt.title('Distribucion de la variable')
+sns.countplot(data = hotelsdf, x = 'adult_num', palette= 'Set2')
+plt.title('Cantidad de adultos por reserva')
+plt.xlabel('Numero de adultos')
+plt.ylabel('Frecuencia')
 ```
 
 ##### Outliers
 
-En el grafico anterior se listan todos las cantidades de adultos de los registro.
-Se puede ver que exiten reservas con 0 adultos, lo cual no tiene mucho sentido.
-Mostramos algunos registros para darnos una idea de cuantos son y ver si podemos obtener informacion adicional. Por otro lado, valores con una cantidad de adultos mayor a representan apariciones unicas en el data frame, por lo cual eliminamos dichos datos
-
 ```python
 a_eliminar_con_cero = hotelsdf[hotelsdf['adult_num'] == 0]
-a_eliminar_con_cuatromas = hotelsdf[hotelsdf['adult_num'] > 4]
+a_eliminar_con_cero 
 ```
+
+```python
+a_eliminar_mayores_3 = hotelsdf[hotelsdf['adult_num'] > 3]
+a_eliminar_mayores_3
+```
+
+```python
+print(f'Total de registros a eliminar: {len(a_eliminar_con_cero) + len(a_eliminar_mayores_3)}')
+```
+
+Existen 41 registros con valores superiores a 3, los cuales representan outliers. A su vez, se incluyen a estos registros aquellos valores identificados previamente 
 
 ##### Ajustes de valor
 
+Eliminamos dichos valores que representan un porcentaje infimo y pueden llegar a desviar las futuras predicciones
 
 ```python
 hotelsdf.drop(a_eliminar_con_cero.index, inplace = True)
-hotelsdf.drop(a_eliminar_con_cuatromas.index, inplace = True)
+hotelsdf.drop(a_eliminar_mayores_3.index, inplace = True)
 hotelsdf.reset_index()
 hotelsdf[(hotelsdf["adult_num"] > 4) | hotelsdf['adult_num'] == 0]
 ```
@@ -227,13 +242,10 @@ hotelsdf[(hotelsdf["adult_num"] > 4) | hotelsdf['adult_num'] == 0]
 Por otro lado realizamos de nuevo las graficas de la distribucion para verificar que no cambie significativamente
 
 ```python
-eje_x = hotelsdf.adult_num.value_counts().index.tolist()
-eje_y = hotelsdf.adult_num.value_counts()
-sns.barplot(x = eje_x, y = eje_y, palette = 'Set2')
-plt.xlabel(xlabel = 'Cantidad de adultos')
-plt.ylabel(ylabel = 'Cantidad de adulto')
-plt.title('Distribucion de la variable')
-plt.show()
+sns.countplot(data = hotelsdf, x = 'adult_num', palette= 'Set2')
+plt.title('Cantidad de adultos por reserva')
+plt.xlabel('Numero de adultos')
+plt.ylabel('Frecuencia')
 ```
 
 ### arrival month day
@@ -244,32 +256,29 @@ plt.show()
 hotelsdf["arrival_month_day"].describe()
 ```
 
-##### Valores nulos/faltantes
-
-```python
-hotelsdf.arrival_month_day.isna().sum()
-```
+Los parametros estadisticos relevantes no muestran por si solos valores irregulares en el analisis
 
 ##### Grafica de distribucion
 
+Una grafica puede llegar a esclarecer o identificar valores fuera de lo comun dentro del dataframe
+
 ```python
-eje_x = hotelsdf.arrival_month_day.value_counts().index.tolist()
-eje_y = hotelsdf.arrival_month_day.value_counts()
-plt.figure(figsize = (9, 5))
-plt.xlabel(xlabel = 'Dia de llegada')
-sns.barplot(x = eje_x, y = eje_y, palette= 'Set2')
+plt.figure(figsize=(8,4))
+sns.countplot(data = hotelsdf, x = 'arrival_month_day')
 plt.title("Dia de llegada del mes")
+plt.xlabel(xlabel = 'Dia de llegada')
 plt.ylabel(ylabel = 'Frecuencia')
 ```
 
-El analisis univariado de arrival month day no arroja informacion relevante al analisis pero por otro lado, muestra que la variable no presenta ningun valor no esperado y desmuestra que no hay un dia de predilecto 
+El analisis univariado de arrival month day no arroja informacion relevante, pero por otro lado, muestra que la variable no presenta ningun valor inesperado y desmuestra que no hay un dia de predilecto del mes
 
 ```python
 plt.xlabel(xlabel = 'Dia de llegada')
 sns.boxplot(data = hotelsdf['arrival_month_day'])
 plt.title("Dia de llegada del mes")
-plt.ylabel(ylabel = 'Distribucion')
+plt.ylabel(ylabel = 'Frecuencia')
 ```
+Por lado un boxplot afirma las concluciones derivadas del grafico anterior 
 
 
 ### arrival week number 
@@ -279,27 +288,18 @@ plt.ylabel(ylabel = 'Distribucion')
 ```python
 hotelsdf.arrival_week_number.describe()
 ```
-
-##### Valores nulos/faltantes
-
-```python
-hotelsdf.arrival_week_number.isnull().sum()
-```
+Un vistazo inicial a los parametros estadisticos no muestra inconsistencias en los registros
 
 ##### Grafica de distribucion
 
 ```python
-eje_y = hotelsdf.arrival_week_number.value_counts()
-eje_x = eje_y.index.tolist()
-plt.figure(figsize=(15, 5))
-plt.xlabel(xlabel='Numero de la semana del año')
-plt.title(label = 'Llegadas por semana del año')
-sns.barplot(x = eje_x, y = eje_y, palette =  'Set2')
-plt.ylabel(ylabel='Frecuencias')
+plt.figure(figsize=(15,5))
+sns.countplot(data = hotelsdf, x = 'arrival_week_number', palette='Set2')
+plt.title('Semanas del año')
+plt.xlabel('Numero de la semana')
+plt.ylabel('Frecuencia')
 ```
-
-##### Outliers
-##### Ajustes de valor
+De la grafica concluimos que no existen outliers entre los registros 
 
 ### arrival year 
 
@@ -309,22 +309,16 @@ plt.ylabel(ylabel='Frecuencias')
 hotelsdf.arrival_year.describe()
 ```
 
-##### Valores nulos/faltantes
-
-```python
-hotelsdf.arrival_year.isnull().sum()
-```
 ##### Grafica de distribucion
 
 ```python
-eje_y = hotelsdf.arrival_year.value_counts()
-eje_x = eje_y.index.tolist()
-sns.barplot(y = eje_y, x= eje_x, palette= 'Set2')
-plt.title('Años de las reservas')
-plt.ylabel(ylabel='Frecuencia')
-plt.xlabel(xlabel='Años')
+sns.countplot(data = hotelsdf, x = 'arrival_year')
+plt.xlabel('Años')
+plt.ylabel('Frecuencia')
+plt.title('Año de las reservas')
 ```
 
+Todos los registros corresponden a los años: 2015, 2016 y 2017 siendo el año 2016 el mas frecuente entre los registros
 
 ### Average Daily Rate
 
@@ -336,35 +330,30 @@ Realizamos un analisis sobre la variable average daily rate
 hotelsdf.average_daily_rate.describe()
 ```
 
-##### Valores nulos/faltantes
-
-```python
-hotelsdf.average_daily_rate.isna().sum()
-```
-
 ##### Grafica de distribucion
 
 ```python
-data = hotelsdf.average_daily_rate
-sns.kdeplot(data = data)
-plt.xlabel(xlabel = 'Average daily rate')
+sns.kdeplot(data = hotelsdf.average_daily_rate)
+plt.xlabel(xlabel = 'Montos')
 plt.ylabel(ylabel = 'Frecuencia')
-plt.title('Distribucion del average daily rate')
+plt.title('Distribucion del Precio promedio de renta diaria')
 ```
 
 ##### Outliers
 
-Del grafico anterior se observan registros de adr los cuales tienen asignados 0, se debe estudiar a que se deben esos valores, asi como tambien tratar el valor negativo que aparece como mínimo, por otro lado, analizamos cuantos de los precios presentes en los registros presentan una desviacion considerable de los valores esperados
+Del grafico anterior se observan registros de average daily rate los cuales tienen asignados 0, se debe estudiar a que se deben esos valores, asi como tambien tratar el valor negativo que aparece como mínimo, por otro lado, analizamos cuantos de los precios presentes en los registros presentan una desviacion considerable de los valores esperados
 
 ```python
 sns.boxplot(data = hotelsdf['average_daily_rate'])
-plt.title("Average daily rate")
+plt.title("Precio promedio de renta diaria")
+plt.xlabel('Average daily rate')
+plt.ylabel('Montos')
 ```
 
 ```python
 
 valores_con_cero = len(hotelsdf[hotelsdf['average_daily_rate'] <= 0])
-total_valores = len(hotelsDfOriginal.adr)
+total_valores = len(hotelsdf.average_daily_rate)
 porcentaje_con_cero = valores_con_cero/total_valores
 print(f" Los de adrs que registran un valor de 0 representa un porcentaje de:{porcentaje_con_cero}' por lo tanto considerando que no son representativos, eliminamos dichos registros inconsistentes ")
 ```
@@ -383,7 +372,6 @@ Utilizamos Z-score para clasificar las desviasiones presentes en los valores
 
 
 ```python
-import scipy.stats as st
 
 media_requisitos=np.mean(hotelsdf.average_daily_rate)
 
@@ -408,7 +396,7 @@ plt.show()
 
 ```python
 desviacion_uno = hotelsdf[(hotelsdf['z_adr'] > 3)]
-desviacion_dos = hotelsdf[(hotelsdf['z_adr'] < -2)].
+desviacion_dos = hotelsdf[(hotelsdf['z_adr'] < -2)]
 hotelsdf.drop(desviacion_uno.index, inplace = True)
 hotelsdf.drop(desviacion_dos.index, inplace = True)
 hotelsdf.reset_index()
@@ -433,7 +421,7 @@ plt.title('Distribucion del average daily rate')
 ```
 
 ```python
-hotelsdf.drop(label = 'z_adr', inplace = True)
+hotelsdf.drop( columns = 'z_adr', inplace = True)
 ```
 
 ### babies number 
@@ -443,12 +431,6 @@ hotelsdf.drop(label = 'z_adr', inplace = True)
 
 ```python
 hotelsdf.babies_num.describe()
-```
-
-##### Valores nulos/faltantes
-
-```python
-hotelsdf.babies_num.isnull().sum()
 ```
 
 ##### Grafica de distribucion
@@ -483,12 +465,6 @@ hotelsdf.reset_index()
 hotelsdf.booking_changes_num.describe()
 ```
 
-##### Valores nulos/faltantes
-
-```python
-hotelsdf.booking_changes_num.isna().sum()
-```
-
 ##### Grafica de distribucion
 
 ```python
@@ -514,7 +490,6 @@ plt.title('Cantidad de cambios por reserva')
 ### children number 
 
 ##### Valores estadisticos relevantes
-##### Valores nulos/faltantes
 ##### Grafica de distribucion
 ##### Outliers
 ##### Ajustes de valor
@@ -522,7 +497,6 @@ plt.title('Cantidad de cambios por reserva')
 ### days in the waiting list 
 
 ##### Valores estadisticos relevantes
-##### Valores nulos/faltantes
 ##### Grafica de distribucion
 ##### Outliers
 ##### Ajustes de valor
@@ -530,7 +504,6 @@ plt.title('Cantidad de cambios por reserva')
 ### lead time 
 
 ##### Valores estadisticos relevantes
-##### Valores nulos/faltantes
 ##### Grafica de distribucion
 ##### Outliers
 ##### Ajustes de valor
@@ -538,7 +511,6 @@ plt.title('Cantidad de cambios por reserva')
 ### previous booking not cancelled number
 
 ##### Valores estadisticos relevantes
-##### Valores nulos/faltantes
 ##### Grafica de distribucion
 ##### Outliers
 ##### Ajustes de valor
@@ -546,7 +518,6 @@ plt.title('Cantidad de cambios por reserva')
 ### previous booking cancellation number
 
 ##### Valores estadisticos relevantes
-##### Valores nulos/faltantes
 ##### Grafica de distribucion
 ##### Outliers
 ##### Ajustes de valor
@@ -554,7 +525,6 @@ plt.title('Cantidad de cambios por reserva')
 ### required car space number 
 
 ##### Valores estadisticos relevantes
-##### Valores nulos/faltantes
 ##### Grafica de distribucion
 ##### Outliers
 ##### Ajustes de valor
@@ -562,7 +532,6 @@ plt.title('Cantidad de cambios por reserva')
 ### reservation status date 
 
 ##### Valores estadisticos relevantes
-##### Valores nulos/faltantes
 ##### Grafica de distribucion
 ##### Outliers
 ##### Ajustes de valor
@@ -570,7 +539,6 @@ plt.title('Cantidad de cambios por reserva')
 ### special request number 
 
 ##### Valores estadisticos relevantes
-##### Valores nulos/faltantes
 ##### Grafica de distribucion
 ##### Outliers
 ##### Ajustes de valor
@@ -578,7 +546,6 @@ plt.title('Cantidad de cambios por reserva')
 ### weekend nights number
 
 ##### Valores estadisticos relevantes
-##### Valores nulos/faltantes
 ##### Grafica de distribucion
 ##### Outliers
 ##### Ajustes de valor
@@ -586,61 +553,13 @@ plt.title('Cantidad de cambios por reserva')
 ### week nights number 
 
 ##### Valores estadisticos relevantes
-##### Valores nulos/faltantes
 ##### Grafica de distribucion
 ##### Outliers
 ##### Ajustes de valor
 
-## Cualitativas
+## Medicion de la correlacion entre las variables cuantitativas
 
-
-Vemos que columnas tienen variables faltantes
-
-```python
-serie_de_nans = hotelsdf.isna().sum()
-serie_de_nans
-```
-Vemos entonces que las columnas con variables faltantes son:
-
-```python
-serie_de_nans[serie_de_nans > 0]
-```
-
-Resolvemos los variables faltantes una columna a la vez
-
-
-## Observamos variables faltantes de children_num
-Aca vemos que la variable children_num esta almacenada como un float. 
-Vamos a ver si hay algun valor de childer con valor decimal distinto a 0.
-
-```python
-hotelsdf["children_num"].value_counts()
-```
-Vemos que no hay ningun valor con decimal distinto a 0, podemos castear la columna a int.
-
-
-Segun la clasificacion de las variables podemos establecer lo siguiente sobre los datos extraidos del dataframe
-
-Variables cuantitativas, entre las cuales podemos encontrar:
-
-- lead_time "time beetwen reservation and arrival"
-- arrival_date_year
-- arrival_date_week_number  
-- arrival_date_day_of_month
-- stays_in_weekend_nights
-- days_in_waiting_list
-- stays_in_week_nights
-- adult
-- children
-- babies
-- previous_cancellations
-- previous_bookings_not_canceled
-- booking_changes
-- days_in_waiting_list
-- adr "average day rate"
-- required_car_parking_spaces
-- total_of_special_requests
-- reservation_status_date
+Una vez hecho el tratado sobre outliers y datos faltantes se mide la correlacion entre las variables cuantitativas encontradas en el dataframe 
 
 ```python
 # Este if es se usa para evitar problemas de versiones de pandas entre la version local y la presente en Google Collab
@@ -656,12 +575,11 @@ sns.color_palette("mako", as_cmap=True)
 plt.show()
 ```
 
-```python
-hotelsdf[cuantitativas].describe()
-```
-
+## Cualitativas
 
 Variables cualitativas
+
+En un principio establecemos una lista que contenga todas las variables cualitativas
 
 ```python
 cualitativas = [
@@ -674,39 +592,221 @@ cualitativas = [
 "deposit_type",
 "distribution_channel",
 "hotel_name",
+'is_canceled',
 "is_repeated_guest",
 "market_segment_type",
 "meal_type",
 "reservation_status",
 "reserved_room_type",
 ]
+```
 
-#no tiene sentido imprimir cosas como id, company, deposite_type
+Observamos de manerea rapida los posibles valores que pueden tomar dichas variables
 
+
+```python 
 for variable in cualitativas:
   print("Variable: " + variable)
   print(hotelsdf[variable].value_counts().index.tolist())
   print()
 ```
+
+## Valores Nulos Faltante
+
 ```python
-cuantitativas_nulas = hotelsdf[cualitativas].isnull().sum()
-cuantitativas_nulas = cuantitativas_nulas[cuantitativas_nulas > 0]
+cualitativas_nulas = hotelsdf[cualitativas].isnull().sum()
+cualitativas_nulas = cualitativas_nulas[cualitativas_nulas > 0]
 
 cuantitativas_nulas_per = pd.Series()
 
-for indice in cuantitativas_nulas.index:
-    cuantitativas_nulas_per[indice] = cuantitativas_nulas[indice]/len(hotelsdf[indice])*100
+for indice in cualitativas_nulas.index:
+    cuantitativas_nulas_per[indice] = cualitativas_nulas[indice]/len(hotelsdf[indice])*100
 
 sns.barplot(x = cuantitativas_nulas_per.index, y = cuantitativas_nulas_per)
 plt.ylabel(ylabel= 'Porcentaje')
 plt.xlabel(xlabel= 'Nombre columna')
 plt.title(label = 'Porcentaje de valores nulos')
 plt.ylim(0, 100)
+plt.yticks([0,10,20,30,40,50,60,70,80,90,100])
 plt.show()
 ```
 
 De la observación anterior se concluye que la variable company id, no proporciona información suficiente y al tener mas del 90% de sus valores nulos conviene descartarla
 
 ```python 
-hotelsdf.drop("agent_id", axis=1, inplace=True)
+hotelsdf.drop("company_id", axis=1, inplace=True)
 ```
+
+### Agent ID
+
+##### Ajuste de valores faltantes
+
+Reemplazamos valores faltantes por 0 ya que no existe previamente y servira para regular los tipos de atos de la columna
+
+```python
+hotelsdf.loc[hotelsdf['agent_id'].isnull(), 'agent_id'] = 0
+hotelsdf[hotelsdf.agent_id.isnull()]
+hotelsdf['agent_id'] = hotelsdf['agent_id'].astype(int)
+```
+
+##### Grafica de distribucion
+
+```python
+cantidad = len(hotelsdf['agent_id'].value_counts().index.tolist())
+print(f"La cantidad de identificaciones de empresa es: {cantidad}")
+```
+
+Debido a que existen 295 id de empresas, graficamos un muestreo de los 10 ids mas frecuentes en el dataframe
+
+```python
+data = hotelsdf.agent_id.value_counts().sort_values(ascending=False).head(10)
+sns.barplot(y = data, x = data.index.tolist())
+#detallar 
+```
+
+##### Outliers
+##### Ajustes de valor
+
+### arrival month
+##### Grafica de distribucion
+
+```python
+eje_y = hotelsdf.arrival_month.value_counts()
+eje_x = eje_y.index.tolist()
+plt.figure(figsize=(8,5))
+plt.xticks(rotation=45)
+sns.barplot(x = eje_x, y = eje_y)
+```
+
+##### Outliers
+##### Ajustes de valor
+
+### Assigned Room type
+
+```python
+eje_y = hotelsdf.assigned_room_type.value_counts()
+eje_x = eje_y.index.tolist()
+plt.figure(figsize=(8,5))
+sns.barplot(x = eje_x, y = eje_y)
+```
+##### Grafica de distribucion
+##### Outliers
+##### Ajustes de valor
+
+### Country
+##### Grafica de distribucion
+```python
+data = hotelsdf.country.value_counts().sort_values(ascending=False).head(20)
+plt.xticks(rotation=45)
+sns.barplot(y = data, x = data.index.tolist())
+```
+##### Ajuste de valores faltantes
+##### Outliers
+##### Ajustes de valor
+
+### Custemer type
+##### Grafica de distribucion
+
+```python
+eje_y = hotelsdf.customer_type.value_counts()
+eje_x = eje_y.index.tolist()
+sns.barplot(x = eje_x, y = eje_y)
+```
+
+##### Outliers
+##### Ajustes de valor
+
+### Deposit type
+##### Grafica de distribucion
+```python
+eje_y = hotelsdf.deposit_type.value_counts()
+eje_x = eje_y.index.tolist()
+sns.barplot(x = eje_x, y = eje_y)
+```
+##### Outliers
+##### Ajustes de valor
+
+### Distribution channel
+##### Grafica de distribucion
+```python
+eje_y = hotelsdf.distribution_channel.value_counts()
+eje_x = eje_y.index.tolist()
+sns.barplot(x = eje_x, y = eje_y)
+```
+##### Outliers
+##### Ajustes de valor
+
+### Hotel Name
+##### Grafica de distribucion
+```python
+eje_y = hotelsdf.hotel_name.value_counts()
+eje_x = eje_y.index.tolist()
+sns.barplot(x = eje_x, y = eje_y)
+```
+##### Outliers
+##### Ajustes de valor
+
+### Is canceled (Target)
+##### Grafica de distribucion
+```python
+eje_y = hotelsdf.is_canceled.value_counts()
+eje_x = eje_y.index.tolist()
+sns.barplot(x = eje_x, y = eje_y)
+```
+##### Outliers
+##### Ajustes de valor
+
+### Is repeated guest
+##### Grafica de distribucion
+```python
+eje_y = hotelsdf.is_repeated_guest.value_counts()
+eje_x = eje_y.index.tolist()
+sns.barplot(x = eje_x, y = eje_y)
+```
+##### Outliers
+##### Ajustes de valor
+
+
+### Market segment
+##### Grafica de distribucion
+```python
+eje_y = hotelsdf.market_segment_type.value_counts()
+eje_x = eje_y.index.tolist()
+plt.xticks(rotation=45)
+sns.barplot(x = eje_x, y = eje_y)
+```
+##### Outliers
+##### Ajustes de valor
+
+### meal type
+##### Grafica de distribucion
+```python
+eje_y = hotelsdf.meal_type.value_counts()
+eje_x = eje_y.index.tolist()
+plt.xticks(rotation=45)
+sns.barplot(x = eje_x, y = eje_y)
+```
+##### Outliers
+##### Ajustes de valor
+
+### Reservation Status
+##### Grafica de distribucion
+```python
+eje_y = hotelsdf.reservation_status.value_counts()
+eje_x = eje_y.index.tolist()
+plt.xticks(rotation=45)
+sns.barplot(x = eje_x, y = eje_y)
+```
+##### Outliers
+##### Ajustes de valor
+
+### Reserved room type
+##### Grafica de distribucion
+```python
+eje_y = hotelsdf.reserved_room_type.value_counts()
+eje_x = eje_y.index.tolist()
+plt.xticks(rotation=45)
+sns.barplot(x = eje_x, y = eje_y)
+```
+##### Outliers
+##### Ajustes de valor
