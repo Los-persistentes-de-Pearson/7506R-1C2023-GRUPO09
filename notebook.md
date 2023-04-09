@@ -502,7 +502,7 @@ Estos ultimos son posibles Outliers (candidatearr????)
 Sin embargo, esperamos a terminar de hacer todos los analisis univariados y luego al hacer los multivariados, compararemos esta variable contra la variable adult_num para observar si existe alguna incoherencia con la cantidad de adultos alojados en dicha reserva.
 
 #TODO
-MOVER LO DE ABAJO A ANALISIS MULTIVARIADO
+#DEJARLO ACA, JUSTIFICAR CON LOS REGISTROS COMO ESTA HECHO
 Mostramos dichos registros junto con las columnas de hotel_name y adult_num para analizarlos más en detalle y determinar si alguno de ellos puede ser Oulier y por que.
 Nuestro criterio para determinar que un valor es adecuado para esta variable es que haya como mucho 1 espacio de estacionamiento por adulto en la reserva.
 
@@ -533,6 +533,7 @@ Con el analisis anteior, tomamos las siguiuentes decisiones:
 
 ```python
 #codigo para ajustar valores.
+#Dropear aca directamenteeee
 ```
 
 ### special requests number 
@@ -554,7 +555,7 @@ print("La cantidad de valores nulos/faltantes es", hotelsdf.special_requests_num
 
 ```python
 sns.countplot(data = hotelsdf, x='special_requests_num', palette='Set1')
-plt.title("Reservas por cantidad de requisitos espediales")
+plt.title("Reservas por cantidad de requisitos especiales")
 ```
 
 ```python
@@ -580,8 +581,8 @@ print("hay", hotelsdf[hotelsdf.special_requests_num==5].shape[0] ,"reservas con 
 ##### Ajustes de valor
 
 
-Debido a la la cantidad de reservas para estos casos, no parcen ser casos puntuales. 
-Procedemos a cmabiar la cantidad de requisitos especiales de dichos registros el valor mas frecuente
+Debido a la la cantidad de reservas para estos casos y que el rango de valores es relativamente acotado, no parcen ser casos puntuales. 
+Procedemos a cambiar la cantidad de requisitos especiales de dichos registros el valor mas frecuente
 
 ```python
 media_special_requests = round(hotelsdf.special_requests_num.mean())
@@ -621,7 +622,7 @@ plt.show()
 ##### Outliers
 
 
-Podriamos suponer como posibles outliers, reservas con muchos dias de estadia. A siple vista se puede ver que hay pocas reservas con 5 o mas noches de fin de semana de estadia. Comenzamos estudiando los valores de 9 o mas dias de fin de semana ya que equivaldrian a un minimo de 4 semanas de estadia.
+Podriamos suponer como posibles outliers, reservas con muchos dias de estadia. A simple vista se puede ver que hay pocas reservas con 5 o mas noches de fin de semana de estadia. Comenzamos estudiando los valores de 9 o mas dias de fin de semana ya que equivaldrian a un minimo de 4 semanas de estadia.
 
 ```python
 mayores_a_nueve = hotelsdf[hotelsdf["weekend_nights_num"]>=9]
@@ -705,12 +706,9 @@ Como son muchos registros y no contienen valores incoherentes posponemos su trat
  Comoanalizar solo las noches de estadia no es un buen indicador de la cantidad de dias totales ya que, por ejemplo, 2 dias de fin de semana pueden ser 2 dias de estadia total (solo el fin de semana) o 7 dias de estadia total (Domingo a Sabado de la siguiente semana). Por ello, esperamos a graficar dias de semana y a generar una columna con dias de estadia para analizar mejor ambas variables y recien ahi determinar si existen ouliers.
 <!-- #endregion -->
 
-Ya que consideramos que la cantidad de dias puede influir, observamos que no haya una inconsistencia en la carga de datos con relacion a la cantidad de dias de semana. Para ello, comparamos la cantidad de noches de fin de semana con las noches de semana que se quedo. Dberiamos obtener varias rectas con las siguientes condiciones:
-- por cada 1 noche de fin de semana puede haber entre 0 y 5 dias de semana.
-- por cada 2 noches de fin de semana puede haber entre 0 y 10 dias de semana.
-Osea si n es el numero de noches de fin de semana con n par, como minimo (n/2)*5 -5  numero de dias de semana y como maximo hay (n/2)*5
-Osea si n es el numero de noches de fin de semana con n impar queda determinado en (n-1/2)*5
-
+Ya que consideramos que la cantidad de dias puede influir, observamos que no haya una inconsistencia en la carga de datos con relacion a la cantidad de dias de semana. Para ello, comparamos la cantidad de noches de fin de semana con las noches de semana que se quedo. Deberiamos obtener varias rectas con las siguientes condiciones:
+- Cuando el numero de noches n de fin de semana es impar, las pendientes de las rectas tienen una variacion de +- 5 noches de semana
+- Cuando el numero de noches n de fin de semana es par, las pendientes de las rectas tienen una variacion de +- 10 noches de semana
 
 ```python
 hotelsdf[hotelsdf["weekend_nights_num"]==8]
@@ -722,7 +720,16 @@ plt.title('Dispersograma noches finde vs noches de semana')
 plt.show()
 ```
 
+```python
+hotelsdf["dias_totales"] = hotelsdf["week_nights_num"] + hotelsdf["weekend_nights_num"]
+
+sns.countplot(data = hotelsdf, x='dias_totales', hue='is_canceled')
+```
+
 Nos dio lo esperado. No hay datos incosistentes en cuanto a su comparacion con el numero de noches de semana.
+
+
+#Anslisis de Mahalanobis
 
 
 ##### Ajustes de valor
