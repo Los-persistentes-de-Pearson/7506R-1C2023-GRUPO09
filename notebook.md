@@ -649,7 +649,7 @@ Primero vamos a ver la cantidad de dias que hay en nuestro dataset
 ### previous booking not cancelled number
 
 
-#### Valores estadisticos relevantes
+##### Valores estadisticos relevantes
 
 ```python
 hotelsdf["previous_bookings_not_canceled_num"].describe()
@@ -658,13 +658,13 @@ hotelsdf["previous_bookings_not_canceled_num"].describe()
 Esta variable representa la cantidad de reservasa que no fueron canceladas por el usuario antes de la reserva actual
 
 
-#### Valores nulos/faltantes
+##### Valores nulos/faltantes
 
 ```python
 hotelsdf.previous_bookings_not_canceled_num.isna().sum()
 ```
 
-#### Grafica de distribucion
+##### Grafica de distribucion
 
 
 ```python
