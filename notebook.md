@@ -1061,8 +1061,11 @@ cualitativas = [
 ]
 ```
 
-## Valores Nulos Faltante
+### Agent ID
 
+#### Valores faltantes
+EL CUADRO QUE VIENE TIENE QUE SER AJUSTADO PARA QUE SOLO MUESTRE COMPANY ID!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+CUIDADO!!!! RECORDAR CAMBIAR ANTES DE ENTREGAR
 ```python
 cualitativas_nulas = hotelsdf[cualitativas].isnull().sum()
 cualitativas_nulas = cualitativas_nulas[cualitativas_nulas > 0]
@@ -1080,16 +1083,6 @@ plt.ylim(0, 100)
 plt.yticks([0,10,20,30,40,50,60,70,80,90,100])
 plt.show()
 ```
-
-De la observación anterior se concluye que la variable company id, no proporciona información suficiente y al tener mas del 90% de sus valores nulos conviene descartarla
-
-```python
-hotelsdf.drop("company_id", axis=1, inplace=True)
-```
-
-### Agent ID
-
-#### Valores faltantes
 
 
 #### Valores que toma
@@ -1185,10 +1178,57 @@ sns.barplot(x = eje_x, y = eje_y)
 #### Outliers
 #### Ajustes de valor
 
+
+### Company ID
+#### Valores faltantes
+EL CUADRO QUE VIENE TIENE QUE SER AJUSTADO PARA QUE SOLO MUESTRE COMPANY ID!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+CUIDADO!!!! RECORDAR CAMBIAR ANTES DE ENTREGAR
+```python
+cualitativas_nulas = hotelsdf[cualitativas].isnull().sum()
+cualitativas_nulas = cualitativas_nulas[cualitativas_nulas > 0]
+
+cuantitativas_nulas_per = pd.Series()
+
+for indice in cualitativas_nulas.index:
+    cuantitativas_nulas_per[indice] = cualitativas_nulas[indice]/len(hotelsdf[indice])*100
+
+sns.barplot(x = cuantitativas_nulas_per.index, y = cuantitativas_nulas_per)
+plt.ylabel(ylabel= 'Porcentaje')
+plt.xlabel(xlabel= 'Nombre columna')
+plt.title(label = 'Porcentaje de valores nulos')
+plt.ylim(0, 100)
+plt.yticks([0,10,20,30,40,50,60,70,80,90,100])
+plt.show()
+```
+
+#### Valores que toma
+#### Grafica de distribucion
+#### Outliers
+#### Ajustes de valor
+
 ### Country
 
 
 #### Valores faltantes
+EL CUADRO QUE VIENE TIENE QUE SER AJUSTADO PARA QUE SOLO MUESTRE COMPANY ID!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+CUIDADO!!!! RECORDAR CAMBIAR ANTES DE ENTREGAR
+```python
+cualitativas_nulas = hotelsdf[cualitativas].isnull().sum()
+cualitativas_nulas = cualitativas_nulas[cualitativas_nulas > 0]
+
+cuantitativas_nulas_per = pd.Series()
+
+for indice in cualitativas_nulas.index:
+    cuantitativas_nulas_per[indice] = cualitativas_nulas[indice]/len(hotelsdf[indice])*100
+
+sns.barplot(x = cuantitativas_nulas_per.index, y = cuantitativas_nulas_per)
+plt.ylabel(ylabel= 'Porcentaje')
+plt.xlabel(xlabel= 'Nombre columna')
+plt.title(label = 'Porcentaje de valores nulos')
+plt.ylim(0, 100)
+plt.yticks([0,10,20,30,40,50,60,70,80,90,100])
+plt.show()
+```
 
 
 #### Valores que toma
