@@ -1061,16 +1061,6 @@ cualitativas = [
 ]
 ```
 
-Observamos de manerea rapida los posibles valores que pueden tomar dichas variables
-
-
-```python
-for variable in cualitativas:
-  print("Variable: " + variable)
-  print(hotelsdf[variable].value_counts().index.tolist())
-  print()
-```
-
 ## Valores Nulos Faltante
 
 ```python
