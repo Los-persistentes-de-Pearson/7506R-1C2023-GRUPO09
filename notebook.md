@@ -26,6 +26,7 @@ import sklearn as sk
 import seaborn as sns
 from matplotlib import pyplot as plt
 import scipy.stats as st
+from calendar import month_name
 ```
 
 ## Cargamos de datos a un dataframe
@@ -1063,7 +1064,7 @@ cualitativas = [
 Observamos de manerea rapida los posibles valores que pueden tomar dichas variables
 
 
-```python 
+```python
 for variable in cualitativas:
   print("Variable: " + variable)
   print(hotelsdf[variable].value_counts().index.tolist())
@@ -1092,11 +1093,22 @@ plt.show()
 
 De la observación anterior se concluye que la variable company id, no proporciona información suficiente y al tener mas del 90% de sus valores nulos conviene descartarla
 
-```python 
+```python
 hotelsdf.drop("company_id", axis=1, inplace=True)
 ```
 
 ### Agent ID
+
+#### Valores faltantes
+
+
+#### Valores que toma
+
+```python
+agentIDValores = (hotelsdf["agent_id"].unique())
+agentIDValores.sort()
+print(agentIDValores)
+```
 
 #### Ajuste de valores faltantes
 
@@ -1127,6 +1139,22 @@ sns.barplot(y = data, x = data.index.tolist())
 #### Ajustes de valor
 
 ### arrival month
+
+
+#### Valores faltantes
+
+
+#### Valores que toma
+
+
+```python
+arrivalMonthValores = (hotelsdf["arrival_month"].unique())
+month_lookup = list(month_name)
+months = arrivalMonthValores
+sorted(months, key=month_lookup.index)
+#print(leadTimeValores)
+```
+
 #### Grafica de distribucion
 
 ```python
@@ -1142,6 +1170,21 @@ sns.barplot(x = eje_x, y = eje_y)
 
 ### Assigned Room type
 
+
+#### Valores faltantes
+
+
+
+#### Valores que toma
+
+
+
+```python
+assigned_room_typeValores = (hotelsdf["assigned_room_type"].unique())
+assigned_room_typeValores.sort()
+print(assigned_room_typeValores)
+```
+
 ```python
 eje_y = hotelsdf.assigned_room_type.value_counts()
 eje_x = eje_y.index.tolist()
@@ -1153,6 +1196,20 @@ sns.barplot(x = eje_x, y = eje_y)
 #### Ajustes de valor
 
 ### Country
+
+
+#### Valores faltantes
+
+
+#### Valores que toma
+
+
+```python
+countryValores = (hotelsdf["country"].unique())
+#countryValores.sort() #No se puede ordenar porque tiene valores nan
+print(countryValores)
+```
+
 #### Grafica de distribucion
 ```python
 data = hotelsdf.country.value_counts().sort_values(ascending=False).head(20)
@@ -1164,6 +1221,18 @@ sns.barplot(y = data, x = data.index.tolist())
 #### Ajustes de valor
 
 ### Custemer type
+#### Valores faltantes
+
+
+#### Valores que toma
+
+
+```python
+customer_typeValores = (hotelsdf["customer_type"].unique())
+customer_typeValores.sort()
+print(customer_typeValores)
+```
+
 #### Grafica de distribucion
 
 ```python
@@ -1176,6 +1245,18 @@ sns.barplot(x = eje_x, y = eje_y)
 #### Ajustes de valor
 
 ### Deposit type
+#### Valores faltantes
+
+
+#### Valores que toma
+
+
+```python
+deposit_typeValores = (hotelsdf["deposit_type"].unique())
+deposit_typeValores.sort()
+print(deposit_typeValores)
+```
+
 #### Grafica de distribucion
 ```python
 eje_y = hotelsdf.deposit_type.value_counts()
@@ -1186,6 +1267,18 @@ sns.barplot(x = eje_x, y = eje_y)
 #### Ajustes de valor
 
 ### Distribution channel
+#### Valores faltantes
+
+
+#### Valores que toma
+
+
+```python
+distribution_channelValores = (hotelsdf["distribution_channel"].unique())
+distribution_channelValores.sort()
+print(distribution_channelValores)
+```
+
 #### Grafica de distribucion
 ```python
 eje_y = hotelsdf.distribution_channel.value_counts()
@@ -1196,6 +1289,18 @@ sns.barplot(x = eje_x, y = eje_y)
 #### Ajustes de valor
 
 ### Hotel Name
+#### Valores faltantes
+
+
+#### Valores que toma
+
+
+```python
+hotel_nameValores = (hotelsdf["hotel_name"].unique())
+hotel_nameValores.sort()
+print(hotel_nameValores)
+```
+
 #### Grafica de distribucion
 ```python
 eje_y = hotelsdf.hotel_name.value_counts()
@@ -1206,6 +1311,18 @@ sns.barplot(x = eje_x, y = eje_y)
 #### Ajustes de valor
 
 ### Is canceled (Target)
+#### Valores faltantes
+
+
+#### Valores que toma
+
+
+```python
+is_canceledValores = (hotelsdf["is_canceled"].unique())
+is_canceledValores.sort()
+print(is_canceledValores)
+```
+
 #### Grafica de distribucion
 ```python
 eje_y = hotelsdf.is_canceled.value_counts()
@@ -1216,6 +1333,18 @@ sns.barplot(x = eje_x, y = eje_y)
 #### Ajustes de valor
 
 ### Is repeated guest
+#### Valores faltantes
+
+
+#### Valores que toma
+
+
+```python
+is_repeated_guestValores = (hotelsdf["is_repeated_guest"].unique())
+is_repeated_guestValores.sort()
+print(is_repeated_guestValores)
+```
+
 #### Grafica de distribucion
 ```python
 eje_y = hotelsdf.is_repeated_guest.value_counts()
@@ -1227,6 +1356,18 @@ sns.barplot(x = eje_x, y = eje_y)
 
 
 ### Market segment
+#### Valores faltantes
+
+
+#### Valores que toma
+
+
+```python
+market_segment_typeValores = (hotelsdf["market_segment_type"].unique())
+market_segment_typeValores.sort()
+print(market_segment_typeValores)
+```
+
 #### Grafica de distribucion
 ```python
 eje_y = hotelsdf.market_segment_type.value_counts()
@@ -1238,6 +1379,18 @@ sns.barplot(x = eje_x, y = eje_y)
 #### Ajustes de valor
 
 ### meal type
+#### Valores faltantes
+
+
+#### Valores que toma
+
+
+```python
+meal_typeValores = (hotelsdf["meal_type"].unique())
+meal_typeValores.sort()
+print(meal_typeValores)
+```
+
 #### Grafica de distribucion
 ```python
 eje_y = hotelsdf.meal_type.value_counts()
@@ -1249,6 +1402,18 @@ sns.barplot(x = eje_x, y = eje_y)
 #### Ajustes de valor
 
 ### Reservation Status
+#### Valores faltantes
+
+
+#### Valores que toma
+
+
+```python
+reservation_statusValores = (hotelsdf["reservation_status"].unique())
+reservation_statusValores.sort()
+print(reservation_statusValores)
+```
+
 #### Grafica de distribucion
 ```python
 eje_y = hotelsdf.reservation_status.value_counts()
@@ -1260,6 +1425,18 @@ sns.barplot(x = eje_x, y = eje_y)
 #### Ajustes de valor
 
 ### Reserved room type
+#### Valores faltantes
+
+
+#### Valores que toma
+
+
+```python
+reserved_room_typeValores = (hotelsdf["reserved_room_type"].unique())
+reserved_room_typeValores.sort()
+print(reserved_room_typeValores)
+```
+
 #### Grafica de distribucion
 ```python
 eje_y = hotelsdf.reserved_room_type.value_counts()
