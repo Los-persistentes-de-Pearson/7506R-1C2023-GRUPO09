@@ -15,7 +15,7 @@ jupyter:
 
 En este jupyter notebook vamos a explorar un conjunto de datos sobre reservas de hoteles y tratar de hallar un modelo que nos permita predecir si la reserva va a ser cancelada
 
-# Exploracion Inicial e ingenieria de caracteristicas
+# Preparacion del ambiente de trabajo
 Importamos todas las librerias que vamos a usar
 
 
