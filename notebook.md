@@ -985,55 +985,7 @@ sns.countplot(data = mayores_a_11_noches_semana, x='week_nights_num', palette='S
 Como son muchos registros y no contienen valores incoherentes posponemos su tratamiento para estudiarlos con un analisis multivariado en la siguiente seccion.
 
 
-### (lo de abasjo va a multivariadoooo)
 
- Comoanalizar solo las noches de estadia no es un buen indicador de la cantidad de dias totales ya que, por ejemplo, 2 dias de fin de semana pueden ser 2 dias de estadia total (solo el fin de semana) o 7 dias de estadia total (Domingo a Sabado de la siguiente semana). Por ello, esperamos a graficar dias de semana y a generar una columna con dias de estadia para analizar mejor ambas variables y recien ahi determinar si existen ouliers.
-
-Ya que consideramos que la cantidad de dias puede influir, observamos que no haya una inconsistencia en la carga de datos con relacion a la cantidad de dias de semana. Para ello, comparamos la cantidad de noches de fin de semana con las noches de semana que se quedo. Deberiamos obtener varias rectas con las siguientes condiciones:
-- Cuando el numero de noches n de fin de semana es impar, las pendientes de las rectas tienen una variacion de +- 5 noches de semana
-- Cuando el numero de noches n de fin de semana es par, las pendientes de las rectas tienen una variacion de +- 10 noches de semana
-
-```python
-hotelsdf[hotelsdf["weekend_nights_num"]==8]
-```
-
-```python
-sns.scatterplot(x=hotelsdf.weekend_nights_num,y=hotelsdf.week_nights_num)
-plt.title('Dispersograma noches finde vs noches de semana')
-plt.show()
-```
-
-```python
-hotelsdf["dias_totales"] = hotelsdf["week_nights_num"] + hotelsdf["weekend_nights_num"]
-
-sns.countplot(data = hotelsdf, x='dias_totales', hue='is_canceled')
-```
-
-Nos dio lo esperado. No hay datos incosistentes en cuanto a su comparacion con el numero de noches de semana.
-
-
-#Anslisis de Mahalanobis
-
-
-#### Ajustes de valor
-
-## Medicion de la correlacion entre las variables cuantitativas
-
-Una vez hecho el tratado sobre outliers y datos faltantes se mide la correlacion entre las variables cuantitativas encontradas en el dataframe
-
-```python
-# Este if es se usa para evitar problemas de versiones de pandas entre la version local y la presente en Google Collab
-if (pd.__version__) == "1.5.2":
-    correlaciones = hotelsdf[cuantitativas].corr(numeric_only=True)
-else:
-    correlaciones = hotelsdf[cuantitativas].corr()
-
-sns.set(style = 'darkgrid')
-plt.figure( figsize = (12, 9))
-sns.heatmap(data = correlaciones,annot = True, vmin = -1, vmax =1, fmt='.2f')
-sns.color_palette("mako", as_cmap=True)
-plt.show()
-```
 
 ## Cualitativas
 
@@ -1478,3 +1430,55 @@ sns.barplot(x = eje_x, y = eje_y)
 #### Ajustes de valor
 
 Como ya habiamos observado en la cantidad de dias de fin de semana, la mayor cantidad de gente se queda 
+
+
+
+# Analisis multivariado
+## Medicion de la correlacion entre las variables cuantitativas
+
+Una vez hecho el tratado sobre outliers y datos faltantes medimos la correlacion entre las variables cuantitativas encontradas en el dataframe
+
+```python
+# Este if es se usa para evitar problemas de versiones de pandas entre la version local y la presente en Google Collab
+if (pd.__version__) == "1.5.2":
+    correlaciones = hotelsdf[cuantitativas].corr(numeric_only=True)
+else:
+    correlaciones = hotelsdf[cuantitativas].corr()
+
+sns.set(style = 'darkgrid')
+plt.figure( figsize = (12, 9))
+sns.heatmap(data = correlaciones,annot = True, vmin = -1, vmax =1, fmt='.2f')
+sns.color_palette("mako", as_cmap=True)
+plt.show()
+```
+
+### (lo de abasjo va a multivariadoooo)
+
+ Comoanalizar solo las noches de estadia no es un buen indicador de la cantidad de dias totales ya que, por ejemplo, 2 dias de fin de semana pueden ser 2 dias de estadia total (solo el fin de semana) o 7 dias de estadia total (Domingo a Sabado de la siguiente semana). Por ello, esperamos a graficar dias de semana y a generar una columna con dias de estadia para analizar mejor ambas variables y recien ahi determinar si existen ouliers.
+
+Ya que consideramos que la cantidad de dias puede influir, observamos que no haya una inconsistencia en la carga de datos con relacion a la cantidad de dias de semana. Para ello, comparamos la cantidad de noches de fin de semana con las noches de semana que se quedo. Deberiamos obtener varias rectas con las siguientes condiciones:
+- Cuando el numero de noches n de fin de semana es impar, las pendientes de las rectas tienen una variacion de +- 5 noches de semana
+- Cuando el numero de noches n de fin de semana es par, las pendientes de las rectas tienen una variacion de +- 10 noches de semana
+
+```python
+hotelsdf[hotelsdf["weekend_nights_num"]==8]
+```
+
+```python
+sns.scatterplot(x=hotelsdf.weekend_nights_num,y=hotelsdf.week_nights_num)
+plt.title('Dispersograma noches finde vs noches de semana')
+plt.show()
+```
+
+```python
+hotelsdf["dias_totales"] = hotelsdf["week_nights_num"] + hotelsdf["weekend_nights_num"]
+
+sns.countplot(data = hotelsdf, x='dias_totales', hue='is_canceled')
+```
+
+Nos dio lo esperado. No hay datos incosistentes en cuanto a su comparacion con el numero de noches de semana.
+
+
+Anslisis de Mahalanobis
+
+
