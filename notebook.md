@@ -945,7 +945,7 @@ mayores_a_5_menores_a_nueve_finde = hotelsdf[hotelsdf["weekend_nights_num"]>=5]
 sns.countplot(data = mayores_a_5_menores_a_nueve_finde, x='weekend_nights_num', palette='Set1')
 ```
 
-Como son muchos mas registros posponemos su analisis para despues de terminar de estudiar todas las variables cuantitativas pero los dejamos marcados como posibles registros a modificar.
+Como son muchos mas registros posponemos su analisis para estudiarlos en un analisis multivariado despues de terminar de estudiar todas las variables cuantitativas pero los dejamos marcados como posibles registros a modificar.
 
 
 ### week nights number 
@@ -982,9 +982,7 @@ mayores_a_11_noches_semana.shape[0]
 sns.countplot(data = mayores_a_11_noches_semana, x='week_nights_num', palette='Set1')
 ```
 
-Como son muchos registros y no contienen valores incoherentes posponemos su tratamiento para estudiarlos con un analisis multivariado en la siguiente seccion.
-
-
+Como son muchos registros y no contienen valores incoherentes a primera vista posponemos su tratamiento para estudiarlos con un analisis multivariado comparandolo con weekend_nights_number en dicha seccion.
 
 
 ## Cualitativas
@@ -1454,20 +1452,99 @@ plt.show()
 
 ### (lo de abasjo va a multivariadoooo)
 
- Comoanalizar solo las noches de estadia no es un buen indicador de la cantidad de dias totales ya que, por ejemplo, 2 dias de fin de semana pueden ser 2 dias de estadia total (solo el fin de semana) o 7 dias de estadia total (Domingo a Sabado de la siguiente semana). Por ello, esperamos a graficar dias de semana y a generar una columna con dias de estadia para analizar mejor ambas variables y recien ahi determinar si existen ouliers.
-
-Ya que consideramos que la cantidad de dias puede influir, observamos que no haya una inconsistencia en la carga de datos con relacion a la cantidad de dias de semana. Para ello, comparamos la cantidad de noches de fin de semana con las noches de semana que se quedo. Deberiamos obtener varias rectas con las siguientes condiciones:
-- Cuando el numero de noches n de fin de semana es impar, las pendientes de las rectas tienen una variacion de +- 5 noches de semana
+Como dijimos previamente, analizar por separado las noches de dia de semana y las noches de dias de fin de semana no basta parta estudiar dichas variables. El primer problema que podria surgir es que la cantidad de noches de semana y de fin de semana no guarden una relacion coherente. Al graficarlos debería ocurrir lo siguiente:
+- Cuando el numero de noches n de fin de semana es impar, las pendientes de las rectas tienen una variacion de +/- 5 noches de semana
 - Cuando el numero de noches n de fin de semana es par, las pendientes de las rectas tienen una variacion de +- 10 noches de semana
-
-```python
-hotelsdf[hotelsdf["weekend_nights_num"]==8]
-```
 
 ```python
 sns.scatterplot(x=hotelsdf.weekend_nights_num,y=hotelsdf.week_nights_num)
 plt.title('Dispersograma noches finde vs noches de semana')
 plt.show()
+```
+
+Al observar el grafico observamos que todos los puntos se encuentran en los rangos explicados anteriormente.
+
+
+Sin embargo, ocurre que si bien puede resultar util tener datos sobre las noches de semana y las de fin de semana, un dato que nos podria resultar aun mas util es la cantidad de noches totales de estadia.
+Agregamos una columna con dicho dato
+
+```python
+hotelsdf["dias_totales"] = hotelsdf["week_nights_num"] + hotelsdf["weekend_nights_num"]
+```
+
+Puesto que ahora tenemos una nueva variable, realizamos un breve analisis univariado sobre la misma para determinar si existen Outliers no detectados en las columans de week y weekend nights number.
+
+```python
+plt.figure(figsize=(15,5))
+sns.countplot(data = hotelsdf, x = 'dias_totales', palette= 'Set2')
+plt.title('Cantidad de reservas por dias de estadia')
+plt.xlabel('Dias de estadia')
+plt.ylabel('Frecuencia')
+```
+
+La mayoria de las reservas son de estadias de entre 1 y 7 dias de estadia. En menor medida se observan reservas para estadias entre 8 y 14 dias y por ultimos unas pocas entre 15 y 30 dias. Realizamos un boxplot para darnos una idea de que numero utilizar como corte para determinar outliers.
+
+```python
+plt.xlabel(xlabel = 'Dia estadia')
+sns.boxplot(data = hotelsdf['dias_totales'])
+plt.title("reservas por dias de estadia")
+plt.ylabel(ylabel = 'Frecuencia')
+```
+
+Segun el grafico se alejarian de la media todos los valores de 8 o mas dias de estadia. Vemos cuantos registros son y que porcentaje representan del total
+
+```python
+reservas_mas_de_ocho_dias = hotelsdf[(hotelsdf.dias_totales>=8)].shape[0]
+print("hay",reservas_mas_de_ocho_dias,"que representan un porcentaje del total de", reservas_mas_de_ocho_dias*100/hotelsdf.shape[0],"%")
+```
+
+Puesto que este valor es muy elevado, apelamos al sentido comun. Rservas de hasta 14 dias de estadia son muy posibles, por lo cual estuidiamos las de mas 15 o mas dias.
+
+```python
+mas_de_quince_dias = hotelsdf[hotelsdf["dias_totales"]>=15]
+#plt.figure(figsize=(15,5))
+sns.countplot(data = mas_de_quince_dias, x = 'dias_totales', palette= 'Set2', hue = "is_canceled")
+plt.title('Cantidad de dias de estadia')
+plt.xlabel('Dias de estadia')
+plt.ylabel('Frecuencia')
+```
+
+Primero vemos cuantos registros son en total
+
+```python
+print("hay",mas_de_quince_dias.shape[0],"que se quedan mas de 15 dias y representan un porcentaje del total de", (mas_de_quince_dias.shape[0])*100/hotelsdf.shape[0],"%")
+```
+
+Luego vemos cuantos de esos cancelan
+
+```python
+cancelaron_y_mas_de_15 = hotelsdf[ (hotelsdf.dias_totales>=15) & (hotelsdf.is_canceled == 1) ].shape[0]
+
+print("hay",cancelaron_y_mas_de_15,"que cancelaron y se quedaron mas de 15 o mas dias.Osea un", cancelaron_y_mas_de_15*100/mas_de_quince_dias.shape[0],"% de los que se que se quedan mas de 15 dias cancelan")
+```
+
+Vemos que el porcentaje de reservas de mas de 15 dias que cancelan es muy alto. Sin embargo, la cantidad de registros con los que ocurre esto son muy pocos. Dejarlos, podria generar ruido al momento de realizar la prediccion. Nos podria llevar, erroneamente a pensar que alguien que se quedo muchos dias cancelaria cuando esto no necesariamente es asi. En el problema q estamos resolviendo, es prefereible no detectar a alguien que cancela, que suponer que alguien cancelaria y que luego no lo haga ya que en terminos de presupuestos, disponibilidad o cualquiera sea el uso que se le de a esta prediccion, no estar preparardo para una reserva perjudicaria mucho mas que estarlo "por las dudas".
+
+
+Intentamos hacer un calculo de distancia Mahalanobis pero debido a la cantidad de datos, nos generaba errores, por ello lo dejamos comentado.
+
+"MemoryError: Unable to allocate 26.7 GiB for an array with shape (59903, 59903) and data type float64"
+
+```python
+# #Calulo el vector de medias
+# vmedias=np.mean(hotelsdf[['weekend_nights_num','week_nights_num']])
+
+# #Calculo la diferencia entre las observaciones y el vector de medias
+# weekend_nights_dif = hotelsdf[['weekend_nights_num','week_nights_num']] - vmedias
+
+# #Calculo matriz de covarianza y su inversa
+# cov=hotelsdf[['weekend_nights_num','week_nights_num']].cov().values
+# inv_cov = np.linalg.inv(cov)
+
+# #Calculamos el cuadrado de la distancia de mahalanobis
+# mahal =np.dot( np.dot(weekend_nights_dif, inv_cov) , weekend_nights_dif.T)
+
+# hotelsdf['mahal_week_weekend_nights']=mahal.diagonal()
 ```
 
 ```python
