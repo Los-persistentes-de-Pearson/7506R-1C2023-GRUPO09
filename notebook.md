@@ -15,7 +15,7 @@ jupyter:
 
 En este jupyter notebook vamos a explorar un conjunto de datos sobre reservas de hoteles y tratar de hallar un modelo que nos permita predecir si la reserva va a ser cancelada
 
-# Exploracion Inicial e ingenieria de caracteristicas
+# Preparacion del ambiente de trabajo
 Importamos todas las librerias que vamos a usar
 
 
@@ -26,6 +26,7 @@ import sklearn as sk
 import seaborn as sns
 from matplotlib import pyplot as plt
 import scipy.stats as st
+from calendar import month_name
 ```
 
 ## Cargamos de datos a un dataframe
@@ -670,14 +671,19 @@ hotelsdf[hotelsdf["lead_time"] >= 400]
 ```
 
 #### Outliers
-Los valores mas llamativos son aquellos por encima de 300; sin embargo no podemos establecer que son outliers porque son cantidades de dias
 
 
-#### Ajustes de valor
+```python
+porcentaje = str((len(hotelsdf[hotelsdf["lead_time"] >= 400]) * 100)/len(hotelsdf))
+print("Los valores mas llamativos son aquellos por encima de 400. Dichos valores representan un: " + porcentaje + "%")
+```
 
-Vamos a aplicar la tecnica de normalizado para poder aprovechar los datos. Podemos separarlo en 3 grandes grupos: Poco tiempo, mediano tiempo, mucho tiempo.\
-Primero vamos a ver la cantidad de dias que hay en nuestro dataset
+Es un porcentaje lo suficientemente bajo para poder borrarlos
 
+```python
+hotelsdf.drop(hotelsdf[hotelsdf["lead_time"] >= 400].index, inplace = True)
+hotelsdf.reset_index()
+```
 
 ### previous booking not cancelled number
 
@@ -784,42 +790,36 @@ plt.title("Cantidad de reservas por espacios de estacionamiento")
 
 Viendo el grafico podemos identificar que el numero de espacios de estacionamiento mas comun es 0, seguido por 1. 
 Además encontramos algunos pocos casos en los que se reservaron 2, 3 y 8 espacios.
-Estos ultimos son posibles Outliers (candidatearr????)
-Sin embargo, esperamos a terminar de hacer todos los analisis univariados y luego al hacer los multivariados, compararemos esta variable contra la variable adult_num para observar si existe alguna incoherencia con la cantidad de adultos alojados en dicha reserva.
+Estos ultimos son posibles Outliers.
 
-#TODO
-#DEJARLO ACA, JUSTIFICAR CON LOS REGISTROS COMO ESTA HECHO
-Mostramos dichos registros junto con las columnas de hotel_name y adult_num para analizarlos más en detalle y determinar si alguno de ellos puede ser Oulier y por que.
+Mostramos dichos registros junto con la columnas de adult_num para analizarlos más en detalle y determinar si alguno de ellos puede ser Outlier y por que.
 Nuestro criterio para determinar que un valor es adecuado para esta variable es que haya como mucho 1 espacio de estacionamiento por adulto en la reserva.
 
 ```python
 registrosDosOMasEspacios = hotelsdf[hotelsdf["required_car_parking_spaces_num"]>=2]
 #PREG deberia hacer un .copy x las dudas?
-display(registrosDosOMasEspacios[['hotel_name', 'adult_num', "required_car_parking_spaces_num"]].sort_values(
+display(registrosDosOMasEspacios[['adult_num', "required_car_parking_spaces_num"]].sort_values(
     by = "required_car_parking_spaces_num", 
     ascending = False
 ))
 ```
 
-OJO, VER TEMA DE NUMERO DE REGISTROOOOO
-
 De la tabla anterior se pueden sacar las siguientes conclusiones:
-- En el resgistro n° 8269, el valor de 8 espacios de estacionamiento es claramente un Outlier ya que no es coherente que una habitacion para dos personas haya reservado esa cantidad de espacios de estacionamiento.
-- EL resgistros n° 13713 con el valor de 3 espacios de estacionamiento es tambien un Outliers ya que tampoco es coherente que 2 personas hayan reservado 3 espacios de estacionamiento.
-- Los registros restantes NO son Outliers ya que si contienen valores poco freciuentes, son coherentes con el criterio explicado en el parrafo de arriba.
+- El resgistro con valor de 8 espacios de estacionamiento es claramente un Outlier ya que no es coherente que una habitacion para dos personas haya reservado esa cantidad de espacios de estacionamiento.
+- El resgistro con el valor de 3 espacios de estacionamiento y 2 adultos tambien es un Outliers ya que tampoco es coherente que 2 personas hayan reservado 3 espacios de estacionamiento.
+- Los registros restantes NO son Outliers ya que si bien contienen valores poco freciuentes, son coherentes con el criterio explicado en el parrafo de arriba.
 
 
 #### Ajustes de valor
 
 
 Con el analisis anteior, tomamos las siguiuentes decisiones:
-- En el registro n° 8269, cambiamos el valor de required_car_parking_spaces_num por el valor mas frecuente (1) para no eliminar el registro por este simple detalle.
-- En el registro n° 13713, cambiamos el valor de required_car_parking_spaces_num por el valor "2" suponiendo un error de tipeo.
+- Para el resgistro con valor de 8 espacios de estacionamiento,lo eliminamos por tratarse de un Outlier muy grosero.
+- En el registro resgistro con el valor de 3 espacios de estacionamiento y 2 adultos, cambiamos el valor de required_car_parking_spaces_num por el valor "2" suponiendo un error de tipeo.
 - Se mantienen sin cambios el resto de los registros restantes listados arriba.
 
 ```python
-#codigo para ajustar valores.
-#Dropear aca directamenteeee
+hotelsdf.loc[ (hotelsdf.required_car_parking_spaces_num==3) & (hotelsdf.adult_num==2) , "required_car_parking_spaces_num"] = 2
 ```
 
 ### special requests number 
@@ -944,7 +944,7 @@ mayores_a_5_menores_a_nueve_finde = hotelsdf[hotelsdf["weekend_nights_num"]>=5]
 sns.countplot(data = mayores_a_5_menores_a_nueve_finde, x='weekend_nights_num', palette='Set1')
 ```
 
-Como son muchos mas registros posponemos su analisis para despues de terminar de estudiar todas las variables cuantitativas pero los dejamos marcados como posibles registros a modificar.
+Como son muchos mas registros posponemos su analisis para estudiarlos en un analisis multivariado despues de terminar de estudiar todas las variables cuantitativas pero los dejamos marcados como posibles registros a modificar.
 
 
 ### week nights number 
@@ -981,58 +981,8 @@ mayores_a_11_noches_semana.shape[0]
 sns.countplot(data = mayores_a_11_noches_semana, x='week_nights_num', palette='Set1')
 ```
 
-Como son muchos registros y no contienen valores incoherentes posponemos su tratamiento para estudiarlos con un analisis multivariado en la siguiente seccion.
+Como son muchos registros y no contienen valores incoherentes a primera vista posponemos su tratamiento para estudiarlos con un analisis multivariado comparandolo con weekend_nights_number en dicha seccion.
 
-
-### (lo de abasjo va a multivariadoooo)
-
- Comoanalizar solo las noches de estadia no es un buen indicador de la cantidad de dias totales ya que, por ejemplo, 2 dias de fin de semana pueden ser 2 dias de estadia total (solo el fin de semana) o 7 dias de estadia total (Domingo a Sabado de la siguiente semana). Por ello, esperamos a graficar dias de semana y a generar una columna con dias de estadia para analizar mejor ambas variables y recien ahi determinar si existen ouliers.
-
-Ya que consideramos que la cantidad de dias puede influir, observamos que no haya una inconsistencia en la carga de datos con relacion a la cantidad de dias de semana. Para ello, comparamos la cantidad de noches de fin de semana con las noches de semana que se quedo. Deberiamos obtener varias rectas con las siguientes condiciones:
-- Cuando el numero de noches n de fin de semana es impar, las pendientes de las rectas tienen una variacion de +- 5 noches de semana
-- Cuando el numero de noches n de fin de semana es par, las pendientes de las rectas tienen una variacion de +- 10 noches de semana
-
-```python
-hotelsdf[hotelsdf["weekend_nights_num"]==8]
-```
-
-```python
-sns.scatterplot(x=hotelsdf.weekend_nights_num,y=hotelsdf.week_nights_num)
-plt.title('Dispersograma noches finde vs noches de semana')
-plt.show()
-```
-
-```python
-hotelsdf["dias_totales"] = hotelsdf["week_nights_num"] + hotelsdf["weekend_nights_num"]
-
-sns.countplot(data = hotelsdf, x='dias_totales', hue='is_canceled')
-```
-
-Nos dio lo esperado. No hay datos incosistentes en cuanto a su comparacion con el numero de noches de semana.
-
-
-#Anslisis de Mahalanobis
-
-
-#### Ajustes de valor
-
-## Medicion de la correlacion entre las variables cuantitativas
-
-Una vez hecho el tratado sobre outliers y datos faltantes se mide la correlacion entre las variables cuantitativas encontradas en el dataframe
-
-```python
-# Este if es se usa para evitar problemas de versiones de pandas entre la version local y la presente en Google Collab
-if (pd.__version__) == "1.5.2":
-    correlaciones = hotelsdf[cuantitativas].corr(numeric_only=True)
-else:
-    correlaciones = hotelsdf[cuantitativas].corr()
-
-sns.set(style = 'darkgrid')
-plt.figure( figsize = (12, 9))
-sns.heatmap(data = correlaciones,annot = True, vmin = -1, vmax =1, fmt='.2f')
-sns.color_palette("mako", as_cmap=True)
-plt.show()
-```
 
 ## Cualitativas
 
@@ -1060,18 +1010,11 @@ cualitativas = [
 ]
 ```
 
-Observamos de manerea rapida los posibles valores que pueden tomar dichas variables
+### Agent ID
 
-
-```python 
-for variable in cualitativas:
-  print("Variable: " + variable)
-  print(hotelsdf[variable].value_counts().index.tolist())
-  print()
-```
-
-## Valores Nulos Faltante
-
+#### Valores faltantes
+EL CUADRO QUE VIENE TIENE QUE SER AJUSTADO PARA QUE SOLO MUESTRE COMPANY ID!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+CUIDADO!!!! RECORDAR CAMBIAR ANTES DE ENTREGAR
 ```python
 cualitativas_nulas = hotelsdf[cualitativas].isnull().sum()
 cualitativas_nulas = cualitativas_nulas[cualitativas_nulas > 0]
@@ -1090,13 +1033,14 @@ plt.yticks([0,10,20,30,40,50,60,70,80,90,100])
 plt.show()
 ```
 
-De la observación anterior se concluye que la variable company id, no proporciona información suficiente y al tener mas del 90% de sus valores nulos conviene descartarla
 
-```python 
-hotelsdf.drop("company_id", axis=1, inplace=True)
+#### Valores que toma
+
+```python
+agentIDValores = (hotelsdf["agent_id"].unique())
+agentIDValores.sort()
+print(agentIDValores)
 ```
-
-### Agent ID
 
 #### Ajuste de valores faltantes
 
@@ -1129,6 +1073,22 @@ El resto de valores tienen representaciones de ids validas pero aparecen de mane
 
 
 ### arrival month
+
+
+#### Valores faltantes
+
+
+#### Valores que toma
+
+
+```python
+arrivalMonthValores = (hotelsdf["arrival_month"].unique())
+month_lookup = list(month_name)
+months = arrivalMonthValores
+sorted(months, key=month_lookup.index)
+#print(leadTimeValores)
+```
+
 #### Grafica de distribucion
 
 ```python
@@ -1142,8 +1102,7 @@ plt.ylabel('Frecuencia')
 Del siguiente grafico observamos que el mes de agosto es el mes con mas reservas hechas, por otro lado enero es el mes con menos reservas 
 
 ### Assigned Room type
-
-Realiamos un grafico de la frecuencia de los tipos de habitaciones asignadas 
+Realizamos un grafico de la frecuencia de los tipos de habitaciones asignadas 
 
 #### Grafica de distribucion
 ```python
@@ -1155,7 +1114,68 @@ plt.ylabel('Frecuencia')
 
 Del cual concluimos que las habitaciones de tipo: H, I y K son las menos frecuentas y la habitacion tipo A se lleva la mayoria de las apariciones en los registros 
 
+
+### Company ID
+#### Valores faltantes
+EL CUADRO QUE VIENE TIENE QUE SER AJUSTADO PARA QUE SOLO MUESTRE COMPANY ID!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+CUIDADO!!!! RECORDAR CAMBIAR ANTES DE ENTREGAR
+```python
+cualitativas_nulas = hotelsdf[cualitativas].isnull().sum()
+cualitativas_nulas = cualitativas_nulas[cualitativas_nulas > 0]
+
+cuantitativas_nulas_per = pd.Series()
+
+for indice in cualitativas_nulas.index:
+    cuantitativas_nulas_per[indice] = cualitativas_nulas[indice]/len(hotelsdf[indice])*100
+
+sns.barplot(x = cuantitativas_nulas_per.index, y = cuantitativas_nulas_per)
+plt.ylabel(ylabel= 'Porcentaje')
+plt.xlabel(xlabel= 'Nombre columna')
+plt.title(label = 'Porcentaje de valores nulos')
+plt.ylim(0, 100)
+plt.yticks([0,10,20,30,40,50,60,70,80,90,100])
+plt.show()
+```
+
+#### Valores que toma
+#### Grafica de distribucion
+#### Outliers
+#### Ajustes de valor
+
 ### Country
+
+
+#### Valores faltantes
+EL CUADRO QUE VIENE TIENE QUE SER AJUSTADO PARA QUE SOLO MUESTRE COMPANY ID!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+CUIDADO!!!! RECORDAR CAMBIAR ANTES DE ENTREGAR
+```python
+cualitativas_nulas = hotelsdf[cualitativas].isnull().sum()
+cualitativas_nulas = cualitativas_nulas[cualitativas_nulas > 0]
+
+cuantitativas_nulas_per = pd.Series()
+
+for indice in cualitativas_nulas.index:
+    cuantitativas_nulas_per[indice] = cualitativas_nulas[indice]/len(hotelsdf[indice])*100
+
+sns.barplot(x = cuantitativas_nulas_per.index, y = cuantitativas_nulas_per)
+plt.ylabel(ylabel= 'Porcentaje')
+plt.xlabel(xlabel= 'Nombre columna')
+plt.title(label = 'Porcentaje de valores nulos')
+plt.ylim(0, 100)
+plt.yticks([0,10,20,30,40,50,60,70,80,90,100])
+plt.show()
+```
+
+
+#### Valores que toma
+
+
+```python
+countryValores = (hotelsdf["country"].unique())
+#countryValores.sort() #No se puede ordenar porque tiene valores nan
+print(countryValores)
+```
+
 #### Grafica de distribucion
 
 Hacemos una grafica de los 20 paises con mayor aparicion en los registros
@@ -1191,6 +1211,18 @@ plt.ylabel('Frecuencia')
 ```
 
 ### Custemer type
+#### Valores faltantes
+
+
+#### Valores que toma
+
+
+```python
+customer_typeValores = (hotelsdf["customer_type"].unique())
+customer_typeValores.sort()
+print(customer_typeValores)
+```
+
 #### Grafica de distribucion
 
 ```python
@@ -1203,6 +1235,18 @@ sns.barplot(x = eje_x, y = eje_y)
 #### Ajustes de valor
 
 ### Deposit type
+#### Valores faltantes
+
+
+#### Valores que toma
+
+
+```python
+deposit_typeValores = (hotelsdf["deposit_type"].unique())
+deposit_typeValores.sort()
+print(deposit_typeValores)
+```
+
 #### Grafica de distribucion
 ```python
 eje_y = hotelsdf.deposit_type.value_counts()
@@ -1213,6 +1257,18 @@ sns.barplot(x = eje_x, y = eje_y)
 #### Ajustes de valor
 
 ### Distribution channel
+#### Valores faltantes
+
+
+#### Valores que toma
+
+
+```python
+distribution_channelValores = (hotelsdf["distribution_channel"].unique())
+distribution_channelValores.sort()
+print(distribution_channelValores)
+```
+
 #### Grafica de distribucion
 ```python
 eje_y = hotelsdf.distribution_channel.value_counts()
@@ -1223,6 +1279,18 @@ sns.barplot(x = eje_x, y = eje_y)
 #### Ajustes de valor
 
 ### Hotel Name
+#### Valores faltantes
+
+
+#### Valores que toma
+
+
+```python
+hotel_nameValores = (hotelsdf["hotel_name"].unique())
+hotel_nameValores.sort()
+print(hotel_nameValores)
+```
+
 #### Grafica de distribucion
 ```python
 eje_y = hotelsdf.hotel_name.value_counts()
@@ -1233,6 +1301,18 @@ sns.barplot(x = eje_x, y = eje_y)
 #### Ajustes de valor
 
 ### Is canceled (Target)
+#### Valores faltantes
+
+
+#### Valores que toma
+
+
+```python
+is_canceledValores = (hotelsdf["is_canceled"].unique())
+is_canceledValores.sort()
+print(is_canceledValores)
+```
+
 #### Grafica de distribucion
 ```python
 eje_y = hotelsdf.is_canceled.value_counts()
@@ -1243,6 +1323,18 @@ sns.barplot(x = eje_x, y = eje_y)
 #### Ajustes de valor
 
 ### Is repeated guest
+#### Valores faltantes
+
+
+#### Valores que toma
+
+
+```python
+is_repeated_guestValores = (hotelsdf["is_repeated_guest"].unique())
+is_repeated_guestValores.sort()
+print(is_repeated_guestValores)
+```
+
 #### Grafica de distribucion
 ```python
 eje_y = hotelsdf.is_repeated_guest.value_counts()
@@ -1254,6 +1346,18 @@ sns.barplot(x = eje_x, y = eje_y)
 
 
 ### Market segment
+#### Valores faltantes
+
+
+#### Valores que toma
+
+
+```python
+market_segment_typeValores = (hotelsdf["market_segment_type"].unique())
+market_segment_typeValores.sort()
+print(market_segment_typeValores)
+```
+
 #### Grafica de distribucion
 ```python
 eje_y = hotelsdf.market_segment_type.value_counts()
@@ -1265,6 +1369,18 @@ sns.barplot(x = eje_x, y = eje_y)
 #### Ajustes de valor
 
 ### meal type
+#### Valores faltantes
+
+
+#### Valores que toma
+
+
+```python
+meal_typeValores = (hotelsdf["meal_type"].unique())
+meal_typeValores.sort()
+print(meal_typeValores)
+```
+
 #### Grafica de distribucion
 ```python
 eje_y = hotelsdf.meal_type.value_counts()
@@ -1276,6 +1392,18 @@ sns.barplot(x = eje_x, y = eje_y)
 #### Ajustes de valor
 
 ### Reservation Status
+#### Valores faltantes
+
+
+#### Valores que toma
+
+
+```python
+reservation_statusValores = (hotelsdf["reservation_status"].unique())
+reservation_statusValores.sort()
+print(reservation_statusValores)
+```
+
 #### Grafica de distribucion
 ```python
 eje_y = hotelsdf.reservation_status.value_counts()
@@ -1287,6 +1415,18 @@ sns.barplot(x = eje_x, y = eje_y)
 #### Ajustes de valor
 
 ### Reserved room type
+#### Valores faltantes
+
+
+#### Valores que toma
+
+
+```python
+reserved_room_typeValores = (hotelsdf["reserved_room_type"].unique())
+reserved_room_typeValores.sort()
+print(reserved_room_typeValores)
+```
+
 #### Grafica de distribucion
 ```python
 eje_y = hotelsdf.reserved_room_type.value_counts()
@@ -1298,3 +1438,140 @@ sns.barplot(x = eje_x, y = eje_y)
 #### Ajustes de valor
 
 Como ya habiamos observado en la cantidad de dias de fin de semana, la mayor cantidad de gente se queda 
+
+
+
+# Analisis multivariado
+## Medicion de la correlacion entre las variables cuantitativas
+
+Una vez hecho el tratado sobre outliers y datos faltantes medimos la correlacion entre las variables cuantitativas encontradas en el dataframe
+
+```python
+# Este if es se usa para evitar problemas de versiones de pandas entre la version local y la presente en Google Collab
+if (pd.__version__) == "1.5.2":
+    correlaciones = hotelsdf[cuantitativas].corr(numeric_only=True)
+
+else:
+    correlaciones = hotelsdf[cuantitativas].corr()
+
+    
+sns.set(style = 'darkgrid')
+plt.figure( figsize = (12, 9))
+sns.heatmap(data = correlaciones,annot = True, vmin = -1, vmax =1, fmt='.2f')
+sns.color_palette("mako", as_cmap=True)
+plt.show()
+```
+
+### (lo de abasjo va a multivariadoooo)
+
+Como dijimos previamente, analizar por separado las noches de dia de semana y las noches de dias de fin de semana no basta parta estudiar dichas variables. El primer problema que podria surgir es que la cantidad de noches de semana y de fin de semana no guarden una relacion coherente. Al graficarlos debería ocurrir lo siguiente:
+- Cuando el numero de noches n de fin de semana es impar, las pendientes de las rectas tienen una variacion de +/- 5 noches de semana
+- Cuando el numero de noches n de fin de semana es par, las pendientes de las rectas tienen una variacion de +- 10 noches de semana
+
+```python
+sns.scatterplot(x=hotelsdf.weekend_nights_num,y=hotelsdf.week_nights_num)
+plt.title('Dispersograma noches finde vs noches de semana')
+plt.show()
+```
+
+Al observar el grafico observamos que todos los puntos se encuentran en los rangos explicados anteriormente.
+
+
+Sin embargo, ocurre que si bien puede resultar util tener datos sobre las noches de semana y las de fin de semana, un dato que nos podria resultar aun mas util es la cantidad de noches totales de estadia.
+Agregamos una columna con dicho dato
+
+```python
+hotelsdf["dias_totales"] = hotelsdf["week_nights_num"] + hotelsdf["weekend_nights_num"]
+```
+
+Puesto que ahora tenemos una nueva variable, realizamos un breve analisis univariado sobre la misma para determinar si existen Outliers no detectados en las columans de week y weekend nights number.
+
+```python
+plt.figure(figsize=(15,5))
+sns.countplot(data = hotelsdf, x = 'dias_totales', palette= 'Set2')
+plt.title('Cantidad de reservas por dias de estadia')
+plt.xlabel('Dias de estadia')
+plt.ylabel('Frecuencia')
+```
+
+La mayoria de las reservas son de estadias de entre 1 y 7 dias de estadia. En menor medida se observan reservas para estadias entre 8 y 14 dias y por ultimos unas pocas entre 15 y 30 dias. Realizamos un boxplot para darnos una idea de que numero utilizar como corte para determinar outliers.
+
+```python
+plt.xlabel(xlabel = 'Dia estadia')
+sns.boxplot(data = hotelsdf['dias_totales'])
+plt.title("reservas por dias de estadia")
+plt.ylabel(ylabel = 'Frecuencia')
+```
+
+Segun el grafico se alejarian de la media todos los valores de 8 o mas dias de estadia. Vemos cuantos registros son y que porcentaje representan del total
+
+```python
+reservas_mas_de_ocho_dias = hotelsdf[(hotelsdf.dias_totales>=8)].shape[0]
+print("hay",reservas_mas_de_ocho_dias,"que representan un porcentaje del total de", reservas_mas_de_ocho_dias*100/hotelsdf.shape[0],"%")
+```
+
+Puesto que este valor es muy elevado, apelamos al sentido comun. Rservas de hasta 14 dias de estadia son muy posibles, por lo cual estuidiamos las de mas 15 o mas dias.
+
+```python
+quince_o_mas_dias = hotelsdf[hotelsdf["dias_totales"]>=15]
+#plt.figure(figsize=(15,5))
+sns.countplot(data = quince_o_mas_dias, x = 'dias_totales', palette= 'Set2', hue = "is_canceled")
+plt.title('Cantidad de dias de estadia')
+plt.xlabel('Dias de estadia')
+plt.ylabel('Frecuencia')
+```
+
+Primero vemos cuantos registros son en total
+
+```python
+print("hay",quince_o_mas_dias.shape[0],"que se quedan 15 o mas dias y representan un porcentaje del total de", (quince_o_mas_dias.shape[0])*100/hotelsdf.shape[0],"%")
+```
+
+Luego vemos cuantos de esos cancelan
+
+```python
+cancelaron_y_quince_o_mas_dias = hotelsdf[ (hotelsdf.dias_totales>=15) & (hotelsdf.is_canceled == 1) ].shape[0]
+
+print("hay",cancelaron_y_quince_o_mas,"que cancelaron y se quedaron mas de 15 o mas dias.Osea un", cancelaron_y_quince_o_mas_dias*100/quince_o_mas_dias.shape[0],"% de los que se que se quedan mas de 15 dias cancelan")
+```
+
+Vemos que el porcentaje de reservas de mas de 15 dias que cancelan es muy alto. Sin embargo, la cantidad de registros con los que ocurre esto son muy pocos. Dejarlos, podria generar ruido al momento de realizar la prediccion. Nos podria llevar, erroneamente a pensar que alguien que se quedo muchos dias cancelaria cuando esto no necesariamente es asi. En el problema q estamos resolviendo, es prefereible no detectar a alguien que cancela, que suponer que alguien cancelaria y que luego no lo haga ya que en terminos de presupuestos, disponibilidad o cualquiera sea el uso que se le de a esta prediccion, no estar preparardo para una reserva perjudicaria mucho mas que estarlo "por las dudas".
+Procedemos a eliminarlos
+
+```python
+a_eliminar_con_quince_o_mas_dias = hotelsdf[hotelsdf['dias_totales'] >= 15]
+hotelsdf.drop(a_eliminar_con_quince_o_mas_dias.index, inplace = True)
+hotelsdf.reset_index()
+```
+
+Intentamos hacer un calculo de distancia Mahalanobis pero debido a la cantidad de datos, nos generaba errores, por ello lo dejamos comentado.
+
+"MemoryError: Unable to allocate 26.7 GiB for an array with shape (59903, 59903) and data type float64"
+
+```python
+# #Calulo el vector de medias
+# vmedias=np.mean(hotelsdf[['weekend_nights_num','week_nights_num']])
+
+# #Calculo la diferencia entre las observaciones y el vector de medias
+# weekend_nights_dif = hotelsdf[['weekend_nights_num','week_nights_num']] - vmedias
+
+# #Calculo matriz de covarianza y su inversa
+# cov=hotelsdf[['weekend_nights_num','week_nights_num']].cov().values
+# inv_cov = np.linalg.inv(cov)
+
+# #Calculamos el cuadrado de la distancia de mahalanobis
+# mahal =np.dot( np.dot(weekend_nights_dif, inv_cov) , weekend_nights_dif.T)
+
+# hotelsdf['mahal_week_weekend_nights']=mahal.diagonal()
+```
+
+```python
+sns.countplot(data = hotelsdf, x='dias_totales', hue='is_canceled')
+```
+
+Nos dio lo esperado. No hay datos incosistentes en cuanto a su comparacion con el numero de noches de semana.
+
+
+Anslisis de Mahalanobis
+
+
