@@ -671,14 +671,19 @@ hotelsdf[hotelsdf["lead_time"] >= 400]
 ```
 
 #### Outliers
-Los valores mas llamativos son aquellos por encima de 300; sin embargo no podemos establecer que son outliers porque son cantidades de dias
 
 
-#### Ajustes de valor
+```python
+porcentaje = str((len(hotelsdf[hotelsdf["lead_time"] >= 400]) * 100)/len(hotelsdf))
+print("Los valores mas llamativos son aquellos por encima de 400. Dichos valores representan un: " + porcentaje + "%")
+```
 
-Vamos a aplicar la tecnica de normalizado para poder aprovechar los datos. Podemos separarlo en 3 grandes grupos: Poco tiempo, mediano tiempo, mucho tiempo.\
-Primero vamos a ver la cantidad de dias que hay en nuestro dataset
+Es un porcentaje lo suficientemente bajo para poder borrarlos
 
+```python
+hotelsdf.drop(hotelsdf[hotelsdf["lead_time"] >= 400].index, inplace = True)
+hotelsdf.reset_index()
+```
 
 ### previous booking not cancelled number
 
@@ -1442,9 +1447,11 @@ Una vez hecho el tratado sobre outliers y datos faltantes medimos la correlacion
 # Este if es se usa para evitar problemas de versiones de pandas entre la version local y la presente en Google Collab
 if (pd.__version__) == "1.5.2":
     correlaciones = hotelsdf[cuantitativas].corr(numeric_only=True)
+
 else:
     correlaciones = hotelsdf[cuantitativas].corr()
 
+    
 sns.set(style = 'darkgrid')
 plt.figure( figsize = (12, 9))
 sns.heatmap(data = correlaciones,annot = True, vmin = -1, vmax =1, fmt='.2f')
