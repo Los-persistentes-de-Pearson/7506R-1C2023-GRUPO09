@@ -1501,9 +1501,9 @@ print("hay",reservas_mas_de_ocho_dias,"que representan un porcentaje del total d
 Puesto que este valor es muy elevado, apelamos al sentido comun. Rservas de hasta 14 dias de estadia son muy posibles, por lo cual estuidiamos las de mas 15 o mas dias.
 
 ```python
-mas_de_quince_dias = hotelsdf[hotelsdf["dias_totales"]>=15]
+quince_o_mas_dias = hotelsdf[hotelsdf["dias_totales"]>=15]
 #plt.figure(figsize=(15,5))
-sns.countplot(data = mas_de_quince_dias, x = 'dias_totales', palette= 'Set2', hue = "is_canceled")
+sns.countplot(data = quince_o_mas_dias, x = 'dias_totales', palette= 'Set2', hue = "is_canceled")
 plt.title('Cantidad de dias de estadia')
 plt.xlabel('Dias de estadia')
 plt.ylabel('Frecuencia')
@@ -1512,19 +1512,25 @@ plt.ylabel('Frecuencia')
 Primero vemos cuantos registros son en total
 
 ```python
-print("hay",mas_de_quince_dias.shape[0],"que se quedan mas de 15 dias y representan un porcentaje del total de", (mas_de_quince_dias.shape[0])*100/hotelsdf.shape[0],"%")
+print("hay",quince_o_mas_dias.shape[0],"que se quedan 15 o mas dias y representan un porcentaje del total de", (quince_o_mas_dias.shape[0])*100/hotelsdf.shape[0],"%")
 ```
 
 Luego vemos cuantos de esos cancelan
 
 ```python
-cancelaron_y_mas_de_15 = hotelsdf[ (hotelsdf.dias_totales>=15) & (hotelsdf.is_canceled == 1) ].shape[0]
+cancelaron_y_quince_o_mas_dias = hotelsdf[ (hotelsdf.dias_totales>=15) & (hotelsdf.is_canceled == 1) ].shape[0]
 
-print("hay",cancelaron_y_mas_de_15,"que cancelaron y se quedaron mas de 15 o mas dias.Osea un", cancelaron_y_mas_de_15*100/mas_de_quince_dias.shape[0],"% de los que se que se quedan mas de 15 dias cancelan")
+print("hay",cancelaron_y_quince_o_mas,"que cancelaron y se quedaron mas de 15 o mas dias.Osea un", cancelaron_y_quince_o_mas_dias*100/quince_o_mas_dias.shape[0],"% de los que se que se quedan mas de 15 dias cancelan")
 ```
 
 Vemos que el porcentaje de reservas de mas de 15 dias que cancelan es muy alto. Sin embargo, la cantidad de registros con los que ocurre esto son muy pocos. Dejarlos, podria generar ruido al momento de realizar la prediccion. Nos podria llevar, erroneamente a pensar que alguien que se quedo muchos dias cancelaria cuando esto no necesariamente es asi. En el problema q estamos resolviendo, es prefereible no detectar a alguien que cancela, que suponer que alguien cancelaria y que luego no lo haga ya que en terminos de presupuestos, disponibilidad o cualquiera sea el uso que se le de a esta prediccion, no estar preparardo para una reserva perjudicaria mucho mas que estarlo "por las dudas".
+Procedemos a eliminarlos
 
+```python
+a_eliminar_con_quince_o_mas_dias = hotelsdf[hotelsdf['dias_totales'] >= 15]
+hotelsdf.drop(a_eliminar_con_quince_o_mas_dias.index, inplace = True)
+hotelsdf.reset_index()
+```
 
 Intentamos hacer un calculo de distancia Mahalanobis pero debido a la cantidad de datos, nos generaba errores, por ello lo dejamos comentado.
 
@@ -1548,8 +1554,6 @@ Intentamos hacer un calculo de distancia Mahalanobis pero debido a la cantidad d
 ```
 
 ```python
-hotelsdf["dias_totales"] = hotelsdf["week_nights_num"] + hotelsdf["weekend_nights_num"]
-
 sns.countplot(data = hotelsdf, x='dias_totales', hue='is_canceled')
 ```
 
