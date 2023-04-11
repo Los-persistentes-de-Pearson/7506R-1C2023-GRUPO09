@@ -1295,6 +1295,9 @@ plt.xticks(rotation=45)
 sns.barplot(x = eje_x, y = eje_y)
 ```
 #### Outliers
-#### Ajustes de valor
+#### Ajustes de valor 
 
 Como ya habiamos observado en la cantidad de dias de fin de semana, la mayor cantidad de gente se queda 
+
+
+PARA HACER EL COMMIT
