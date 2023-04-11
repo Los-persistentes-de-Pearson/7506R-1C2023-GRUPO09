@@ -27,6 +27,7 @@ import seaborn as sns
 from matplotlib import pyplot as plt
 import scipy.stats as st
 from calendar import month_name
+from sklearn.preprocessing import MinMaxScaler
 ```
 
 ## Cargamos de datos a un dataframe
@@ -671,14 +672,40 @@ hotelsdf[hotelsdf["lead_time"] >= 400]
 ```
 
 #### Outliers
-Los valores mas llamativos son aquellos por encima de 300; sin embargo no podemos establecer que son outliers porque son cantidades de dias
 
+
+```python
+porcentaje = str((len(hotelsdf[hotelsdf["lead_time"] >= 400]) * 100)/len(hotelsdf))
+print("Los valores mas llamativos son aquellos por encima de 400. Dichos valores representan un: " + porcentaje + "%")
+```
+
+Es un porcentaje lo suficientemente bajo para poder borrarlos
+
+```python
+hotelsdf.drop(hotelsdf[hotelsdf["lead_time"] >= 400].index, inplace = True)
+hotelsdf.reset_index()
+```
 
 #### Ajustes de valor
 
-Vamos a aplicar la tecnica de normalizado para poder aprovechar los datos. Podemos separarlo en 3 grandes grupos: Poco tiempo, mediano tiempo, mucho tiempo.\
-Primero vamos a ver la cantidad de dias que hay en nuestro dataset
+Vamos a aplicar la tecnica de normalizado para poder entender mejor los datos. Esto va a limitar los datos entre 0 y 1. Esto nos va a permitir estudiar mejor la variable; ya que no es tan importante la cantidad de dias sino su magnitud. \
 
+```python
+scaler = MinMaxScaler() 
+lead_time_min_max = scaler.fit_transform(hotelsdf['lead_time'].to_frame())
+
+sns_hist=sns.histplot(data=lead_time_min_max, alpha = 0.5, bins=18).set(title="Histograma feature duracion_recorrido min-max",xlabel="duracion_recorrido min-max",ylabel="Frecuencia")
+plt.show()
+```
+
+```python
+hotelsdf["lead_time_min_max"]  = lead_time_min_max
+```
+
+```python
+cuantitativas.append("lead_time_min_max")
+cuantitativas.sort()
+```
 
 ### previous booking not cancelled number
 
@@ -1442,9 +1469,11 @@ Una vez hecho el tratado sobre outliers y datos faltantes medimos la correlacion
 # Este if es se usa para evitar problemas de versiones de pandas entre la version local y la presente en Google Collab
 if (pd.__version__) == "1.5.2":
     correlaciones = hotelsdf[cuantitativas].corr(numeric_only=True)
+
 else:
     correlaciones = hotelsdf[cuantitativas].corr()
 
+    
 sns.set(style = 'darkgrid')
 plt.figure( figsize = (12, 9))
 sns.heatmap(data = correlaciones,annot = True, vmin = -1, vmax =1, fmt='.2f')
