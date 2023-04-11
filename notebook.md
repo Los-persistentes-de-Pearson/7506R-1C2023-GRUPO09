@@ -1120,48 +1120,75 @@ Debido a que existen 295 id de empresas, graficamos un muestreo de los 10 ids ma
 ```python
 data = hotelsdf.agent_id.value_counts().sort_values(ascending=False).head(10)
 sns.barplot(y = data, x = data.index.tolist())
-#detallar 
+plt.title('Top 10 ID de agencia mas frecuentes')
+plt.xlabel('ID de agencia')
+plt.ylabel('Frecuencia')
 ```
 
-#### Outliers
-#### Ajustes de valor
+El resto de valores tienen representaciones de ids validas pero aparecen de manera menos frecuente, al ser tantos, mostramos los mas frecuentes para darnos una idea. En este caso el id mas frecuente es el 9 con aproximadamente unos 16 mil registros 
+
 
 ### arrival month
 #### Grafica de distribucion
 
 ```python
-eje_y = hotelsdf.arrival_month.value_counts()
-eje_x = eje_y.index.tolist()
-plt.figure(figsize=(8,5))
+plt.title('Meses de llegada')
+sns.countplot(data = hotelsdf, x = 'arrival_month', palette='Set2')
 plt.xticks(rotation=45)
-sns.barplot(x = eje_x, y = eje_y)
+plt.xlabel('Meses')
+plt.ylabel('Frecuencia')
 ```
 
-#### Outliers
-#### Ajustes de valor
+Del siguiente grafico observamos que el mes de agosto es el mes con mas reservas hechas, por otro lado enero es el mes con menos reservas 
 
 ### Assigned Room type
 
-```python
-eje_y = hotelsdf.assigned_room_type.value_counts()
-eje_x = eje_y.index.tolist()
-plt.figure(figsize=(8,5))
-sns.barplot(x = eje_x, y = eje_y)
-```
+Realiamos un grafico de la frecuencia de los tipos de habitaciones asignadas 
+
 #### Grafica de distribucion
-#### Outliers
-#### Ajustes de valor
+```python
+sns.countplot(data = hotelsdf, x='assigned_room_type', palette='Set2')
+plt.title('Tipos de habitacion asignada')
+plt.xlabel('Tipo de habitacion')
+plt.ylabel('Frecuencia')
+```
+
+Del cual concluimos que las habitaciones de tipo: H, I y K son las menos frecuentas y la habitacion tipo A se lleva la mayoria de las apariciones en los registros 
 
 ### Country
 #### Grafica de distribucion
+
+Hacemos una grafica de los 20 paises con mayor aparicion en los registros
+
 ```python
 data = hotelsdf.country.value_counts().sort_values(ascending=False).head(20)
 plt.xticks(rotation=45)
-sns.barplot(y = data, x = data.index.tolist())
+sns.barplot(y = data, x = data.index.tolist(), palette='Set2')
+plt.title('Paises por reserva')
+plt.xlabel('Pais')
+plt.ylabel('Frecuencia')
 ```
+
+Del grafico concluimos que Portugal es el pais del cual hay mayor numerp de reservas, seguido de: Alemania, Fracia, España. Por otro lado aun hay registros con valores faltantes 
+
 #### Ajuste de valores faltantes
-#### Outliers
-#### Ajustes de valor
+
+Para evitar la eliminacion de los registros y debido a la muy marcada tendencia de las reservas a venir de Portugal asignamos a los valores faltantes dicho pais, puesto que representas aproximadamente un 0.2% de los datos 
+
+```python
+hotelsdf.loc[hotelsdf['country'].isnull(), 'country'] = 'PRT'
+```
+
+Dicha asignacion no genera una desviacion, la prueba de eso en el siguiente grafico 
+
+```python
+data = hotelsdf.country.value_counts().sort_values(ascending=False).head(20)
+plt.xticks(rotation=45)
+sns.barplot(y = data, x = data.index.tolist(), palette='Set2')
+plt.title('Paises por reserva')
+plt.xlabel('Pais')
+plt.ylabel('Frecuencia')
+```
 
 ### Custemer type
 #### Grafica de distribucion
