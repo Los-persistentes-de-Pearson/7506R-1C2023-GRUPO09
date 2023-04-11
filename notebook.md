@@ -27,7 +27,6 @@ import seaborn as sns
 from matplotlib import pyplot as plt
 import scipy.stats as st
 from calendar import month_name
-from sklearn.preprocessing import MinMaxScaler
 ```
 
 ## Cargamos de datos a un dataframe
@@ -684,27 +683,6 @@ Es un porcentaje lo suficientemente bajo para poder borrarlos
 ```python
 hotelsdf.drop(hotelsdf[hotelsdf["lead_time"] >= 400].index, inplace = True)
 hotelsdf.reset_index()
-```
-
-#### Ajustes de valor
-
-Vamos a aplicar la tecnica de normalizado para poder entender mejor los datos. Esto va a limitar los datos entre 0 y 1. Esto nos va a permitir estudiar mejor la variable; ya que no es tan importante la cantidad de dias sino su magnitud. \
-
-```python
-scaler = MinMaxScaler() 
-lead_time_min_max = scaler.fit_transform(hotelsdf['lead_time'].to_frame())
-
-sns_hist=sns.histplot(data=lead_time_min_max, alpha = 0.5, bins=18).set(title="Histograma feature duracion_recorrido min-max",xlabel="duracion_recorrido min-max",ylabel="Frecuencia")
-plt.show()
-```
-
-```python
-hotelsdf["lead_time_min_max"]  = lead_time_min_max
-```
-
-```python
-cuantitativas.append("lead_time_min_max")
-cuantitativas.sort()
 ```
 
 ### previous booking not cancelled number
