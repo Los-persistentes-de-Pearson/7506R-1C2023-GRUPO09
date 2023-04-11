@@ -785,42 +785,36 @@ plt.title("Cantidad de reservas por espacios de estacionamiento")
 
 Viendo el grafico podemos identificar que el numero de espacios de estacionamiento mas comun es 0, seguido por 1. 
 Además encontramos algunos pocos casos en los que se reservaron 2, 3 y 8 espacios.
-Estos ultimos son posibles Outliers (candidatearr????)
-Sin embargo, esperamos a terminar de hacer todos los analisis univariados y luego al hacer los multivariados, compararemos esta variable contra la variable adult_num para observar si existe alguna incoherencia con la cantidad de adultos alojados en dicha reserva.
+Estos ultimos son posibles Outliers.
 
-#TODO
-#DEJARLO ACA, JUSTIFICAR CON LOS REGISTROS COMO ESTA HECHO
-Mostramos dichos registros junto con las columnas de hotel_name y adult_num para analizarlos más en detalle y determinar si alguno de ellos puede ser Oulier y por que.
+Mostramos dichos registros junto con la columnas de adult_num para analizarlos más en detalle y determinar si alguno de ellos puede ser Outlier y por que.
 Nuestro criterio para determinar que un valor es adecuado para esta variable es que haya como mucho 1 espacio de estacionamiento por adulto en la reserva.
 
 ```python
 registrosDosOMasEspacios = hotelsdf[hotelsdf["required_car_parking_spaces_num"]>=2]
 #PREG deberia hacer un .copy x las dudas?
-display(registrosDosOMasEspacios[['hotel_name', 'adult_num', "required_car_parking_spaces_num"]].sort_values(
+display(registrosDosOMasEspacios[['adult_num', "required_car_parking_spaces_num"]].sort_values(
     by = "required_car_parking_spaces_num", 
     ascending = False
 ))
 ```
 
-OJO, VER TEMA DE NUMERO DE REGISTROOOOO
-
 De la tabla anterior se pueden sacar las siguientes conclusiones:
-- En el resgistro n° 8269, el valor de 8 espacios de estacionamiento es claramente un Outlier ya que no es coherente que una habitacion para dos personas haya reservado esa cantidad de espacios de estacionamiento.
-- EL resgistros n° 13713 con el valor de 3 espacios de estacionamiento es tambien un Outliers ya que tampoco es coherente que 2 personas hayan reservado 3 espacios de estacionamiento.
-- Los registros restantes NO son Outliers ya que si contienen valores poco freciuentes, son coherentes con el criterio explicado en el parrafo de arriba.
+- El resgistro con valor de 8 espacios de estacionamiento es claramente un Outlier ya que no es coherente que una habitacion para dos personas haya reservado esa cantidad de espacios de estacionamiento.
+- El resgistro con el valor de 3 espacios de estacionamiento y 2 adultos tambien es un Outliers ya que tampoco es coherente que 2 personas hayan reservado 3 espacios de estacionamiento.
+- Los registros restantes NO son Outliers ya que si bien contienen valores poco freciuentes, son coherentes con el criterio explicado en el parrafo de arriba.
 
 
 #### Ajustes de valor
 
 
 Con el analisis anteior, tomamos las siguiuentes decisiones:
-- En el registro n° 8269, cambiamos el valor de required_car_parking_spaces_num por el valor mas frecuente (1) para no eliminar el registro por este simple detalle.
-- En el registro n° 13713, cambiamos el valor de required_car_parking_spaces_num por el valor "2" suponiendo un error de tipeo.
+- Para el resgistro con valor de 8 espacios de estacionamiento,lo eliminamos por tratarse de un Outlier muy grosero.
+- En el registro resgistro con el valor de 3 espacios de estacionamiento y 2 adultos, cambiamos el valor de required_car_parking_spaces_num por el valor "2" suponiendo un error de tipeo.
 - Se mantienen sin cambios el resto de los registros restantes listados arriba.
 
 ```python
-#codigo para ajustar valores.
-#Dropear aca directamenteeee
+hotelsdf.loc[ (hotelsdf.required_car_parking_spaces_num==3) & (hotelsdf.adult_num==2) , "required_car_parking_spaces_num"] = 2
 ```
 
 ### special requests number 
