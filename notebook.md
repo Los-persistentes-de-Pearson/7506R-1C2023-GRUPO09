@@ -1534,5 +1534,5 @@ plt.ylabel("Frecuencia")
 Una vez analizada la variable contra el target podemos decir que la misma no proporciona suficiente informacion para el analisis y por lo tanto descartamos la misma para descongestionarla cantidad de variables a usar en el analisis futuro
 
 ```python
-#hotelsdf.drop("meal_type", axis=1, inplace=True)
+hotelsdf.drop("meal_type", axis=1, inplace=True)
 ```
