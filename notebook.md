@@ -1414,7 +1414,7 @@ sns.color_palette("mako", as_cmap=True)
 plt.show()
 ```
 
-### (lo de abasjo va a multivariadoooo)
+### Week nights number vs Weekend nights number
 
 Como dijimos previamente, analizar por separado las noches de dia de semana y las noches de dias de fin de semana no basta parta estudiar dichas variables. El primer problema que podria surgir es que la cantidad de noches de semana y de fin de semana no guarden una relacion coherente. Al graficarlos debería ocurrir lo siguiente:
 - Cuando el numero de noches n de fin de semana es impar, las pendientes de las rectas tienen una variacion de +/- 5 noches de semana
@@ -1533,6 +1533,30 @@ plt.ylabel("Frecuencia")
 
 Una vez analizada la variable contra el target podemos decir que la misma no proporciona suficiente informacion para el analisis y por lo tanto descartamos la misma para descongestionarla cantidad de variables a usar en el analisis futuro
 
+#### Dias_totales vs Lead_time
+
 ```python
-hotelsdf.drop("meal_type", axis=1, inplace=True)
+sns.scatterplot(x=hotelsdf.dias_totales,y=hotelsdf.lead_time)
+plt.title('Dispersograma dias totales lead time')
+plt.show()
 ```
+
+Los dias totales y la cantidad de tiempo previo desde la reserva hasta la fecha de llegada se distribuyen de manera homogenea. No se identifican outliers
+
+
+## Relacion contra el target: is_canceled
+
+```python
+sns.kdeplot(data= hotelsdf, x = "lead_time", hue= "is_canceled")
+```
+
+```python
+sns.kdeplot(data= hotelsdf, x = "average_daily_rate", hue= "is_canceled")
+```
+
+```python
+sns.kdeplot(data= hotelsdf, x = "previous_cancellations_num", hue= "is_canceled")
+```
+
+```python
+sns.countplot(data= hotelsdf, x="previous_cancellations_num",  hue= "is_canceled")
