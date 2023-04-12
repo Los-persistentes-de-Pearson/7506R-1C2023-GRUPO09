@@ -1183,6 +1183,7 @@ Como faltan tantisimos datos decidimos que esta columna es irrelevante
 
 ```python
 hotelsdf.drop("company_id", axis=1, inplace=True)
+cualitativas.remove("company_id")
 ```
 
 #### Valores que toma
