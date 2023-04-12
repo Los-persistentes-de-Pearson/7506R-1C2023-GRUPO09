@@ -578,22 +578,20 @@ print("Y toma dichos valores con la siguiente frecuencia")
 hotelsdf["days_in_waiting_list"].value_counts()
 ```
 
+Observamos que la gran mayoria de la gente estuvo 0 dias en la lista de espera. 
+
+
+Vamos a graficar los valores mayores a 0 para poder apreciar la distribucion de los otros datos
+
 ```python
-#plt.xlabel(xlabel = 'Dia de llegada')
-#sns.boxplot(data = hotelsdf['days_in_waiting_list'])
-#plt.title("Dia de llegada del mes")
-#plt.ylabel(ylabel = 'Frecuencia')
-#data = hotelsdf.days_in_waiting_list
-#sns.kdeplot(data = data)
-#plt.xlabel(xlabel = 'Average daily rate')
-#plt.ylabel(ylabel = 'Frecuencia')
-#plt.title('Distribucion del average daily rate')
-
-
-#sns.boxplot(data = hotelsdf, x='days_in_waiting_list', palette='Set1')
+mayor0=hotelsdf[hotelsdf["days_in_waiting_list"] > 0]
+plt.hist(mayor0.days_in_waiting_list)
+plt.title('Histograma dias en la lista de espera')
+plt.xlabel('Cantidad de dias')
+plt.show()
 ```
 
-#### Outliers
+### Outliers
 
 
 Los valores mas llamativos son aquellos por encima de 300; sin embargo no podemos establecer que son outliers porque son cantidades de dias
