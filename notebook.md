@@ -1595,3 +1595,19 @@ Los dias totales y la cantidad de tiempo previo desde la reserva hasta la fecha 
 
 
 ## Relacion contra el target: is_canceled
+
+```python
+sns.kdeplot(data= hotelsdf, x = "lead_time", hue= "is_canceled")
+```
+
+```python
+sns.kdeplot(data= hotelsdf, x = "average_daily_rate", hue= "is_canceled")
+```
+
+```python
+sns.kdeplot(data= hotelsdf, x = "previous_cancellations_num", hue= "is_canceled")
+```
+
+```python
+sns.countplot(data= hotelsdf, x="previous_cancellations_num",  hue= "is_canceled")
+```
