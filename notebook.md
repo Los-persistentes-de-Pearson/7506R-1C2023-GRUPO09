@@ -1137,6 +1137,12 @@ plt.yticks([0,10,20,30,40,50,60,70,80,90,100])
 plt.show()
 ```
 
+Como faltan tantisimos datos decidimos que esta columna es irrelevante
+
+```python
+hotelsdf.drop("company_id", axis=1, inplace=True)
+```
+
 #### Valores que toma
 #### Grafica de distribucion
 #### Outliers
@@ -1210,7 +1216,7 @@ plt.xlabel('Pais')
 plt.ylabel('Frecuencia')
 ```
 
-### Custemer type
+### Customer type
 #### Valores faltantes
 
 
@@ -1435,7 +1441,7 @@ plt.xticks(rotation=45)
 sns.barplot(x = eje_x, y = eje_y)
 ```
 #### Outliers
-#### Ajustes de valor 
+#### Ajustes de valor
 
 Como ya habiamos observado en la cantidad de dias de fin de semana, la mayor cantidad de gente se queda 
 
@@ -1532,7 +1538,7 @@ Luego vemos cuantos de esos cancelan
 ```python
 cancelaron_y_quince_o_mas_dias = hotelsdf[ (hotelsdf.dias_totales>=15) & (hotelsdf.is_canceled == 1) ].shape[0]
 
-print("hay",cancelaron_y_quince_o_mas,"que cancelaron y se quedaron mas de 15 o mas dias.Osea un", cancelaron_y_quince_o_mas_dias*100/quince_o_mas_dias.shape[0],"% de los que se que se quedan mas de 15 dias cancelan")
+print("hay",cancelaron_y_quince_o_mas_dias,"que cancelaron y se quedaron mas de 15 o mas dias.Osea un", cancelaron_y_quince_o_mas_dias*100/quince_o_mas_dias.shape[0],"% de los que se que se quedan mas de 15 dias cancelan")
 ```
 
 Vemos que el porcentaje de reservas de mas de 15 dias que cancelan es muy alto. Sin embargo, la cantidad de registros con los que ocurre esto son muy pocos. Dejarlos, podria generar ruido al momento de realizar la prediccion. Nos podria llevar, erroneamente a pensar que alguien que se quedo muchos dias cancelaria cuando esto no necesariamente es asi. En el problema q estamos resolviendo, es prefereible no detectar a alguien que cancela, que suponer que alguien cancelaria y que luego no lo haga ya que en terminos de presupuestos, disponibilidad o cualquiera sea el uso que se le de a esta prediccion, no estar preparardo para una reserva perjudicaria mucho mas que estarlo "por las dudas".
