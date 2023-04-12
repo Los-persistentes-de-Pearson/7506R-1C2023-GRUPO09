@@ -608,7 +608,7 @@ Sin embargo esos valores representan un:
 print(str((len(mayor0)*100)/len(hotelsdf)) + "%")
 ```
 
-Porcentaje que consideramos un tanto elevado para eliminarlos 
+Vale casi un 4% del tota. Consideramos un tanto elevado para eliminarlos 
 
 
 ### lead time 
@@ -643,32 +643,33 @@ No tiene valores faltantes
 Vamos a analizar la frecuencia de los distintos valores que lead time puede tomar
 
 ```python
+print("Los valores que toma la variable son los siguientes:")
+daysInWaitingListValores = (hotelsdf["lead_time"].unique())
+daysInWaitingListValores.sort()
+print(daysInWaitingListValores)
+print()
+print("Y toma dichos valores con la siguiente frecuencia")
+hotelsdf["lead_time"].value_counts()
+
 hotelsdf["lead_time"].value_counts()
 ```
 
 Vamos a graficarlos para ver su distribucion
 
 ```python
-data = hotelsdf.lead_time
-sns.kdeplot(data = data)
-plt.xlabel(xlabel = 'Lead time')
-plt.ylabel(ylabel = 'Frecuencia')
-plt.title('Distribucion del lead time') #TODO: Cambiar la Y para ver la frecuencia, no esa numero raro
+plt.hist(hotelsdf.lead_time)
+plt.title('Histograma dias de anticipacion de la reserva')
+plt.xlabel('Cantidad de dias')
+plt.show()
 ```
 
 Vemos que la mayoria de los valores estan por debajo de 300
 
 ```python
-leadTimeValores = (hotelsdf["lead_time"].unique())
-leadTimeValores.sort()
-print(leadTimeValores)
-```
-
-```python
 sns.boxplot(data=hotelsdf.lead_time)
 plt.xlabel("Cantidad de reservas")
-plt.ylabel("Canidad de noches de fin de semana")
-plt.title("Canidad de noches de fin de semana por reserva")
+plt.ylabel("Cantidad de dias de anticipacion")
+plt.title("Boxplot dias de anticipacion de la reserva")
 plt.show()
 ```
 
@@ -689,6 +690,16 @@ Es un porcentaje lo suficientemente bajo para poder borrarlos
 ```python
 hotelsdf.drop(hotelsdf[hotelsdf["lead_time"] >= 400].index, inplace = True)
 hotelsdf.reset_index()
+```
+
+Vamos a observar como se ve nuestro grafico despues de sacar los outliers
+
+```python
+sns.boxplot(data=hotelsdf.lead_time)
+plt.xlabel("Cantidad de reservas")
+plt.ylabel("Cantidad de dias de anticipacion")
+plt.title("Boxplot dias de anticipacion de la reserva")
+plt.show()
 ```
 
 ### previous booking not cancelled number
