@@ -585,22 +585,30 @@ Vamos a graficar los valores mayores a 0 para poder apreciar la distribucion de 
 
 ```python
 mayor0=hotelsdf[hotelsdf["days_in_waiting_list"] > 0]
+mayor0.reset_index()
 plt.hist(mayor0.days_in_waiting_list)
 plt.title('Histograma dias en la lista de espera')
 plt.xlabel('Cantidad de dias')
 plt.show()
 ```
 
-### Outliers
+Vamos a trazar un boxplot para tratar de identificar valores outliers
 
+```python
+sns.boxplot(data = hotelsdf['days_in_waiting_list'])
+plt.title("Precio promedio de renta diaria")
+plt.xlabel('Average daily rate')
+plt.ylabel('Montos')
+```
 
-Los valores mas llamativos son aquellos por encima de 300; sin embargo no podemos establecer que son outliers porque son cantidades de dias
+La forma de este grafico nos muestra que tenemos muchos casos de 1 sola ocurrencia para todos los valores que no son 0.
+Sin embargo esos valores representan un:
 
+```python
+print(str((len(mayor0)*100)/len(hotelsdf)) + "%")
+```
 
-#### Ajustes de valor
-
-Vamos a aplicar la tecnica de normalizar para poder aprovechar los datos. Podemos separarlo en 3 grandes grupos: Poco tiempo, mediano tiempo, mucho tiempo.\
-Primero vamos a ver la cantidad de dias que hay en nuestro dataset
+Porcentaje que consideramos un tanto elevado para eliminarlos 
 
 
 ### lead time 
