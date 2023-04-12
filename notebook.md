@@ -80,8 +80,6 @@ nuevas_columnas = {
     'previous_bookings_not_canceled':'previous_bookings_not_canceled_num',
     'previous_cancellations':'previous_cancellations_num',
     'required_car_parking_spaces':'required_car_parking_spaces_num',
-    'reservation_status':'reservation_status',
-    'reservation_status_date':'reservation_status_date',
     'reserved_room_type':'reserved_room_type',
     'stays_in_weekend_nights':'weekend_nights_num',
     'stays_in_week_nights':'week_nights_num',
@@ -129,8 +127,6 @@ Vamos a dividir las variables en cuantitativas y cualitativas.
 | previous_bookings_not_canceled_num  | Cuantitativa    |                          |
 | previous_cancellations_num          | Cuantitativa    |                          |
 | required_car_parking_spaces_num     | Cuantitativa    |                          |
-| reservation_status                  | Cualitativa     |                          |
-| reservation_status_date             | Cuantitativa    |                          |
 | reserved_room_type                  | Cualitativa     |                          |
 | weekend_nights_num                  | Cuantitativa    |                          |
 | week_nights_num                     | Cuantitativa    |                          |
@@ -159,7 +155,6 @@ cuantitativas = [
 "previous_bookings_not_canceled_num",
 "previous_cancellations_num",
 "required_car_parking_spaces_num",
-"reservation_status_date",
 "special_requests_num",
 "weekend_nights_num",
 "week_nights_num",
@@ -1048,7 +1043,6 @@ cualitativas = [
 "is_repeated_guest",
 "market_segment_type",
 "meal_type",
-"reservation_status",
 "reserved_room_type",
 ]
 ```
@@ -1377,25 +1371,6 @@ plt.ylabel("Frecuencia")
 plt.xlabel("Tipo de comida")
 ```
 
-### Reservation Status
-#### Valores que toma
-
-
-```python
-reservation_statusValores = (hotelsdf["reservation_status"].unique())
-reservation_statusValores.sort()
-print(reservation_statusValores)
-```
-
-#### Grafica de distribucion
-
-```python
-sns.countplot(data=hotelsdf, x = 'reservation_status')
-plt.title("Estados de reservas")
-plt.ylabel("Frecuencia")
-plt.xlabel("Estado de reserva")
-```
-
 ### Reserved room type
 
 #### Valores que toma
@@ -1415,10 +1390,7 @@ plt.ylabel("Frecuencia")
 plt.xlabel("Tipo de habitacion")
 ```
 
-
-
 Como ya habiamos observado en la cantidad de dias de fin de semana, la mayor cantidad de gente se queda 
-
 
 
 # Analisis multivariado
