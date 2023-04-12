@@ -650,8 +650,6 @@ print(daysInWaitingListValores)
 print()
 print("Y toma dichos valores con la siguiente frecuencia")
 hotelsdf["lead_time"].value_counts()
-
-hotelsdf["lead_time"].value_counts()
 ```
 
 Vamos a graficarlos para ver su distribucion
@@ -723,25 +721,52 @@ hotelsdf.previous_bookings_not_canceled_num.isna().sum()
 
 
 ```python
-eje_y = hotelsdf["previous_bookings_not_canceled_num"].value_counts()
-eje_x = eje_y.index.tolist()
-sns.barplot(y = eje_y, x = eje_x, palette='Set2')
-plt.xlabel('Cantidad de reservas no canceladas')
-plt.ylabel(ylabel='Frecuencia')
-plt.title('Numero de reservas no canceladas')
-
-hotelsdf["previous_bookings_not_canceled_num"].value_counts() #TODO: Corregir cuadro, se ve horrible el cuadro
+print("Los valores que toma la variable son los siguientes:")
+daysInWaitingListValores = (hotelsdf["previous_bookings_not_canceled_num"].unique())
+daysInWaitingListValores.sort()
+print(daysInWaitingListValores)
+print()
+print("Y toma dichos valores con la siguiente frecuencia")
+hotelsdf["previous_bookings_not_canceled_num"].value_counts()
 ```
 
+Vamos a graficar los valores mayores a 0 para poder apreciar la distribucion de los otros datos
+
+```python
+mayor0=hotelsdf[hotelsdf["previous_bookings_not_canceled_num"] > 0]
+mayor0.reset_index()
+plt.hist(mayor0.days_in_waiting_list)
+plt.title('Histograma dias en la lista de espera mayor a 0')
+plt.xlabel('Cantidad de dias')
+plt.show()
+```
+
+Del grafico se observa que la gran mayoria de la gente que no cancelo, no cancelaron entre 1 y 10 veces
+
+
 #### Outliers
-No parece haber ningun valor fuera  de lo comun
 
+```python
+sns.boxplot(data = hotelsdf['previous_bookings_not_canceled_num'])
+plt.xlabel('Dias en la lista de espera')
+plt.ylabel('Dias')
+```
 
-#### Ajustes de valor
+Debido a la gran cantidad de valores con 0, y a la poca cantidad de valores sin 0 todos los valores distintos a 0 figuran como outliers. \
+Dichos valores representan:
 
-Vamos a aplicar la tecnica de normalizar para poder aprovechar los datos. Podemos separarlo en 3 grandes grupos: Poco tiempo, mediano tiempo, mucho tiempo.\
-Primero vamos a ver la cantidad de dias que hay en nuestro dataset
+```python
+print(str((len(hotelsdf[hotelsdf["previous_bookings_not_canceled_num"] > 0])*100)/len(hotelsdf)) + "%")
+```
 
+Considerando el bajo volumen que representan, decidimos dropearlos
+
+```python
+#hotelsdf.drop(hotelsdf[hotelsdf["previous_bookings_not_canceled_num"] > 0].index, inplace = True)
+#hotelsdf.reset_index()
+
+print(990*"DECIDIR SI BORRAR TODO")
+```
 
 ### previous booking cancellation number
 
