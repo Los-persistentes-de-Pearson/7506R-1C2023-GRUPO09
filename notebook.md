@@ -822,6 +822,13 @@ Con el analisis anteior, tomamos las siguiuentes decisiones:
 hotelsdf.loc[ (hotelsdf.required_car_parking_spaces_num==3) & (hotelsdf.adult_num==2) , "required_car_parking_spaces_num"] = 2
 ```
 
+```python
+sns.countplot(data = hotelsdf, x='required_car_parking_spaces_num')
+plt.title("Cantidad de reservas por espacios de estacionamiento")
+plt.ylabel("Frecuencia")
+plt.xlabel("Espacios de autos requeridos")
+```
+
 ### special requests number 
 
 
