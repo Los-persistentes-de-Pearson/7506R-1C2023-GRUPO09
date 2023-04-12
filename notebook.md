@@ -112,6 +112,7 @@ Vamos a dividir las variables en cuantitativas y cualitativas.
 | assigned_room_type                  | Cualitativa     |                          |
 | babies_num                          | Cuantitativa    |                          |
 | booking_changes_num                 | Cuantitativa    |                          |
+| booking_id                          | Cualitativa     |                          |
 | children_num                        | Cuantitativa    |                          |
 | company_id                          | Cualitativa     |                          |
 | country                             | Cualitativa     |                          |
@@ -120,6 +121,7 @@ Vamos a dividir las variables en cuantitativas y cualitativas.
 | deposit_type                        | Cualitativa     |                          |
 | distribution_channel                | Cualitativa     |                          |
 | hotel_name                          | Cualitativa     |                          |
+| is_canceled                         | Cualitativa     |                          |
 | is_repeated_guest                   | Cualitativa     |                          |
 | lead_time                           | Cuantitativa    |                          |
 | market_segment_type                 | Cualitativa     |                          |
@@ -133,6 +135,7 @@ Vamos a dividir las variables en cuantitativas y cualitativas.
 | weekend_nights_num                  | Cuantitativa    |                          |
 | week_nights_num                     | Cuantitativa    |                          |
 | special_requests_num                | Cuantitativa    |                          |
+
 
 
 ## Cuantitativas
@@ -708,6 +711,7 @@ hotelsdf.previous_bookings_not_canceled_num.isna().sum()
 ```python
 eje_y = hotelsdf["previous_bookings_not_canceled_num"].value_counts()
 eje_x = eje_y.index.tolist()
+plt.figure(figsize=(13,5))
 sns.barplot(y = eje_y, x = eje_x, palette='Set2')
 plt.xlabel('Cantidad de reservas no canceladas')
 plt.ylabel(ylabel='Frecuencia')
@@ -783,6 +787,8 @@ print("La cantidad de valores nulos/faltantes es", hotelsdf.required_car_parking
 ```python
 sns.countplot(data = hotelsdf, x='required_car_parking_spaces_num')
 plt.title("Cantidad de reservas por espacios de estacionamiento")
+plt.ylabel("Frecuencia")
+plt.xlabel("Espacios de autos requeridos")
 ```
 
 #### Outliers
@@ -849,6 +855,8 @@ print("La cantidad de valores nulos/faltantes es", hotelsdf.special_requests_num
 ```python
 sns.countplot(data = hotelsdf, x='special_requests_num', palette='Set1')
 plt.title("Reservas por cantidad de requisitos especiales")
+plt.xlabel("Cantidad requerimiento especiales")
+plt.ylabel("Frecuencia")
 ```
 
 ```python
@@ -882,6 +890,15 @@ media_special_requests = round(hotelsdf.special_requests_num.mean())
 hotelsdf.loc[hotelsdf['special_requests_num'] >= 4, 'special_requests_num'] = media_special_requests
 ```
 
+Graficamos nuevamente la distribucion de la variable para validar los cambios realizados 
+
+```python 
+sns.countplot(data = hotelsdf, x='special_requests_num', palette='Set1')
+plt.title("Reservas por cantidad de requisitos especiales")
+plt.xlabel("Cantidad requerimiento especiales")
+plt.ylabel("Frecuencia")
+```
+
 ### weekend nights number
 
 
@@ -902,13 +919,15 @@ print("La cantidad de valores nulos/faltantes es", hotelsdf.weekend_nights_num.i
 ```python
 sns.countplot(data = hotelsdf, x='weekend_nights_num', palette='Set1')
 plt.title("Reservas por cantidad de noches de fin de semana")
+plt.xlabel("Numero de noches de fin de semana")
+plt.ylabel("Frecuencia")
 ```
 
 ```python
 sns.boxplot(data=hotelsdf.weekend_nights_num)
 plt.xlabel("Cantidad de reservas")
-plt.ylabel("Canidad de noches de fin de semana")
-plt.title("Canidad de noches de fin de semana por reserva")
+plt.ylabel("Cantidad de noches de fin de semana")
+plt.title("Cantdad de noches de fin de semana por reserva")
 plt.show()
 ```
 
@@ -924,6 +943,9 @@ mayores_a_nueve.shape[0]
 
 ```python
 sns.countplot(data = mayores_a_nueve, x='weekend_nights_num', palette='Set1')
+plt.title("Reservas por cantidad de noches de fin de semana")
+plt.xlabel("Numero de noches de fin de semana")
+plt.ylabel("Frecuencia")
 ```
 
 #### Ajustes de valor
@@ -953,6 +975,12 @@ sns.countplot(data = mayores_a_5_menores_a_nueve_finde, x='weekend_nights_num', 
 
 Como son muchos mas registros posponemos su analisis para estudiarlos en un analisis multivariado despues de terminar de estudiar todas las variables cuantitativas pero los dejamos marcados como posibles registros a modificar.
 
+```python
+sns.countplot(data = hotelsdf, x='weekend_nights_num', palette='Set1')
+plt.title("Reservas por cantidad de noches de fin de semana")
+plt.xlabel("Numero de noches de fin de semana")
+plt.ylabel("Frecuencia")
+```
 
 ### week nights number 
 
@@ -974,6 +1002,8 @@ print("La cantidad de valores nulos/faltantes es", hotelsdf.week_nights_num.isna
 ```python
 sns.countplot(data = hotelsdf, x='week_nights_num', palette='Set1')
 plt.title("Reservas por cantidad de noches de de semana")
+plt.xlabel("Noches de semana")
+plt.ylabel("Frecuencia")
 ```
 
 Se puede ver que la gran mayoria de las reservas son estadias de entre ningna (0) y 5 noches de semana y en menor medida estadias de entre 6 y 10 noches de semana. 
@@ -986,9 +1016,14 @@ mayores_a_11_noches_semana.shape[0]
 
 ```python
 sns.countplot(data = mayores_a_11_noches_semana, x='week_nights_num', palette='Set1')
+plt.title("Estancias de mas de once dias")
+plt.xlabel("Noches de semana")
+plt.ylabel("Frecuencia")
 ```
 
 Como son muchos registros y no contienen valores incoherentes a primera vista posponemos su tratamiento para estudiarlos con un analisis multivariado comparandolo con weekend_nights_number en dicha seccion.
+
+Ocurre que ademas los registros que este caso representarian una desviacion muy grande fueron eliminados al momento de eliminar aquellos outliers de noches de fin de semana
 
 
 ## Cualitativas
@@ -1002,6 +1037,7 @@ cualitativas = [
 "agent_id",
 "arrival_month",
 "assigned_room_type",
+"booking_id",
 "company_id",
 "country",
 "customer_type",
@@ -1043,6 +1079,8 @@ Viendo que la columna company_id tiene un 92% de valores faltantes es convenient
 hotelsdf.drop("company_id", axis=1, inplace=True)
 cualitativas.remove("company_id")
 ```
+
+Por otro lado la variable booking ID no sera graficada puesto que corresponde a una cadena que representa un codigo unico para cada reserva 
 
 ### Agent ID
 
