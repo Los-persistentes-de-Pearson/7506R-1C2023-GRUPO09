@@ -1466,6 +1466,26 @@ plt.xlabel("Tipo de habitacion")
 Como ya habiamos observado en la cantidad de dias de fin de semana, la mayor cantidad de gente se queda 
 
 
+# Estado del data frame post analisis univariado
+
+
+Vamos a observar el estado de nuestro data frame actualmente para observar que efecto tuvo nuestro analisis en el volumen de los datos
+
+```python
+pd.concat([hotelsdf.head(2), hotelsdf.sample(5), hotelsdf.tail(2)])
+```
+
+```python
+hotelsdf.info()
+```
+
+```python
+print("Vemos que despues del proceso de Ingenieria de caracteristicas, la cantidad de datos se redujo en un " + str(100 - len(hotelsdf) * 100 / 61913) + "%") 
+```
+
+Ademas observamos que no tenemos mas datos faltantes, visto en como los unicos valores del tipo float64 es average_daily_rate, el cual es un valor de punto flotante.
+
+
 # Analisis multivariado
 ## Medicion de la correlacion entre las variables cuantitativas
 
