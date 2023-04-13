@@ -208,7 +208,7 @@ Eliminamos dichos valores que representan un porcentaje infimo y pueden llegar a
 ```python
 hotelsdf.drop(a_eliminar_con_cero.index, inplace = True)
 hotelsdf.drop(a_eliminar_mayores_3.index, inplace = True)
-hotelsdf.reset_index()
+hotelsdf.reset_index(drop=True)
 hotelsdf[(hotelsdf["adult_num"] > 4) | hotelsdf['adult_num'] == 0]
 ```
 
@@ -335,6 +335,7 @@ eliminar valores con 0
 ```python
 a_eliminar_con_cero = hotelsdf[hotelsdf['average_daily_rate'] <= 0].index
 hotelsdf.drop(a_eliminar_con_cero, inplace = True)
+hotelsdf.reset_index(drop=True)
 ```
 
 #### Ajustes de valor
@@ -371,7 +372,7 @@ desviacion_uno = hotelsdf[(hotelsdf['z_adr'] > 3)]
 desviacion_dos = hotelsdf[(hotelsdf['z_adr'] < -2)]
 hotelsdf.drop(desviacion_uno.index, inplace = True)
 hotelsdf.drop(desviacion_dos.index, inplace = True)
-hotelsdf.reset_index()
+hotelsdf.reset_index(drop=True)
 ```
 
 ```python
@@ -394,6 +395,7 @@ plt.title('Distribucion del average daily rate')
 
 ```python
 hotelsdf.drop(labels = 'z_adr', inplace = True, axis = 1)
+hotelsdf.reset_index(drop=True)
 ```
 
 ### babies number 
@@ -426,7 +428,7 @@ hotelsdf[(hotelsdf.babies_num >= 1) & (hotelsdf.adult_num < 1)]
 
 ```python
 hotelsdf.drop(hotelsdf[hotelsdf.babies_num == 9].index, inplace = True)
-hotelsdf.reset_index()
+hotelsdf.reset_index(drop=True)
 ```
 
 ### booking changes number 
@@ -447,21 +449,7 @@ plt.xlabel('Numero de cambios')
 plt.ylabel(ylabel='Frecuencia')
 plt.title('Cantidad de cambios por reserva')
 ```
-#### Outliers
-
-```python
-
-```
-
-#### Ajustes de valor
-
-```python
-
-```
-
 ### children number 
-
-#### Valores estadisticos relevantes
 #### Grafica de distribucion
 
 ```python
@@ -494,6 +482,7 @@ print("Considerando que la cantidad de datos de children_num faltante es " + str
 ```python
 # Borramos las columnas sin valores
 hotelsdf.drop((hotelsdf[hotelsdf["children_num"].isna() == True].index.values),inplace=True)
+hotelsdf.reset_index(drop=True)
 ```
 
 ```python
@@ -536,6 +525,20 @@ Considerando que es un valor tanto mas alto que el resto, que es un unico caso y
 
 ```python
 hotelsdf.drop((hotelsdf[hotelsdf["children_num"] == 10].index.values),inplace=True)
+hotelsdf.reset_index(drop=True)
+```
+
+Una vez ajustados los valores, nuestros valores toman la siguiente forma:
+
+```python
+eje_y = hotelsdf["children_num"].value_counts()
+eje_x = eje_y.index.tolist()
+sns.barplot(y = eje_y, x = eje_x, palette='Set2')
+plt.xlabel('Cantidad de ninos')
+plt.ylabel(ylabel='Frecuencia')
+plt.title('Numero de ninos por reserva')
+
+hotelsdf["children_num"].value_counts()
 ```
 
 ### days in the waiting list 
@@ -583,7 +586,7 @@ Vamos a graficar los valores mayores a 0 para poder apreciar la distribucion de 
 
 ```python
 mayor0=hotelsdf[hotelsdf["days_in_waiting_list"] > 0]
-mayor0.reset_index()
+mayor0.reset_index(drop=True)
 plt.hist(mayor0.days_in_waiting_list)
 plt.title('Histograma dias en la lista de espera')
 plt.xlabel('Cantidad de dias')
@@ -594,9 +597,9 @@ Vamos a trazar un boxplot para tratar de identificar valores outliers
 
 ```python
 sns.boxplot(data = hotelsdf['days_in_waiting_list'])
-plt.title("Precio promedio de renta diaria")
-plt.xlabel('Average daily rate')
-plt.ylabel('Montos')
+plt.title("Dias en la lista de espera")
+plt.xlabel('Frecuencia')
+plt.ylabel('Dias')
 ```
 
 La forma de este grafico nos muestra que tenemos muchos casos de 1 sola ocurrencia para todos los valores que no son 0.
@@ -656,6 +659,7 @@ Vamos a graficarlos para ver su distribucion
 plt.hist(hotelsdf.lead_time)
 plt.title('Histograma dias de anticipacion de la reserva')
 plt.xlabel('Cantidad de dias')
+plt.ylabel('Frecuencia')
 plt.show()
 ```
 
@@ -685,7 +689,7 @@ Es un porcentaje lo suficientemente bajo para poder borrarlos
 
 ```python
 hotelsdf.drop(hotelsdf[hotelsdf["lead_time"] >= 400].index, inplace = True)
-hotelsdf.reset_index()
+hotelsdf.reset_index(drop=True)
 ```
 
 Vamos a observar como se ve nuestro grafico despues de sacar los outliers
@@ -695,6 +699,12 @@ sns.boxplot(data=hotelsdf.lead_time)
 plt.xlabel("Cantidad de reservas")
 plt.ylabel("Cantidad de dias de anticipacion")
 plt.title("Boxplot dias de anticipacion de la reserva")
+plt.show()
+
+plt.hist(hotelsdf.lead_time)
+plt.title('Histograma dias de anticipacion de la reserva')
+plt.xlabel('Cantidad de dias')
+plt.ylabel('Frecuencia')
 plt.show()
 ```
 
@@ -732,7 +742,7 @@ Vamos a graficar los valores mayores a 0 para poder apreciar la distribucion de 
 
 ```python
 mayor0=hotelsdf[hotelsdf["previous_bookings_not_canceled_num"] > 0]
-mayor0.reset_index()
+mayor0.reset_index(drop=True)
 plt.hist(mayor0.days_in_waiting_list)
 plt.title('Histograma dias en la lista de espera mayor a 0')
 plt.xlabel('Cantidad de dias')
@@ -760,21 +770,17 @@ print(str((len(hotelsdf[hotelsdf["previous_bookings_not_canceled_num"] > 0])*100
 Considerando el bajo volumen que representan, decidimos dropearlos
 
 ```python
-#hotelsdf.drop(hotelsdf[hotelsdf["previous_bookings_not_canceled_num"] > 0].index, inplace = True)
-#hotelsdf.reset_index()
-
-print(990*"DECIDIR SI BORRAR TODO")
-```
-
-```python
-print(990*"DECIDIR SI BORRAR TODO")
+hotelsdf.drop(hotelsdf[hotelsdf["previous_bookings_not_canceled_num"] > 0].index, inplace = True)
+hotelsdf.reset_index(drop=True)
 ```
 
 Sin embargo, al dropearlos, el resto de nuestros valores son 0. Esto quiere decir que todo el resto de las columnas presentan los mismos valores. \
 Es por esto que decidimos eliminar la totalidad de la columna visto a que no nos aporta informacion.
 
 ```python
-#hotelsdf.drop("previous_bookings_not_canceled_num", axis=1, inplace=True)
+hotelsdf.drop("previous_bookings_not_canceled_num", axis=1, inplace=True)
+cuantitativas.remove("previous_bookings_not_canceled_num")
+hotelsdf.reset_index(drop=True)
 ```
 
 ### previous booking cancellation number
@@ -803,14 +809,10 @@ print()
 print("Y toma dichos valores con la siguiente frecuencia")
 hotelsdf["previous_cancellations_num"].value_counts()
 ```
-Vamos a graficar los valores mayores a 0 para poder apreciar la distribucion de los otros datos
-
 ```python
-mayor0=hotelsdf[hotelsdf["previous_cancellations_num"] > 0]
-mayor0.reset_index()
-plt.hist(mayor0.days_in_waiting_list)
-plt.title('Histograma dias en la lista de espera mayor a 0')
-plt.xlabel('Cantidad de dias')
+sns.countplot(data = hotelsdf, x='previous_cancellations_num', palette='Set1')
+plt.title('Countplot reservas previas no canceladas')
+plt.xlabel('Cantidad de reservas')
 plt.show()
 ```
 
@@ -834,6 +836,28 @@ print(str((len(hotelsdf[hotelsdf["previous_cancellations_num"] > 0])*100)/len(ho
 
 Porcentaje que es demasiado elevado como para eliminar
 
+
+Sin embargo, la mayoria de estos datos estan concetrados en los registros con 1 cancelacion. Si tomamos un umbral un poco mayor podemos descartar los valores atipicos. Por ejemplo, los registros con 2 cancelaciones o mas represenan un
+
+```python
+print(str((len(hotelsdf[hotelsdf["previous_cancellations_num"] >= 2])*100)/len(hotelsdf)) + "%")
+```
+
+Al ser un porcentaje tan insignificante, decidimos eliminar esas
+
+```python
+hotelsdf.drop(hotelsdf[hotelsdf["previous_cancellations_num"] >= 2].index, inplace = True)
+hotelsdf.reset_index(drop=True)
+```
+
+Observamos como nuestros valores cambiaron despues del ajuste
+
+```python
+sns.countplot(data = hotelsdf, x='previous_cancellations_num', palette='Set1')
+plt.title('Countplot reservas previas no canceladas')
+plt.xlabel('Cantidad de reservas')
+plt.show()
+```
 
 #### Ajustes de valor
 
@@ -872,7 +896,6 @@ Nuestro criterio para determinar que un valor es adecuado para esta variable es 
 
 ```python
 registrosDosOMasEspacios = hotelsdf[hotelsdf["required_car_parking_spaces_num"]>=2]
-#PREG deberia hacer un .copy x las dudas?
 display(registrosDosOMasEspacios[['adult_num', "required_car_parking_spaces_num"]].sort_values(
     by = "required_car_parking_spaces_num", 
     ascending = False
@@ -1025,7 +1048,7 @@ Son solo 13 registros, es decir, representan muy poca cantidad del total. Tomamo
 ```python
 mas_de_nueve_noches_finde = hotelsdf[hotelsdf["weekend_nights_num"]>=9]
 hotelsdf.drop(mas_de_nueve_noches_finde.index, inplace = True)
-hotelsdf.reset_index()
+hotelsdf.reset_index(drop=True)
 ```
 
 Hasta ahora analizamos las estadias con mas de 9 noches de fin de semana (al menos un mes de esatdia)
@@ -1145,6 +1168,7 @@ Viendo que la columna company_id tiene un 92% de valores faltantes es convenient
 
 ```python
 hotelsdf.drop("company_id", axis=1, inplace=True)
+hotelsdf.reset_index(drop=True)
 cualitativas.remove("company_id")
 ```
 
@@ -1480,7 +1504,8 @@ hotelsdf.info()
 ```
 
 ```python
-print("Vemos que despues del proceso de Ingenieria de caracteristicas, la cantidad de datos se redujo en un " + str(100 - len(hotelsdf) * 100 / 61913) + "%") 
+porcentaje = str(100 - len(hotelsdf) * 100 / len(hotelsDfOriginal))[:5]
+print("Vemos que despues del proceso de Ingenieria de caracteristicas, la cantidad de datos se redujo en un " + porcentaje + "%") 
 ```
 
 Ademas observamos que no tenemos mas datos faltantes, visto en como los unicos valores del tipo float64 es average_daily_rate, el cual es un valor de punto flotante.
@@ -1586,7 +1611,7 @@ Procedemos a eliminarlos
 ```python
 a_eliminar_con_quince_o_mas_dias = hotelsdf[hotelsdf['dias_totales'] >= 15]
 hotelsdf.drop(a_eliminar_con_quince_o_mas_dias.index, inplace = True)
-hotelsdf.reset_index()
+hotelsdf.reset_index(drop=True)
 ```
 
 ```python
@@ -1626,7 +1651,7 @@ indices_outliers = hotelsdf[(hotelsdf['customer_type'] == 'Group') & (hotelsdf['
 hotelsdf.drop(indices_outliers, inplace = True)
 indices_outliers2 = hotelsdf[(hotelsdf['customer_type'] == 'Contract') & (hotelsdf['average_daily_rate'] > 200)].index
 hotelsdf.drop(indices_outliers2, inplace = True)
-hotelsdf.reset_index()
+hotelsdf.reset_index(drop=True)
 ```
 
 Graficamos nuevamente para verificar que dicho tratamiento no generara una desviacion considerable en el analisis
@@ -1663,7 +1688,7 @@ hotelsdf.drop(indices_tipo_k, inplace=True)
 hotelsdf.drop(indices_tipo_i, inplace=True)
 hotelsdf.drop(indices_tipo_b, inplace=True)
 hotelsdf.drop(indices_tipo_b2, inplace=True)
-hotelsdf.reset_index()
+hotelsdf.reset_index(drop=True)
 ```
 
 Mostramos nuevamente la distribucion de las variables alteradas
