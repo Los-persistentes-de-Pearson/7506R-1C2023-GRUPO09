@@ -892,7 +892,6 @@ Nuestro criterio para determinar que un valor es adecuado para esta variable es 
 
 ```python
 registrosDosOMasEspacios = hotelsdf[hotelsdf["required_car_parking_spaces_num"]>=2]
-#PREG deberia hacer un .copy x las dudas?
 display(registrosDosOMasEspacios[['adult_num', "required_car_parking_spaces_num"]].sort_values(
     by = "required_car_parking_spaces_num", 
     ascending = False
