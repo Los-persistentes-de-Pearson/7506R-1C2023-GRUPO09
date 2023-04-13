@@ -1730,9 +1730,5 @@ sns.kdeplot(data= hotelsdf, x = "average_daily_rate", hue= "is_canceled")
 ```
 
 ```python
-sns.kdeplot(data= hotelsdf, x = "previous_cancellations_num", hue= "is_canceled")
-```
-
-```python
 sns.countplot(data= hotelsdf, x="previous_cancellations_num",  hue= "is_canceled")
 ```
