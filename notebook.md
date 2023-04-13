@@ -341,7 +341,7 @@ hotelsdf.reset_index(drop=True)
 #### Ajustes de valor
 
 
-Utilizamos Z-score para clasificar las desviasiones presentes en los valores
+Utilizamos Z-score para clasificar las desviaciones presentes en los valores
 
 
 ```python
@@ -609,7 +609,7 @@ Sin embargo esos valores representan un:
 print(str((len(mayor0)*100)/len(hotelsdf)) + "%")
 ```
 
-Vale casi un 4% del tota. Consideramos un tanto elevado para eliminarlos 
+Vale casi un 4% del total. Consideramos un tanto elevado para eliminarlos 
 
 
 ### lead time 
@@ -708,7 +708,7 @@ plt.ylabel('Frecuencia')
 plt.show()
 ```
 
-### previous booking not cancelled number
+### previous booking not canceled number
 
 #### Valores estadisticos relevantes
 
@@ -716,7 +716,7 @@ plt.show()
 hotelsdf["previous_bookings_not_canceled_num"].describe()
 ```
 
-Esta variable representa la cantidad de reservasa que no fueron canceladas por el usuario antes de la reserva actual
+Esta variable representa la cantidad de reservas que no fueron canceladas por el usuario antes de la reserva actual
 
 
 #### Valores nulos/faltantes
@@ -791,7 +791,7 @@ hotelsdf.reset_index(drop=True)
 hotelsdf["previous_cancellations_num"].describe()
 ```
 
-Esta variable representa la cantidad de reservasa que si fueron canceladas por el usuario antes de la reserva actual
+Esta variable representa la cantidad de reservas que si fueron canceladas por el usuario antes de la reserva actual
 
 
 #### Valores nulos/faltantes
@@ -827,7 +827,7 @@ plt.xlabel('Dias en la lista de espera')
 plt.ylabel('Dias')
 ```
 
-Del grafico se ve que todos los valores por encima de 0 estan  por fuera de los cuartiles.\
+Del grafico se ve que todos los valores por encima de 0 estan  por fuera de los cuantiles.\
 Sin embargo, esos datos representan:
 
 ```python
@@ -837,7 +837,7 @@ print(str((len(hotelsdf[hotelsdf["previous_cancellations_num"] > 0])*100)/len(ho
 Porcentaje que es demasiado elevado como para eliminar
 
 
-Sin embargo, la mayoria de estos datos estan concetrados en los registros con 1 cancelacion. Si tomamos un umbral un poco mayor podemos descartar los valores atipicos. Por ejemplo, los registros con 2 cancelaciones o mas represenan un
+Sin embargo, la mayoria de estos datos estan concetrados en los registros con 1 cancelacion. Si tomamos un umbral un poco mayor podemos descartar los valores atipicos. Por ejemplo, los registros con 2 cancelaciones o mas represenan un outlier
 
 ```python
 print(str((len(hotelsdf[hotelsdf["previous_cancellations_num"] >= 2])*100)/len(hotelsdf)) + "%")
@@ -903,17 +903,17 @@ display(registrosDosOMasEspacios[['adult_num', "required_car_parking_spaces_num"
 ```
 
 De la tabla anterior se pueden sacar las siguientes conclusiones:
-- El resgistro con valor de 8 espacios de estacionamiento es claramente un Outlier ya que no es coherente que una habitacion para dos personas haya reservado esa cantidad de espacios de estacionamiento.
-- El resgistro con el valor de 3 espacios de estacionamiento y 2 adultos tambien es un Outliers ya que tampoco es coherente que 2 personas hayan reservado 3 espacios de estacionamiento.
-- Los registros restantes NO son Outliers ya que si bien contienen valores poco freciuentes, son coherentes con el criterio explicado en el parrafo de arriba.
+- El registro con valor de 8 espacios de estacionamiento es claramente un Outlier ya que no es coherente que una habitacion para dos personas haya reservado esa cantidad de espacios de estacionamiento.
+- El registro con el valor de 3 espacios de estacionamiento y 2 adultos tambien es un Outliers ya que tampoco es coherente que 2 personas hayan reservado 3 espacios de estacionamiento.
+- Los registros restantes NO son Outliers ya que si bien contienen valores poco frecuentes, son coherentes con el criterio explicado en el parrafo de arriba.
 
 
 #### Ajustes de valor
 
 
-Con el analisis anteior, tomamos las siguiuentes decisiones:
-- Para el resgistro con valor de 8 espacios de estacionamiento,lo eliminamos por tratarse de un Outlier muy grosero.
-- En el registro resgistro con el valor de 3 espacios de estacionamiento y 2 adultos, cambiamos el valor de required_car_parking_spaces_num por el valor "2" suponiendo un error de tipeo.
+Con el analisis anteior, tomamos las siguientes decisiones:
+- Para el registro con valor de 8 espacios de estacionamiento,lo eliminamos por tratarse de un Outlier muy grosero.
+- En el registro registro con el valor de 3 espacios de estacionamiento y 2 adultos, cambiamos el valor de required_car_parking_spaces_num por el valor "2" suponiendo un error de tipeo.
 - Se mantienen sin cambios el resto de los registros restantes listados arriba.
 
 ```python
@@ -963,7 +963,7 @@ plt.show()
 
 
 Viendo los graficos vemos que los valores mas frecuentes de requisitos especiales son 0 (ninguno), 1 y 2 y algunos menos con 3. Ademas hay muy pocos con 4 y 5. 
-Los valores que podrian levantar sosppecha son 4 y 5.
+Los valores que podrian levantar sospecha son 4 y 5.
 Miramos la cantidad de registros de cada uno de ellos para ver que no sean casos puntuales.
 
 ```python
@@ -974,7 +974,7 @@ print("hay", hotelsdf[hotelsdf.special_requests_num==5].shape[0] ,"reservas con 
 #### Ajustes de valor
 
 
-Debido a la la cantidad de reservas para estos casos y que el rango de valores es relativamente acotado, no parcen ser casos puntuales. 
+Debido a la la cantidad de reservas para estos casos y que el rango de valores es relativamente acotado, no parecen ser casos puntuales. 
 Procedemos a cambiar la cantidad de requisitos especiales de dichos registros el valor mas frecuente
 
 ```python
@@ -1051,7 +1051,7 @@ hotelsdf.drop(mas_de_nueve_noches_finde.index, inplace = True)
 hotelsdf.reset_index(drop=True)
 ```
 
-Hasta ahora analizamos las estadias con mas de 9 noches de fin de semana (al menos un mes de esatdia)
+Hasta ahora analizamos las estadias con mas de 9 noches de fin de semana (al menos un mes de estadia)
 Sin embargo nos resta estudiar, los casos de 5, 6, 7 y 8 dias de fin de semana.
 Vemos cuantos registros son
 
@@ -1098,7 +1098,7 @@ plt.xlabel("Noches de semana")
 plt.ylabel("Frecuencia")
 ```
 
-Se puede ver que la gran mayoria de las reservas son estadias de entre ningna (0) y 5 noches de semana y en menor medida estadias de entre 6 y 10 noches de semana. 
+Se puede ver que la gran mayoria de las reservas son estadias de entre ninguna (0) y 5 noches de semana y en menor medida estadias de entre 6 y 10 noches de semana. 
 Como en el grafico no se ven puntualmente los registros con estadias de 11 o mas noches de semana, los graficamos de nuevo para ver como se distribuyen y estudiarlos mejor
 
 ```python
@@ -1186,7 +1186,7 @@ print(agent_id_valores)
 
 #### Ajuste de valores faltantes
 
-Reemplazamos valores faltantes por 0 ya que no existe previamente y servira para regular los tipos de atos de la columna
+Reemplazamos valores faltantes por 0 ya que no existe previamente y servira para regular los tipos de datos de la columna
 
 ```python
 hotelsdf.loc[hotelsdf['agent_id'].isnull(), 'agent_id'] = 0
@@ -1493,7 +1493,7 @@ Como ya habiamos observado en la cantidad de dias de fin de semana, la mayor can
 # Estado del data frame post analisis univariado
 
 
-Vamos a observar el estado de nuestro data frame actualmente para observar que efecto tuvo nuestro analisis en el volumen de los datos
+Vamos a observar el estado de nuestro dataframe actualmente para observar que efecto tuvo nuestro analisis en el volumen de los datos
 
 ```python
 pd.concat([hotelsdf.head(2), hotelsdf.sample(5), hotelsdf.tail(2)])
@@ -1554,7 +1554,7 @@ Agregamos una columna con dicho dato
 hotelsdf["dias_totales"] = hotelsdf["week_nights_num"] + hotelsdf["weekend_nights_num"]
 ```
 
-Puesto que ahora tenemos una nueva variable, realizamos un breve analisis univariado sobre la misma para determinar si existen Outliers no detectados en las columans de week y weekend nights number.
+Puesto que ahora tenemos una nueva variable, realizamos un breve analisis univariado sobre la misma para determinar si existen Outliers no detectados en las columnas de week y weekend nights number.
 
 ```python
 plt.figure(figsize=(15,5))
@@ -1580,7 +1580,7 @@ reservas_mas_de_ocho_dias = hotelsdf[(hotelsdf.dias_totales>=8)].shape[0]
 print("hay",reservas_mas_de_ocho_dias,"que representan un porcentaje del total de", reservas_mas_de_ocho_dias*100/hotelsdf.shape[0],"%")
 ```
 
-Puesto que este valor es muy elevado, apelamos al sentido comun. Rservas de hasta 14 dias de estadia son muy posibles, por lo cual estuidiamos las de mas 15 o mas dias.
+Puesto que este valor es muy elevado, apelamos al sentido comun. Reservas de hasta 14 dias de estadia son muy posibles, por lo cual estudiamos las de mas 15 o mas dias.
 
 ```python
 quince_o_mas_dias = hotelsdf[hotelsdf["dias_totales"]>=15]
@@ -1745,9 +1745,7 @@ Estas graficas podrian sugerir que reservas realizadas con mayor anticipacion te
 ### previous_cancellations_num
 
 ```python
-#TODO CAMBIARRRRR
-hotelsdf_filtratres = hotelsdf[ hotelsdf["previous_cancellations_num"] <2]
-sns.countplot(data= hotelsdf_filtratres, x="previous_cancellations_num",  hue= "is_canceled")
+sns.countplot(data= hotelsdf, x="previous_cancellations_num",  hue= "is_canceled")
 plt.title("Cantidad de reservas respecto a la cantidad de cancelaciones previas")
 plt.xlabel("Cancelaciones previas")
 plt.ylabel("Cantidad de reservas")
@@ -1781,7 +1779,7 @@ plt.xlabel("Precio promedio diario por hab")
 plt.ylabel("Densidad de registros")
 ```
 
-Se puede ver que las garficas de ADR haciendo foco en is_cancelled se comportan de manera similiar para todos los valores. No podemos estabecer que exista una influencia directa de esta variable sobre el target.
+Se puede ver que las garficas de ADR haciendo foco en is_canceled se comportan de manera similiar para todos los valores. No podemos estabecer que exista una influencia directa de esta variable sobre el target.
 
 
 ### Dias Totales
