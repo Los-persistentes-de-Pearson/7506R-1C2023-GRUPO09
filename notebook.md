@@ -1504,7 +1504,8 @@ hotelsdf.info()
 ```
 
 ```python
-print("Vemos que despues del proceso de Ingenieria de caracteristicas, la cantidad de datos se redujo en un " + str(100 - len(hotelsdf) * 100 / 61913) + "%") 
+porcentaje = str(100 - len(hotelsdf) * 100 / len(hotelsDfOriginal))[:5]
+print("Vemos que despues del proceso de Ingenieria de caracteristicas, la cantidad de datos se redujo en un " + porcentaje + "%") 
 ```
 
 Ademas observamos que no tenemos mas datos faltantes, visto en como los unicos valores del tipo float64 es average_daily_rate, el cual es un valor de punto flotante.
@@ -1735,4 +1736,8 @@ sns.kdeplot(data= hotelsdf, x = "average_daily_rate", hue= "is_canceled")
 
 ```python
 sns.countplot(data= hotelsdf, x="previous_cancellations_num",  hue= "is_canceled")
+```
+
+```python
+sns.countplot(data=hotelsdf, x = 'reserved_room_type',  hue= "is_canceled")
 ```
