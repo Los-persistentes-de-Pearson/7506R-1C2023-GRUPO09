@@ -774,7 +774,7 @@ Sin embargo, al dropearlos, el resto de nuestros valores son 0. Esto quiere deci
 Es por esto que decidimos eliminar la totalidad de la columna visto a que no nos aporta informacion.
 
 ```python
-hotelsdf.drop("company_id", axis=1, inplace=True)
+#hotelsdf.drop("previous_bookings_not_canceled_num", axis=1, inplace=True)
 ```
 
 ### previous booking cancellation number
