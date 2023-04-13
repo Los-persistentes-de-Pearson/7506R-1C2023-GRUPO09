@@ -101,8 +101,8 @@ Vamos a dividir las variables en cuantitativas y cualitativas.
 |     Nombre de la variable           |       Tipo      |      Descripcion         |
 | ----------------------------------- | --------------- | ------------------------ |  
 | average_daily_rate                  | Cuantitativa    | Promedio de la ganancia diaria, por habitacion                              |
-| adult_num                           | Cuantitativa    |           numero de adultos en la reserva              |
-| agent_id                            | Cualitativa     |                          |
+| adult_num                           | Cuantitativa    |           Numero de adultos en la reserva              |
+| agent_id                            | Cualitativa     | ID de la agencia de viaje quer                         |
 | arrival_month_day                   | Cuantitativa    |                          |
 | arrival_month                       | Cualitativa     |                          |
 | arrival_week_number                 | Cuantitativa    |                          |
