@@ -447,21 +447,7 @@ plt.xlabel('Numero de cambios')
 plt.ylabel(ylabel='Frecuencia')
 plt.title('Cantidad de cambios por reserva')
 ```
-#### Outliers
-
-```python
-
-```
-
-#### Ajustes de valor
-
-```python
-
-```
-
 ### children number 
-
-#### Valores estadisticos relevantes
 #### Grafica de distribucion
 
 ```python
@@ -536,6 +522,19 @@ Considerando que es un valor tanto mas alto que el resto, que es un unico caso y
 
 ```python
 hotelsdf.drop((hotelsdf[hotelsdf["children_num"] == 10].index.values),inplace=True)
+```
+
+Una vez ajustados los valores, nuestros valores toman la siguiente forma:
+
+```python
+eje_y = hotelsdf["children_num"].value_counts()
+eje_x = eje_y.index.tolist()
+sns.barplot(y = eje_y, x = eje_x, palette='Set2')
+plt.xlabel('Cantidad de ninos')
+plt.ylabel(ylabel='Frecuencia')
+plt.title('Numero de ninos por reserva')
+
+hotelsdf["children_num"].value_counts()
 ```
 
 ### days in the waiting list 
@@ -696,6 +695,12 @@ sns.boxplot(data=hotelsdf.lead_time)
 plt.xlabel("Cantidad de reservas")
 plt.ylabel("Cantidad de dias de anticipacion")
 plt.title("Boxplot dias de anticipacion de la reserva")
+plt.show()
+
+plt.hist(hotelsdf.lead_time)
+plt.title('Histograma dias de anticipacion de la reserva')
+plt.xlabel('Cantidad de dias')
+plt.ylabel('Frecuencia')
 plt.show()
 ```
 
