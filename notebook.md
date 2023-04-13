@@ -1589,34 +1589,6 @@ hotelsdf.drop(a_eliminar_con_quince_o_mas_dias.index, inplace = True)
 hotelsdf.reset_index()
 ```
 
-Intentamos hacer un calculo de distancia Mahalanobis pero debido a la cantidad de datos, nos generaba errores, por ello lo dejamos comentado.
-
-"MemoryError: Unable to allocate 26.7 GiB for an array with shape (59903, 59903) and data type float64"
-
-```python
-# #Calulo el vector de medias
-# vmedias=np.mean(hotelsdf[['weekend_nights_num','week_nights_num']])
-
-# #Calculo la diferencia entre las observaciones y el vector de medias
-# weekend_nights_dif = hotelsdf[['weekend_nights_num','week_nights_num']] - vmedias
-
-# #Calculo matriz de covarianza y su inversa
-# cov=hotelsdf[['weekend_nights_num','week_nights_num']].cov().values
-# inv_cov = np.linalg.inv(cov)
-
-# #Calculamos el cuadrado de la distancia de mahalanobis
-# mahal =np.dot( np.dot(weekend_nights_dif, inv_cov) , weekend_nights_dif.T)
-
-# hotelsdf['mahal_week_weekend_nights']=mahal.diagonal()
-```
-
-```python
-sns.countplot(data = hotelsdf, x='dias_totales', hue='is_canceled')
-```
-
-Nos dio lo esperado. No hay datos incosistentes en cuanto a su comparacion con el numero de noches de semana.
-
-
 ```python
 sns.countplot(data = hotelsdf, x='meal_type', hue='is_canceled')
 plt.title("Tipo de comida en la reserva por cancelacion")
@@ -1636,6 +1608,96 @@ plt.show()
 
 Los dias totales y la cantidad de tiempo previo desde la reserva hasta la fecha de llegada se distribuyen de manera homogenea. No se identifican outliers
 
+#### ADR y Tipo de cliente
+
+```python 
+boxplot = hotelsdf.boxplot(column='average_daily_rate', by='customer_type')
+plt.title('Precio diario promedio por tipo de cliente')
+plt.suptitle("")
+plt.xlabel("Tipo de cliente")
+plt.ylabel("Precio diario promedio")
+```
+
+Se puede observar en las graficas que hay valores que se escapan de lo esperado cuando se hace la medicion en relacion al tipo de cliente, al contabilizar estas observaciones concluimos que son pocas y por lo tanto, eliminamos dichos registros que representan una desviacion. Tambien hay que considerar que la media de todos los registros es de aproximadamente 100 (en la unidad correspondiente) y por lo tanto la desviacion estandar es muy chica mostrando algunos valores como outliers a pesar de haber pasado por un tratamiento previo 
+
+```python
+#obtenemos los indices de los outliers
+indices_outliers = hotelsdf[(hotelsdf['customer_type'] == 'Group') & (hotelsdf['average_daily_rate'] > 200)].index
+hotelsdf.drop(indices_outliers, inplace = True)
+indices_outliers2 = hotelsdf[(hotelsdf['customer_type'] == 'Contract') & (hotelsdf['average_daily_rate'] > 200)].index
+hotelsdf.drop(indices_outliers2, inplace = True)
+hotelsdf.reset_index()
+```
+
+Graficamos nuevamente para verificar que dicho tratamiento no generara una desviacion considerable en el analisis
+
+ ```python 
+boxplot = hotelsdf.boxplot(column='average_daily_rate', by='customer_type')
+plt.title('Precio diario promedio por tipo de cliente')
+plt.suptitle("")
+plt.xlabel("Tipo de cliente")
+plt.ylabel("Precio diario promedio")
+```
+
+### ADR y Tipo de habitacion
+
+```python 
+boxplot = hotelsdf.boxplot(column='average_daily_rate', by='assigned_room_type')
+plt.title('Precio diario promedio por tipo de habitacion')
+plt.suptitle("")
+plt.xlabel("Tipo de cliente")
+plt.ylabel("Precio diario promedio")
+```
+
+Del grafico anterior es claro que aparecen outliers en el precio promedio diario de habitacion cuando este es agrupado por tipo de habitacion. Se identefican los conjuntos de datos que deben ser eliminados o tratados. 
+
+```python 
+indices_tipo_k = hotelsdf[(hotelsdf['assigned_room_type'] == 'K') & (hotelsdf['average_daily_rate'] > 160)].index
+indices_tipo_i = hotelsdf[(hotelsdf['assigned_room_type'] == 'I') & (hotelsdf['average_daily_rate'] > 210)].index
+indices_tipo_b = hotelsdf[(hotelsdf['assigned_room_type'] == 'B') & (hotelsdf['average_daily_rate'] < 30)].index
+indices_tipo_b2 = hotelsdf[(hotelsdf['assigned_room_type'] == 'B') & (hotelsdf['average_daily_rate'] > 210)].index
+print(f"El total de los datos a eliminar es {len(indices_tipo_k ) + len(indices_tipo_b) + len(indices_tipo_b2) + len(indices_tipo_i)}")
+```
+```python
+hotelsdf.drop(indices_tipo_k, inplace=True)
+hotelsdf.drop(indices_tipo_i, inplace=True)
+hotelsdf.drop(indices_tipo_b, inplace=True)
+hotelsdf.drop(indices_tipo_b2, inplace=True)
+hotelsdf.reset_index()
+```
+
+Mostramos nuevamente la distribucion de las variables alteradas
+
+```python 
+boxplot = hotelsdf.boxplot(column='average_daily_rate', by='assigned_room_type')
+plt.title('Precio diario promedio por tipo de habitacion')
+plt.suptitle("")
+plt.xlabel("Tipo de cliente")
+plt.ylabel("Precio diario promedio")
+```
+
+### Adult number, children number y babies number
+
+Realizamos un grafico con la intencion de detectar outliers 
+
+```python
+#Visualizacion 3D
+
+fig = plt.figure(figsize=(12, 8))
+ax = fig.add_subplot(projection='3d')
+x1 = hotelsdf.adult_num
+y1 = hotelsdf.children_num
+z1 = hotelsdf.babies_num
+ax.scatter(x1,y1,z1, label = 'No cancelados')
+ax.set_xlabel('Adultos')
+ax.set_ylabel('Niños')
+ax.set_zlabel('Bebes')
+ax.elev = 5  
+ax.azim = -75
+plt.title('Comparacion adultos, niños y bebes')
+```
+
+A partir del grafico anterior no se puede hacer una observacion relevante en la deteccion de outliers
 
 ## Relacion contra el target: is_canceled
 
