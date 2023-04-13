@@ -760,21 +760,16 @@ print(str((len(hotelsdf[hotelsdf["previous_bookings_not_canceled_num"] > 0])*100
 Considerando el bajo volumen que representan, decidimos dropearlos
 
 ```python
-#hotelsdf.drop(hotelsdf[hotelsdf["previous_bookings_not_canceled_num"] > 0].index, inplace = True)
-#hotelsdf.reset_index()
-
-print(990*"DECIDIR SI BORRAR TODO")
-```
-
-```python
-print(990*"DECIDIR SI BORRAR TODO")
+hotelsdf.drop(hotelsdf[hotelsdf["previous_bookings_not_canceled_num"] > 0].index, inplace = True)
+hotelsdf.reset_index()
 ```
 
 Sin embargo, al dropearlos, el resto de nuestros valores son 0. Esto quiere decir que todo el resto de las columnas presentan los mismos valores. \
 Es por esto que decidimos eliminar la totalidad de la columna visto a que no nos aporta informacion.
 
 ```python
-#hotelsdf.drop("previous_bookings_not_canceled_num", axis=1, inplace=True)
+hotelsdf.drop("previous_bookings_not_canceled_num", axis=1, inplace=True)
+hotelsdf.reset_index()
 ```
 
 ### previous booking cancellation number
@@ -1610,7 +1605,7 @@ Los dias totales y la cantidad de tiempo previo desde la reserva hasta la fecha 
 
 #### ADR y Tipo de cliente
 
-```python 
+```python
 boxplot = hotelsdf.boxplot(column='average_daily_rate', by='customer_type')
 plt.title('Precio diario promedio por tipo de cliente')
 plt.suptitle("")
@@ -1651,7 +1646,7 @@ plt.ylabel("Precio diario promedio")
 
 Del grafico anterior es claro que aparecen outliers en el precio promedio diario de habitacion cuando este es agrupado por tipo de habitacion. Se identefican los conjuntos de datos que deben ser eliminados o tratados. 
 
-```python 
+```python
 indices_tipo_k = hotelsdf[(hotelsdf['assigned_room_type'] == 'K') & (hotelsdf['average_daily_rate'] > 160)].index
 indices_tipo_i = hotelsdf[(hotelsdf['assigned_room_type'] == 'I') & (hotelsdf['average_daily_rate'] > 210)].index
 indices_tipo_b = hotelsdf[(hotelsdf['assigned_room_type'] == 'B') & (hotelsdf['average_daily_rate'] < 30)].index
@@ -1668,7 +1663,7 @@ hotelsdf.reset_index()
 
 Mostramos nuevamente la distribucion de las variables alteradas
 
-```python 
+```python
 boxplot = hotelsdf.boxplot(column='average_daily_rate', by='assigned_room_type')
 plt.title('Precio diario promedio por tipo de habitacion')
 plt.suptitle("")
