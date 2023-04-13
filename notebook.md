@@ -1726,18 +1726,92 @@ A partir del grafico anterior no se puede hacer una observacion relevante en la 
 
 ## Relacion contra el target: is_canceled
 
+
+Vamos a graficar algunas variables haciendo foco en si cancelaron o no. Estas fueron elegidas en base a nuestros analisis multi y univariados y segun el significado que tienen estas variables en el contexto del problema. Optamos por: "lead_time", "average_daily_rate", "previous_cancellations_num", "dias_totales" y "reserved_room_type"
+
+
+### Lead time
+
 ```python
 sns.kdeplot(data= hotelsdf, x = "lead_time", hue= "is_canceled")
+plt.title("Densidad de registros de lead_time s haciendo foco en is_canceled")
+plt.xlabel("Lead time")
+plt.ylabel("Densidad")
 ```
+
+Estas graficas podrian sugerir que reservas realizadas con mayor anticipacion tendrian mas probabilidad de ser canceladas.
+
+
+### previous_cancellations_num
+
+```python
+#TODO CAMBIARRRRR
+hotelsdf_filtratres = hotelsdf[ hotelsdf["previous_cancellations_num"] <2]
+sns.countplot(data= hotelsdf_filtratres, x="previous_cancellations_num",  hue= "is_canceled")
+plt.title("Cantidad de reservas respecto a la cantidad de cancelaciones previas")
+plt.xlabel("Cancelaciones previas")
+plt.ylabel("Cantidad de reservas")
+```
+
+Sin embargo si hacemos zoom en las reservas con una cancelacion previa...
+
+```python
+hotelsdf_con_una_cancelaciones = hotelsdf[ hotelsdf["previous_cancellations_num"] ==1]
+sns.countplot(data= hotelsdf_con_una_cancelaciones, x="previous_cancellations_num",  hue= "is_canceled")
+plt.title("Cantidad de reservas para una cancelacion previa")
+plt.xlabel("Cancelaciones previas")
+plt.ylabel("Cantidad de reservas")
+```
+
+```python
+reservas_con_una_cancelacion = hotelsdf_con_una_cancelaciones.shape[0]
+total_reservas_cancelaciones_prev = hotelsdf["previous_cancellations_num"].shape[0]
+print("las reservas con 1 cancelacion previa represntan un ", reservas_con_una_cancelacion*100/total_reservas_cancelaciones_prev,"%" )
+```
+
+Observando la grafica vemos que existe un salto muy importante en la cantidad de reservas canceladas cuando la cantidad de reservas canceladas anteriormente es 1. Si bien esta variable parece tener una influencia muy importante sobre el valor ocurre con un numero muy pequeño de registros (un 6%)
+
+
+### Average_daily_rate
 
 ```python
 sns.kdeplot(data= hotelsdf, x = "average_daily_rate", hue= "is_canceled")
+plt.title("Densidad de registros del precio promedio diario por hab haciendo foco en la cancelacion")
+plt.xlabel("Precio promedio diario por hab")
+plt.ylabel("Densidad de registros")
 ```
 
+Se puede ver que las garficas de ADR haciendo foco en is_cancelled se comportan de manera similiar para todos los valores. No podemos estabecer que exista una influencia directa de esta variable sobre el target.
+
+
+### Dias Totales
+
 ```python
-sns.countplot(data= hotelsdf, x="previous_cancellations_num",  hue= "is_canceled")
+sns.countplot(data = hotelsdf, x = 'dias_totales', palette= 'Set2', hue = "is_canceled")
+plt.title('Cantidad de dias de estadia')
+plt.xlabel('Dias de estadia')
+plt.ylabel('Frecuencia')
+plt.title("Cantidad de reservas por dias de estadia")
 ```
+
+Podemos ver que no existe una relacion directa entre la cantidad de dias de estadia y si la reserva esta cancelada o no.
+
+
+### reserved_room_type
 
 ```python
 sns.countplot(data=hotelsdf, x = 'reserved_room_type',  hue= "is_canceled")
+plt.title('Cantidad de reservas segun el tipo de cuarto haciendo foco en la cancelacion')
+plt.xlabel('Tipo de habitacion')
+plt.ylabel("Cantidad de reservas por dias de estadia")
+plt.show()
 ```
+
+Podemos ver que no existe una relacion directa entre el tipo de habitacion elegido y si la reserva esta cancelada o no.
+
+
+## Conclusion
+
+
+Como conclusión de esta primera etapa podríamos decir que la única variable que parece tener cierta influencia sobre el target es "lead_time".
+Para el resto de las variables, no podemos afirmar que existe una correlación directa entre ellas y el target. Esto se puede observar en sus graficas de distribucion en las cuales la cantidad de reservas canceladas es practicamente igual a las no canceladas para casi la totalidad del rango.
