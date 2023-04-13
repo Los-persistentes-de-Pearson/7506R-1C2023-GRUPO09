@@ -95,7 +95,7 @@ Por otro lado, podemos observar que tipo de dato almacena cada columna y cuales 
 hotelsdf.info()
 ```
 
-# Analisis de variables
+# Analisis univariado
 Vamos a dividir las variables en cuantitativas y cualitativas.
 
 |     Nombre de la variable           |       Tipo      |      Descripcion         |
