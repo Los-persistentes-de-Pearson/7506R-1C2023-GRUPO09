@@ -15,8 +15,8 @@ jupyter:
 
 En este jupyter notebook vamos a explorar un conjunto de datos sobre reservas de hoteles y tratar de hallar un modelo que nos permita predecir si la reserva va a ser cancelada
 
-# Preparacion del ambiente de trabajo
-Importamos todas las librerias que vamos a usar
+# Preparación del ambiente de trabajo
+Importamos todas las librerías que vamos a usar
 
 
 ```python
@@ -100,43 +100,43 @@ Vamos a dividir las variables en cuantitativas y cualitativas.
 
 |     Nombre de la variable           |       Tipo      |      Descripcion         |
 | ----------------------------------- | --------------- | ------------------------ |  
-| average_daily_rate                  | Cuantitativa    | Promedio de la ganancia diaria, por habitacion                              |
+| average_daily_rate                  | Cuantitativa    | Promedio de la ganancia diaria, por habitación                              |
 | adult_num                           | Cuantitativa    |           Numero de adultos en la reserva              |
-| agent_id                            | Cualitativa     | ID de la agencia de viaje quer                         |
-| arrival_month_day                   | Cuantitativa    |                          |
-| arrival_month                       | Cualitativa     |                          |
-| arrival_week_number                 | Cuantitativa    |                          |
-| arrival_year                        | Cuantitativa    |                          |
-| assigned_room_type                  | Cualitativa     |                          |
-| babies_num                          | Cuantitativa    |                          |
-| booking_changes_num                 | Cuantitativa    |                          |
-| booking_id                          | Cualitativa     |                          |
-| children_num                        | Cuantitativa    |                          |
-| company_id                          | Cualitativa     |                          |
-| country                             | Cualitativa     |                          |
-| customer_type                       | Cualitativa     |                          |
-| days_in_waiting_list                | Cuantitativa    |                          |
-| deposit_type                        | Cualitativa     |                          |
-| distribution_channel                | Cualitativa     |                          |
-| hotel_name                          | Cualitativa     |                          |
-| is_canceled                         | Cualitativa     |                          |
-| is_repeated_guest                   | Cualitativa     |                          |
-| lead_time                           | Cuantitativa    |                          |
-| market_segment_type                 | Cualitativa     |                          |
-| meal_type                           | Cualitativa     |                          |
-| previous_bookings_not_canceled_num  | Cuantitativa    |                          |
-| previous_cancellations_num          | Cuantitativa    |                          |
-| required_car_parking_spaces_num     | Cuantitativa    |                          |
-| reserved_room_type                  | Cualitativa     |                          |
-| weekend_nights_num                  | Cuantitativa    |                          |
-| week_nights_num                     | Cuantitativa    |                          |
-| special_requests_num                | Cuantitativa    |                          |
+| agent_id                            | Cualitativa     | ID de la agencia de viaje que hizo la reserva                         |
+| arrival_month_day                   | Cuantitativa    | Día del mes que llego                         |
+| arrival_month                       | Cualitativa     |  Mes de llegada                        |
+| arrival_week_number                 | Cuantitativa    |   Numero de la semana de llegada                       |
+| arrival_year                        | Cuantitativa    |    Año de llegada                      |
+| assigned_room_type                  | Cualitativa     |     Tipo de cuarto                    |
+| babies_num                          | Cuantitativa    |      Cantidad de bebes                     |
+| booking_changes_num                 | Cuantitativa    |      Cantidad de cambios a la reserva hasta el día de llegada                    |
+| booking_id                          | Cualitativa     |        ID de la reserva                  |
+| children_num                        | Cuantitativa    |         Cantidad de niños                 |
+| company_id                          | Cualitativa     |         ID  de la compañía que hizo la reserva                 |
+| country                             | Cualitativa     |        País de origen                  |
+| customer_type                       | Cualitativa     |         Tipos de reserva                 |
+| days_in_waiting_list                | Cuantitativa    |         Cantidad de días en la lista de espera                 |
+| deposit_type                        | Cualitativa     |          Tipo de deposito para la reserva                |
+| distribution_channel                | Cualitativa     |  Medio por el cual se hizo la reserva                        |
+| hotel_name                          | Cualitativa     |  Nombre del hotel                        |
+| is_canceled                         | Cualitativa     |   Si la reserva fue cancelada o no                       |
+| is_repeated_guest                   | Cualitativa     |    Si el invitado ya había ido al hotel                      |
+| lead_time                           | Cuantitativa    |   Cantidad de días entre el día que se realizo la reserva y el día de llegada                       |
+| market_segment_type                 | Cualitativa     |       Categoría de mercado                   |
+| meal_type                           | Cualitativa     |       Tipo de comida pedida                   |
+| previous_bookings_not_canceled_num  | Cuantitativa    |       Cantidad de reservas previas no canceladas                   |
+| previous_cancellations_num          | Cuantitativa    |       Cantidad de reservas canceladas                   |
+| required_car_parking_spaces_num     | Cuantitativa    |       Cantidad de lugares de estacionamiento pedido                  |
+| reserved_room_type                  | Cualitativa     |       Tipo de cuarto reservado                   |
+| weekend_nights_num                  | Cuantitativa    |        Cantidad de noches de fin de semana que estuvo                  |
+| week_nights_num                     | Cuantitativa    |         Cantidad de noches de semana que estuvo                 |
+| special_requests_num                | Cuantitativa    |         Cantidad de pedidos especiales hechos                 |
 
 
 
 ## Cuantitativas
 
-Se trabaja inicialmente sobre las variables que han sido identificadas como cuantitativas, se grafican y se intenta realizar la identificación de outliers, por otro lado, aquellas que de un analisis exploratorio previo arrojaron la existencia de *nulls/nans* se realiza algún tipo de reemplazo por el valor más conveniente
+Se trabaja inicialmente sobre las variables que han sido identificadas como cuantitativas, se grafican y se intenta realizar la identificación de outliers, por otro lado, aquellas que de un análisis exploratorio previo arrojaron la existencia de *nulls/nans* se realiza algún tipo de reemplazo por el valor más conveniente
 
 Creamos una lista con todas las variables cuantitativas
 
@@ -162,19 +162,19 @@ cuantitativas = [
 ```
 ### Adult number 
 
-Realizamos un analisis sobre la variable adult number
+Realizamos un análisis sobre la variable adult number
 
-#### Valores estadisticos relevantes 
+#### Valores estadísticos relevantes 
 
 ```python
 hotelsdf.adult_num.describe()
 ```
 
-Dentro de los parametros estadisticos representativos observamos un minimo de 0 adultos y un maximo de 55, ambos representando registros con valores anormales. 
+Dentro de los parámetros estadísticos representativos observamos un mínimo de 0 adultos y un máximo de 55, ambos representando registros con valores anormales. 
 
-#### Grafica de distribucion
+#### Gráfica de distribución
 
-Para mas informacion sobre la frecuencia de los valores se grafican las frecuencias
+Para mas información sobre la frecuencia de los valores se grafican las frecuencias
 
 ```python
 sns.countplot(data = hotelsdf, x = 'adult_num', palette= 'Set2')
@@ -203,7 +203,7 @@ Existen 41 registros con valores superiores a 3, los cuales representan outliers
 
 #### Ajustes de valor
 
-Eliminamos dichos valores que representan un porcentaje infimo y pueden llegar a desviar las futuras predicciones
+Eliminamos dichos valores que representan un porcentaje ínfimo y pueden llegar a desviar las futuras predicciones
 
 ```python
 hotelsdf.drop(a_eliminar_con_cero.index, inplace = True)
@@ -212,7 +212,7 @@ hotelsdf.reset_index(drop=True)
 hotelsdf[(hotelsdf["adult_num"] > 4) | hotelsdf['adult_num'] == 0]
 ```
 
-Por otro lado realizamos de nuevo las graficas de la distribucion para verificar que no cambie significativamente
+Por otro lado realizamos de nuevo las gráficas de la distribución para verificar que no cambie significativamente
 
 ```python
 sns.countplot(data = hotelsdf, x = 'adult_num', palette= 'Set2')
@@ -229,11 +229,11 @@ plt.ylabel('Frecuencia')
 hotelsdf["arrival_month_day"].describe()
 ```
 
-Los parametros estadisticos relevantes no muestran por si solos valores irregulares en el analisis
+Los parámetros estadísticos relevantes no muestran por si solos valores irregulares en el análisis
 
-#### Grafica de distribucion
+#### Gráfica de distribución
 
-Una grafica puede llegar a esclarecer o identificar valores fuera de lo comun dentro del dataframe
+Una gráfica puede llegar a esclarecer o identificar valores fuera de lo común dentro del dataframe
 
 ```python
 plt.figure(figsize=(8,4))
@@ -243,7 +243,7 @@ plt.xlabel(xlabel = 'Dia de llegada')
 plt.ylabel(ylabel = 'Frecuencia')
 ```
 
-El analisis univariado de arrival month day no arroja informacion relevante, pero por otro lado, muestra que la variable no presenta ningun valor inesperado y desmuestra que no hay un dia de predilecto del mes
+El análisis uní variado de arrival month day no arroja información relevante, pero por otro lado, muestra que la variable no presenta ningún valor inesperado y desmuestra que no hay un día de predilecto del mes
 
 ```python
 plt.xlabel(xlabel = 'Dia de llegada')
@@ -251,7 +251,7 @@ sns.boxplot(data = hotelsdf['arrival_month_day'])
 plt.title("Dia de llegada del mes")
 plt.ylabel(ylabel = 'Frecuencia')
 ```
-Por lado un boxplot afirma las concluciones derivadas del grafico anterior 
+Por lado un boxplot afirma las concluciones derivadas del gráfico anterior 
 
 
 ### arrival week number 
@@ -261,9 +261,9 @@ Por lado un boxplot afirma las concluciones derivadas del grafico anterior
 ```python
 hotelsdf.arrival_week_number.describe()
 ```
-Un vistazo inicial a los parametros estadisticos no muestra inconsistencias en los registros
+Un vistazo inicial a los parámetros estadisticos no muestra inconsistencias en los registros
 
-#### Grafica de distribucion
+#### Gráfica de distribución
 
 ```python
 plt.figure(figsize=(15,5))
@@ -272,7 +272,7 @@ plt.title('Semanas del año')
 plt.xlabel('Numero de la semana')
 plt.ylabel('Frecuencia')
 ```
-De la grafica concluimos que no existen outliers entre los registros 
+De la gráfica concluimos que no existen outliers entre los registros 
 
 ### arrival year 
 
@@ -282,7 +282,7 @@ De la grafica concluimos que no existen outliers entre los registros
 hotelsdf.arrival_year.describe()
 ```
 
-#### Grafica de distribucion
+#### Gráfica de distribución
 
 ```python
 sns.countplot(data = hotelsdf, x = 'arrival_year')
@@ -302,7 +302,7 @@ Realizamos un analisis sobre la variable average daily rate
 hotelsdf.average_daily_rate.describe()
 ```
 
-#### Grafica de distribucion
+#### Grafica de distribución
 
 ```python
 sns.kdeplot(data = hotelsdf.average_daily_rate)
@@ -381,7 +381,7 @@ cantidad_a_eliminar = desviacion_uno.average_daily_rate.count() + desviacion_dos
 print("Vamos a eliminar " + str(cantidad_a_eliminar)  + " valores ya son valores que tienen una desviacion estandar muy marcada con  respecto al resto de los valores. Ademas, estos valores representan un " +  str(cantidad_a_eliminar/total_valores) + " porcentaje del total")
 ```
 
-Graficamos nuevamente con el proposito de verificar la nueva distribucion adquirida luego de la modificacion 
+Graficamos nuevamente con el proposito de verificar la nueva distribución adquirida luego de la modificacion 
 
 
 
@@ -407,7 +407,7 @@ hotelsdf.reset_index(drop=True)
 hotelsdf.babies_num.describe()
 ```
 
-#### Grafica de distribucion
+#### Grafica de distribución
 
 ```python
 eje_y = hotelsdf.babies_num.value_counts()
@@ -439,7 +439,7 @@ hotelsdf.reset_index(drop=True)
 hotelsdf.booking_changes_num.describe()
 ```
 
-#### Grafica de distribucion
+#### Grafica de distribución
 
 ```python
 eje_y = hotelsdf.booking_changes_num.value_counts()
@@ -450,7 +450,7 @@ plt.ylabel(ylabel='Frecuencia')
 plt.title('Cantidad de cambios por reserva')
 ```
 ### children number 
-#### Grafica de distribucion
+#### Grafica de distribución
 
 ```python
 hotelsdf["children_num"].describe()
@@ -567,7 +567,7 @@ hotelsdf.days_in_waiting_list.isna().sum()
 No tiene valores vacios
 
 
-#### Grafica de distribucion
+#### Grafica de distribución
 
 ```python
 print("Los valores que toma la variable son los siguientes:")
@@ -582,7 +582,7 @@ hotelsdf["days_in_waiting_list"].value_counts()
 Observamos que la gran mayoria de la gente estuvo 0 dias en la lista de espera. 
 
 
-Vamos a graficar los valores mayores a 0 para poder apreciar la distribucion de los otros datos
+Vamos a graficar los valores mayores a 0 para poder apreciar la distribución de los otros datos
 
 ```python
 mayor0=hotelsdf[hotelsdf["days_in_waiting_list"] > 0]
@@ -638,7 +638,7 @@ hotelsdf.days_in_waiting_list.isna().sum()
 No tiene valores faltantes
 
 
-#### Grafica de distribucion
+#### Grafica de distribución
 
 
 Vamos a analizar la frecuencia de los distintos valores que lead time puede tomar
@@ -653,7 +653,7 @@ print("Y toma dichos valores con la siguiente frecuencia")
 hotelsdf["lead_time"].value_counts()
 ```
 
-Vamos a graficarlos para ver su distribucion
+Vamos a graficarlos para ver su distribución
 
 ```python
 plt.hist(hotelsdf.lead_time)
@@ -725,7 +725,7 @@ Esta variable representa la cantidad de reservasa que no fueron canceladas por e
 hotelsdf.previous_bookings_not_canceled_num.isna().sum()
 ```
 
-#### Grafica de distribucion
+#### Grafica de distribución
 
 
 ```python
@@ -738,7 +738,7 @@ print("Y toma dichos valores con la siguiente frecuencia")
 hotelsdf["previous_bookings_not_canceled_num"].value_counts()
 ```
 
-Vamos a graficar los valores mayores a 0 para poder apreciar la distribucion de los otros datos
+Vamos a graficar los valores mayores a 0 para poder apreciar la distribución de los otros datos
 
 ```python
 mayor0=hotelsdf[hotelsdf["previous_bookings_not_canceled_num"] > 0]
@@ -799,7 +799,7 @@ Esta variable representa la cantidad de reservasa que si fueron canceladas por e
 hotelsdf.previous_cancellations_num.isna().sum()
 ```
 
-#### Grafica de distribucion
+#### Grafica de distribución
 ```python
 print("Los valores que toma la variable son los siguientes:")
 daysInWaitingListValores = (hotelsdf["previous_cancellations_num"].unique())
@@ -816,7 +816,7 @@ plt.xlabel('Cantidad de reservas')
 plt.show()
 ```
 
-Del grafico y la distribucion previa se observa que la gran mayoria de la gente que cancelo, cancelo 1 vez.
+Del grafico y la distribución previa se observa que la gran mayoria de la gente que cancelo, cancelo 1 vez.
 
 
 #### Outliers
@@ -875,7 +875,7 @@ hotelsdf.required_car_parking_spaces_num.describe()
 print("La cantidad de valores nulos/faltantes es", hotelsdf.required_car_parking_spaces_num.isna().sum())
 ```
 
-#### Grafica de distribucion
+#### Grafica de distribución
 
 ```python
 sns.countplot(data = hotelsdf, x='required_car_parking_spaces_num')
@@ -942,7 +942,7 @@ hotelsdf.special_requests_num.describe()
 print("La cantidad de valores nulos/faltantes es", hotelsdf.special_requests_num.isna().sum())
 ```
 
-#### Grafica de distribucion
+#### Grafica de distribución
 
 ```python
 sns.countplot(data = hotelsdf, x='special_requests_num', palette='Set1')
@@ -982,7 +982,7 @@ media_special_requests = round(hotelsdf.special_requests_num.mean())
 hotelsdf.loc[hotelsdf['special_requests_num'] >= 4, 'special_requests_num'] = media_special_requests
 ```
 
-Graficamos nuevamente la distribucion de la variable para validar los cambios realizados 
+Graficamos nuevamente la distribución de la variable para validar los cambios realizados 
 
 ```python
 sns.countplot(data = hotelsdf, x='special_requests_num', palette='Set1')
@@ -1006,7 +1006,7 @@ hotelsdf.weekend_nights_num.describe()
 print("La cantidad de valores nulos/faltantes es", hotelsdf.weekend_nights_num.isna().sum())
 ```
 
-#### Grafica de distribucion
+#### Grafica de distribución
 
 ```python
 sns.countplot(data = hotelsdf, x='weekend_nights_num', palette='Set1')
@@ -1089,7 +1089,7 @@ hotelsdf.week_nights_num.describe()
 print("La cantidad de valores nulos/faltantes es", hotelsdf.week_nights_num.isna().sum())
 ```
 
-#### Grafica de distribucion
+#### Grafica de distribución
 
 ```python
 sns.countplot(data = hotelsdf, x='week_nights_num', palette='Set1')
@@ -1194,7 +1194,7 @@ hotelsdf[hotelsdf.agent_id.isnull()]
 hotelsdf['agent_id'] = hotelsdf['agent_id'].astype(int)
 ```
 
-#### Grafica de distribucion
+#### Grafica de distribución
 
 ```python
 cantidad = len(hotelsdf['agent_id'].value_counts().index.tolist())
@@ -1224,7 +1224,7 @@ months = arrival_month_valores
 sorted(months, key=month_lookup.index)
 ```
 
-#### Grafica de la distribucion
+#### Grafica de la distribución
 
 ```python
 plt.title('Meses de llegada')
@@ -1248,7 +1248,7 @@ print(ordenado)
 
 Realizamos un grafico de la frecuencia de los tipos de habitaciones asignadas 
 
-#### Grafica de distribucion
+#### Grafica de distribución
 ```python
 sns.countplot(data = hotelsdf, x='assigned_room_type', palette='Set2')
 plt.title('Tipos de habitacion asignada')
@@ -1267,7 +1267,7 @@ country = hotelsdf['country'].unique().tolist()
 print(country) 
 ```
 
-#### Grafica de distribucion
+#### Grafica de distribución
 
 ```python
 data = hotelsdf.country.value_counts().sort_values(ascending=False).head(20)
@@ -1309,7 +1309,7 @@ customer_typeValores.sort()
 print(customer_typeValores)
 ```
 
-#### Grafica de distribucion
+#### Grafica de distribución
 
 ```python
 sns.countplot(data = hotelsdf, x = 'customer_type', palette='Set2')
@@ -1329,7 +1329,7 @@ deposit_typeValores.sort()
 print(deposit_typeValores)
 ```
 
-#### Grafica de distribucion
+#### Grafica de distribución
 ```python
 sns.countplot(data = hotelsdf, x = 'deposit_type', palette='Set2')
 plt.title("Tipo de deposito en las reservas")
@@ -1349,7 +1349,7 @@ distribution_channelValores.sort()
 print(distribution_channelValores)
 ```
 
-#### Grafica de distribucion
+#### Grafica de distribución
 ```python
 sns.countplot(data = hotelsdf, x = 'hotel_name', palette='Set2')
 plt.title("Nombre de los hoteles")
@@ -1369,7 +1369,7 @@ hotel_nameValores.sort()
 print(hotel_nameValores)
 ```
 
-#### Grafica de distribucion
+#### Grafica de distribución
 ```python
 sns.countplot(data = hotelsdf, x = 'hotel_name', palette='Set2')
 plt.title("Nombre de los hoteles")
@@ -1389,10 +1389,10 @@ is_canceledValores.sort()
 print(is_canceledValores)
 ```
 
-#### Grafica de distribucion
+#### Grafica de distribución
 La variable a predecir, dicha variable tiene valores 0 y 1, siendo 0 no cancelado y 1 las reservas canceladas
 
-#### Grafica de distribucion
+#### Grafica de distribución
 ```python
 para_ver = pd.DataFrame()
 para_ver['is_canceled'] = hotelsdf['is_canceled'].map({1: 'Cancelado', 0: 'No cancelado'})
@@ -1413,7 +1413,7 @@ is_repeated_guestValores.sort()
 print(is_repeated_guestValores)
 ```
 
-#### Grafica de distribucion
+#### Grafica de distribución
 
 ```python
 para_ver['is_repeated_guest'] = hotelsdf['is_repeated_guest'].map({1: 'Si', 0: 'No'})
@@ -1438,8 +1438,8 @@ market_segment_typeValores.sort()
 print(market_segment_typeValores)
 ```
 
-#### Grafica de distribucion
-#### Grafica de distribucion
+#### Grafica de distribución
+#### Grafica de distribución
 
 ```python
 plt.xticks(rotation=30)
@@ -1459,7 +1459,7 @@ meal_typeValores.sort()
 print(meal_typeValores)
 ```
 
-#### Grafica de distribucion
+#### Grafica de distribución
 
 ```python
 sns.countplot(data=hotelsdf, x = 'meal_type', palette='Set2')
@@ -1478,7 +1478,7 @@ reserved_room_typeValores.sort()
 print(reserved_room_typeValores)
 ```
 
-#### Grafica de distribucion
+#### Grafica de distribución
 
 ```python
 sns.countplot(data=hotelsdf, x = 'reserved_room_type')
@@ -1621,7 +1621,7 @@ plt.xlabel("Tipo de comida")
 plt.ylabel("Frecuencia")
 ```
 
-Una vez analizada la variable contra el target podemos decir que la misma no proporciona suficiente informacion para el analisis y por lo tanto descartamos la misma para descongestionarla cantidad de variables a usar en el analisis futuro
+Una vez analizada la variable contra el target podemos decir que la misma no proporciona suficiente información para el análisis y por lo tanto descartamos la misma para descongestionarla cantidad de variables a usar en el análisis futuro
 
 #### Dias_totales vs Lead_time
 
@@ -1631,7 +1631,7 @@ plt.title('Dispersograma dias totales lead time')
 plt.show()
 ```
 
-Los dias totales y la cantidad de tiempo previo desde la reserva hasta la fecha de llegada se distribuyen de manera homogenea. No se identifican outliers
+Los días totales y la cantidad de tiempo previo desde la reserva hasta la fecha de llegada se distribuyen de manera homogénea. No se identifican outliers
 
 #### ADR y Tipo de cliente
 
@@ -1643,7 +1643,7 @@ plt.xlabel("Tipo de cliente")
 plt.ylabel("Precio diario promedio")
 ```
 
-Se puede observar en las graficas que hay valores que se escapan de lo esperado cuando se hace la medicion en relacion al tipo de cliente, al contabilizar estas observaciones concluimos que son pocas y por lo tanto, eliminamos dichos registros que representan una desviacion. Tambien hay que considerar que la media de todos los registros es de aproximadamente 100 (en la unidad correspondiente) y por lo tanto la desviacion estandar es muy chica mostrando algunos valores como outliers a pesar de haber pasado por un tratamiento previo 
+Se puede observar en las gráficas que hay valores que se escapan de lo esperado cuando se hace la medición en relación al tipo de cliente, al contabilizar estas observaciones concluimos que son pocas y por lo tanto, eliminamos dichos registros que representan una desviación. También hay que considerar que la media de todos los registros es de aproximadamente 100 (en la unidad correspondiente) y por lo tanto la desviación estándar es muy chica mostrando algunos valores como outliers a pesar de haber pasado por un tratamiento previo 
 
 ```python
 #obtenemos los indices de los outliers
@@ -1654,7 +1654,7 @@ hotelsdf.drop(indices_outliers2, inplace = True)
 hotelsdf.reset_index(drop=True)
 ```
 
-Graficamos nuevamente para verificar que dicho tratamiento no generara una desviacion considerable en el analisis
+Graficamos nuevamente para verificar que dicho tratamiento no generara una desviación considerable en el análisis
 
  ```python 
 boxplot = hotelsdf.boxplot(column='average_daily_rate', by='customer_type')
@@ -1674,7 +1674,7 @@ plt.xlabel("Tipo de cliente")
 plt.ylabel("Precio diario promedio")
 ```
 
-Del grafico anterior es claro que aparecen outliers en el precio promedio diario de habitacion cuando este es agrupado por tipo de habitacion. Se identefican los conjuntos de datos que deben ser eliminados o tratados. 
+Del gráfico anterior es claro que aparecen outliers en el precio promedio diario de habitación cuando este es agrupado por tipo de habitación. Se identifican los conjuntos de datos que deben ser eliminados o tratados. 
 
 ```python
 indices_tipo_k = hotelsdf[(hotelsdf['assigned_room_type'] == 'K') & (hotelsdf['average_daily_rate'] > 160)].index
@@ -1691,7 +1691,7 @@ hotelsdf.drop(indices_tipo_b2, inplace=True)
 hotelsdf.reset_index(drop=True)
 ```
 
-Mostramos nuevamente la distribucion de las variables alteradas
+Mostramos nuevamente la distribución de las variables alteradas
 
 ```python
 boxplot = hotelsdf.boxplot(column='average_daily_rate', by='assigned_room_type')
@@ -1724,7 +1724,7 @@ plt.title('Comparacion adultos, niños y bebes')
 
 A partir del grafico anterior no se puede hacer una observacion relevante en la deteccion de outliers
 
-## Relacion contra el target: is_canceled
+## Relación contra el target: is_canceled
 
 
 Vamos a graficar algunas variables haciendo foco en si cancelaron o no. Estas fueron elegidas en base a nuestros analisis multi y univariados y segun el significado que tienen estas variables en el contexto del problema. Optamos por: "lead_time", "average_daily_rate", "previous_cancellations_num", "dias_totales" y "reserved_room_type"
@@ -1814,4 +1814,4 @@ Podemos ver que no existe una relacion directa entre el tipo de habitacion elegi
 
 
 Como conclusión de esta primera etapa podríamos decir que la única variable que parece tener cierta influencia sobre el target es "lead_time".
-Para el resto de las variables, no podemos afirmar que existe una correlación directa entre ellas y el target. Esto se puede observar en sus graficas de distribucion en las cuales la cantidad de reservas canceladas es practicamente igual a las no canceladas para casi la totalidad del rango.
+Para el resto de las variables, no podemos afirmar que existe una correlación directa entre ellas y el target. Esto se puede observar en sus graficas de distribución en las cuales la cantidad de reservas canceladas es practicamente igual a las no canceladas para casi la totalidad del rango.
