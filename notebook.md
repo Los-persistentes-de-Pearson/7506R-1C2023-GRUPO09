@@ -330,6 +330,8 @@ porcentaje_con_cero = valores_con_cero/total_valores
 print(f" Los de adrs que registran un valor de 0 representa un porcentaje de:{porcentaje_con_cero}' por lo tanto considerando que no son representativos, eliminamos dichos registros inconsistentes ")
 ```
 
+#### Ajustes de valor
+
 eliminar valores con 0
 
 ```python
@@ -337,9 +339,6 @@ a_eliminar_con_cero = hotelsdf[hotelsdf['average_daily_rate'] <= 0].index
 hotelsdf.drop(a_eliminar_con_cero, inplace = True)
 hotelsdf.reset_index(drop=True)
 ```
-
-#### Ajustes de valor
-
 
 Utilizamos Z-score para clasificar las desviasiones presentes en los valores
 
