@@ -1,21 +1,13 @@
-% \documentclass[8pt]{article}
 \documentclass{article}
 \usepackage[parfill]{parskip}
 \usepackage[a4paper, total={6in, 9in}]{geometry}
-\usepackage{wrapfig}
-\usepackage[dvipsnames, table]{xcolor}%Paquete para usar color
-\usepackage{listings} %Paquete para citar codigo
-\usepackage{soul} %Paquete para tachar texto
-\usepackage{caption}
-%\usepackage{blindtext} % Paquete lorem ipsum
-\usepackage{amsfonts}
-% \usepackage{indentfirst}
-\usepackage{titlesec}
-\titlespacing*{\section}{0pt}{0.01\baselineskip}{0.01\baselineskip}
-\usepackage{graphicx}
 
 \usepackage{titlesec}
-\setcounter{secnumdepth}{5}
+\titlespacing*{\section}{0pt}{0.01\baselineskip}{0.01\baselineskip}
+
+\usepackage{graphicx} %Paquete para incluir imagenes
+
+\usepackage{titlesec}
 \titleformat{\paragraph}
 {\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
 \titlespacing*{\paragraph}
@@ -73,15 +65,6 @@
       \end{minipage}}
   \end{center}
 \end{titlepage}
-
-% \renewcommand*\contentsname{Indice}
-% \tableofcontents
-
-
-
-
-
-% \pagebreak
 
 \section*{Hotels}
 El data frame está compuesto por un conjunto de 61913 filas (registros) y 31 columnas en donde cada registro representa una reserva de hotel y cada columna es una variable distinta que brinda información acerca de dichas reservas. El objetivo de esta primera parte es realizar un análisis exploratorio del DataFrame e identificar Outliers para poder trabajar con uno más “limpio” a la hora de predecir nuestra variable target: “is\_cancelled”. Variables con pocos valores que tienen mucha desviación podrían generar “ruido” y falsas tendencias en las reservas a cancelar por sí o por no. También se puede hacer una predicción más “honesta” evitando sesgos sobre algunas variables.
