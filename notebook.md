@@ -594,9 +594,9 @@ Vamos a trazar un boxplot para tratar de identificar valores outliers
 
 ```python
 sns.boxplot(data = hotelsdf['days_in_waiting_list'])
-plt.title("Precio promedio de renta diaria")
-plt.xlabel('Average daily rate')
-plt.ylabel('Montos')
+plt.title("Dias en la lista de espera")
+plt.xlabel('Frecuencia')
+plt.ylabel('Dias')
 ```
 
 La forma de este grafico nos muestra que tenemos muchos casos de 1 sola ocurrencia para todos los valores que no son 0.
@@ -656,6 +656,7 @@ Vamos a graficarlos para ver su distribucion
 plt.hist(hotelsdf.lead_time)
 plt.title('Histograma dias de anticipacion de la reserva')
 plt.xlabel('Cantidad de dias')
+plt.ylabel('Frecuencia')
 plt.show()
 ```
 
