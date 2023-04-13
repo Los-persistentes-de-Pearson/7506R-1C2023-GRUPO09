@@ -768,16 +768,16 @@ Considerando el bajo volumen que representan, decidimos dropearlos
 print(990*"DECIDIR SI BORRAR TODO")
 ```
 
+```python
+print(990*"DECIDIR SI BORRAR TODO")
+```
+
 ### previous booking cancellation number
 
 
 #### Valores estadisticos relevantes
 ```python
 hotelsdf["previous_cancellations_num"].describe()
-```
-
-```python
-hotelsdf["previous_cancellations_num"].value_counts()
 ```
 
 Esta variable representa la cantidad de reservasa que si fueron canceladas por el usuario antes de la reserva actual
@@ -790,18 +790,46 @@ hotelsdf.previous_cancellations_num.isna().sum()
 
 #### Grafica de distribucion
 ```python
-hotelsdf["previous_cancellations_num"].value_counts() #TODO: Corregir cuadro, se ve horrible el cuadro
-eje_y = hotelsdf["previous_cancellations_num"].value_counts()
-eje_x = eje_y.index.tolist()
-sns.barplot(y = eje_y, x = eje_x, palette='Set2')
-plt.xlabel('Cantidad de reservas canceladas')
-plt.ylabel(ylabel='Frecuencia')
-plt.title('Numero de reservas canceladas')
-
-hotelsdf["previous_cancellations_num"].value_counts() #TODO: Corregir cuadro, se ve horrible el cuadro
+print("Los valores que toma la variable son los siguientes:")
+daysInWaitingListValores = (hotelsdf["previous_cancellations_num"].unique())
+daysInWaitingListValores.sort()
+print(daysInWaitingListValores)
+print()
+print("Y toma dichos valores con la siguiente frecuencia")
+hotelsdf["previous_cancellations_num"].value_counts()
 ```
+```python
+Vamos a graficar los valores mayores a 0 para poder apreciar la distribucion de los otros datos
+```
+
+```python
+mayor0=hotelsdf[hotelsdf["previous_cancellations_num"] > 0]
+mayor0.reset_index()
+plt.hist(mayor0.days_in_waiting_list)
+plt.title('Histograma dias en la lista de espera mayor a 0')
+plt.xlabel('Cantidad de dias')
+plt.show()
+```
+
+Del grafico y la distribucion previa se observa que la gran mayoria de la gente que cancelo, cancelo 1 vez.
+
+
 #### Outliers
-No parece haber ningun valor fuera  de lo comun
+
+```python
+sns.boxplot(data = hotelsdf['previous_cancellations_num'])
+plt.xlabel('Dias en la lista de espera')
+plt.ylabel('Dias')
+```
+
+Del grafico se ve que todos los valores por encima de 0 estan  por fuera de los cuartiles.\
+Sin embargo, esos datos representan:
+
+```python
+print(str((len(hotelsdf[hotelsdf["previous_cancellations_num"] > 0])*100)/len(hotelsdf)) + "%")
+```
+
+Porcentaje que es demasiado elevado como para eliminar
 
 
 #### Ajustes de valor
