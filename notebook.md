@@ -95,7 +95,7 @@ Por otro lado, podemos observar que tipo de dato almacena cada columna y cuales 
 hotelsdf.info()
 ```
 
-# Analisis de variables
+# Analisis univariado
 Vamos a dividir las variables en cuantitativas y cualitativas.
 
 |     Nombre de la variable           |       Tipo      |      Descripcion         |
@@ -576,31 +576,37 @@ print("Y toma dichos valores con la siguiente frecuencia")
 hotelsdf["days_in_waiting_list"].value_counts()
 ```
 
+Observamos que la gran mayoria de la gente estuvo 0 dias en la lista de espera. 
+
+
+Vamos a graficar los valores mayores a 0 para poder apreciar la distribucion de los otros datos
+
 ```python
-#plt.xlabel(xlabel = 'Dia de llegada')
-#sns.boxplot(data = hotelsdf['days_in_waiting_list'])
-#plt.title("Dia de llegada del mes")
-#plt.ylabel(ylabel = 'Frecuencia')
-#data = hotelsdf.days_in_waiting_list
-#sns.kdeplot(data = data)
-#plt.xlabel(xlabel = 'Average daily rate')
-#plt.ylabel(ylabel = 'Frecuencia')
-#plt.title('Distribucion del average daily rate')
-
-
-#sns.boxplot(data = hotelsdf, x='days_in_waiting_list', palette='Set1')
+mayor0=hotelsdf[hotelsdf["days_in_waiting_list"] > 0]
+mayor0.reset_index()
+plt.hist(mayor0.days_in_waiting_list)
+plt.title('Histograma dias en la lista de espera')
+plt.xlabel('Cantidad de dias')
+plt.show()
 ```
 
-#### Outliers
+Vamos a trazar un boxplot para tratar de identificar valores outliers
 
+```python
+sns.boxplot(data = hotelsdf['days_in_waiting_list'])
+plt.title("Precio promedio de renta diaria")
+plt.xlabel('Average daily rate')
+plt.ylabel('Montos')
+```
 
-Los valores mas llamativos son aquellos por encima de 300; sin embargo no podemos establecer que son outliers porque son cantidades de dias
+La forma de este grafico nos muestra que tenemos muchos casos de 1 sola ocurrencia para todos los valores que no son 0.
+Sin embargo esos valores representan un:
 
+```python
+print(str((len(mayor0)*100)/len(hotelsdf)) + "%")
+```
 
-#### Ajustes de valor
-
-Vamos a aplicar la tecnica de normalizar para poder aprovechar los datos. Podemos separarlo en 3 grandes grupos: Poco tiempo, mediano tiempo, mucho tiempo.\
-Primero vamos a ver la cantidad de dias que hay en nuestro dataset
+Vale casi un 4% del tota. Consideramos un tanto elevado para eliminarlos 
 
 
 ### lead time 
@@ -635,32 +641,31 @@ No tiene valores faltantes
 Vamos a analizar la frecuencia de los distintos valores que lead time puede tomar
 
 ```python
+print("Los valores que toma la variable son los siguientes:")
+daysInWaitingListValores = (hotelsdf["lead_time"].unique())
+daysInWaitingListValores.sort()
+print(daysInWaitingListValores)
+print()
+print("Y toma dichos valores con la siguiente frecuencia")
 hotelsdf["lead_time"].value_counts()
 ```
 
 Vamos a graficarlos para ver su distribucion
 
 ```python
-data = hotelsdf.lead_time
-sns.kdeplot(data = data)
-plt.xlabel(xlabel = 'Lead time')
-plt.ylabel(ylabel = 'Frecuencia')
-plt.title('Distribucion del lead time') #TODO: Cambiar la Y para ver la frecuencia, no esa numero raro
+plt.hist(hotelsdf.lead_time)
+plt.title('Histograma dias de anticipacion de la reserva')
+plt.xlabel('Cantidad de dias')
+plt.show()
 ```
 
 Vemos que la mayoria de los valores estan por debajo de 300
 
 ```python
-leadTimeValores = (hotelsdf["lead_time"].unique())
-leadTimeValores.sort()
-print(leadTimeValores)
-```
-
-```python
 sns.boxplot(data=hotelsdf.lead_time)
 plt.xlabel("Cantidad de reservas")
-plt.ylabel("Canidad de noches de fin de semana")
-plt.title("Canidad de noches de fin de semana por reserva")
+plt.ylabel("Cantidad de dias de anticipacion")
+plt.title("Boxplot dias de anticipacion de la reserva")
 plt.show()
 ```
 
@@ -681,6 +686,16 @@ Es un porcentaje lo suficientemente bajo para poder borrarlos
 ```python
 hotelsdf.drop(hotelsdf[hotelsdf["lead_time"] >= 400].index, inplace = True)
 hotelsdf.reset_index()
+```
+
+Vamos a observar como se ve nuestro grafico despues de sacar los outliers
+
+```python
+sns.boxplot(data=hotelsdf.lead_time)
+plt.xlabel("Cantidad de reservas")
+plt.ylabel("Cantidad de dias de anticipacion")
+plt.title("Boxplot dias de anticipacion de la reserva")
+plt.show()
 ```
 
 ### previous booking not cancelled number
@@ -704,26 +719,63 @@ hotelsdf.previous_bookings_not_canceled_num.isna().sum()
 
 
 ```python
-eje_y = hotelsdf["previous_bookings_not_canceled_num"].value_counts()
-eje_x = eje_y.index.tolist()
-plt.figure(figsize=(13,5))
-sns.barplot(y = eje_y, x = eje_x, palette='Set2')
-plt.xlabel('Cantidad de reservas no canceladas')
-plt.ylabel(ylabel='Frecuencia')
-plt.title('Numero de reservas no canceladas')
-
-hotelsdf["previous_bookings_not_canceled_num"].value_counts() #TODO: Corregir cuadro, se ve horrible el cuadro
+print("Los valores que toma la variable son los siguientes:")
+daysInWaitingListValores = (hotelsdf["previous_bookings_not_canceled_num"].unique())
+daysInWaitingListValores.sort()
+print(daysInWaitingListValores)
+print()
+print("Y toma dichos valores con la siguiente frecuencia")
+hotelsdf["previous_bookings_not_canceled_num"].value_counts()
 ```
 
+Vamos a graficar los valores mayores a 0 para poder apreciar la distribucion de los otros datos
+
+```python
+mayor0=hotelsdf[hotelsdf["previous_bookings_not_canceled_num"] > 0]
+mayor0.reset_index()
+plt.hist(mayor0.days_in_waiting_list)
+plt.title('Histograma dias en la lista de espera mayor a 0')
+plt.xlabel('Cantidad de dias')
+plt.show()
+```
+
+Del grafico se observa que la gran mayoria de la gente que no cancelo, no cancelaron entre 1 y 10 veces
+
+
 #### Outliers
-No parece haber ningun valor fuera  de lo comun
 
+```python
+sns.boxplot(data = hotelsdf['previous_bookings_not_canceled_num'])
+plt.xlabel('Dias en la lista de espera')
+plt.ylabel('Dias')
+```
 
-#### Ajustes de valor
+Debido a la gran cantidad de valores con 0, y a la poca cantidad de valores sin 0 todos los valores distintos a 0 figuran como outliers. \
+Dichos valores representan:
 
-Vamos a aplicar la tecnica de normalizar para poder aprovechar los datos. Podemos separarlo en 3 grandes grupos: Poco tiempo, mediano tiempo, mucho tiempo.\
-Primero vamos a ver la cantidad de dias que hay en nuestro dataset
+```python
+print(str((len(hotelsdf[hotelsdf["previous_bookings_not_canceled_num"] > 0])*100)/len(hotelsdf)) + "%")
+```
 
+Considerando el bajo volumen que representan, decidimos dropearlos
+
+```python
+#hotelsdf.drop(hotelsdf[hotelsdf["previous_bookings_not_canceled_num"] > 0].index, inplace = True)
+#hotelsdf.reset_index()
+
+print(990*"DECIDIR SI BORRAR TODO")
+```
+
+```python
+print(990*"DECIDIR SI BORRAR TODO")
+```
+
+Sin embargo, al dropearlos, el resto de nuestros valores son 0. Esto quiere decir que todo el resto de las columnas presentan los mismos valores. \
+Es por esto que decidimos eliminar la totalidad de la columna visto a que no nos aporta informacion.
+
+```python
+#hotelsdf.drop("previous_bookings_not_canceled_num", axis=1, inplace=True)
+```
 
 ### previous booking cancellation number
 
@@ -731,10 +783,6 @@ Primero vamos a ver la cantidad de dias que hay en nuestro dataset
 #### Valores estadisticos relevantes
 ```python
 hotelsdf["previous_cancellations_num"].describe()
-```
-
-```python
-hotelsdf["previous_cancellations_num"].value_counts()
 ```
 
 Esta variable representa la cantidad de reservasa que si fueron canceladas por el usuario antes de la reserva actual
@@ -747,18 +795,44 @@ hotelsdf.previous_cancellations_num.isna().sum()
 
 #### Grafica de distribucion
 ```python
-hotelsdf["previous_cancellations_num"].value_counts() #TODO: Corregir cuadro, se ve horrible el cuadro
-eje_y = hotelsdf["previous_cancellations_num"].value_counts()
-eje_x = eje_y.index.tolist()
-sns.barplot(y = eje_y, x = eje_x, palette='Set2')
-plt.xlabel('Cantidad de reservas canceladas')
-plt.ylabel(ylabel='Frecuencia')
-plt.title('Numero de reservas canceladas')
-
-hotelsdf["previous_cancellations_num"].value_counts() #TODO: Corregir cuadro, se ve horrible el cuadro
+print("Los valores que toma la variable son los siguientes:")
+daysInWaitingListValores = (hotelsdf["previous_cancellations_num"].unique())
+daysInWaitingListValores.sort()
+print(daysInWaitingListValores)
+print()
+print("Y toma dichos valores con la siguiente frecuencia")
+hotelsdf["previous_cancellations_num"].value_counts()
 ```
+Vamos a graficar los valores mayores a 0 para poder apreciar la distribucion de los otros datos
+
+```python
+mayor0=hotelsdf[hotelsdf["previous_cancellations_num"] > 0]
+mayor0.reset_index()
+plt.hist(mayor0.days_in_waiting_list)
+plt.title('Histograma dias en la lista de espera mayor a 0')
+plt.xlabel('Cantidad de dias')
+plt.show()
+```
+
+Del grafico y la distribucion previa se observa que la gran mayoria de la gente que cancelo, cancelo 1 vez.
+
+
 #### Outliers
-No parece haber ningun valor fuera  de lo comun
+
+```python
+sns.boxplot(data = hotelsdf['previous_cancellations_num'])
+plt.xlabel('Dias en la lista de espera')
+plt.ylabel('Dias')
+```
+
+Del grafico se ve que todos los valores por encima de 0 estan  por fuera de los cuartiles.\
+Sin embargo, esos datos representan:
+
+```python
+print(str((len(hotelsdf[hotelsdf["previous_cancellations_num"] > 0])*100)/len(hotelsdf)) + "%")
+```
+
+Porcentaje que es demasiado elevado como para eliminar
 
 
 #### Ajustes de valor
@@ -887,7 +961,7 @@ hotelsdf.loc[hotelsdf['special_requests_num'] >= 4, 'special_requests_num'] = me
 
 Graficamos nuevamente la distribucion de la variable para validar los cambios realizados 
 
-```python 
+```python
 sns.countplot(data = hotelsdf, x='special_requests_num', palette='Set1')
 plt.title("Reservas por cantidad de requisitos especiales")
 plt.xlabel("Cantidad requerimiento especiales")
@@ -1069,7 +1143,7 @@ plt.show()
 
 Viendo que la columna company_id tiene un 92% de valores faltantes es conveniente para el analisis eliminar la columna 
 
-```python 
+```python
 hotelsdf.drop("company_id", axis=1, inplace=True)
 cualitativas.remove("company_id")
 ```
@@ -1119,7 +1193,7 @@ El resto de valores tienen representaciones de ids validas pero aparecen de mane
 
 #### Valores que toma
 
-```python 
+```python
 arrival_month_valores = (hotelsdf["arrival_month"].unique())
 month_lookup = list(month_name)
 months = arrival_month_valores
@@ -1159,7 +1233,6 @@ plt.ylabel('Frecuencia')
 ```
 
 Del cual concluimos que las habitaciones de tipo: H, I y K son las menos frecuentas y la habitacion tipo A se lleva la mayoria de las apariciones en los registros 
-
 
 ### Country
 
@@ -1393,6 +1466,26 @@ plt.xlabel("Tipo de habitacion")
 Como ya habiamos observado en la cantidad de dias de fin de semana, la mayor cantidad de gente se queda 
 
 
+# Estado del data frame post analisis univariado
+
+
+Vamos a observar el estado de nuestro data frame actualmente para observar que efecto tuvo nuestro analisis en el volumen de los datos
+
+```python
+pd.concat([hotelsdf.head(2), hotelsdf.sample(5), hotelsdf.tail(2)])
+```
+
+```python
+hotelsdf.info()
+```
+
+```python
+print("Vemos que despues del proceso de Ingenieria de caracteristicas, la cantidad de datos se redujo en un " + str(100 - len(hotelsdf) * 100 / 61913) + "%") 
+```
+
+Ademas observamos que no tenemos mas datos faltantes, visto en como los unicos valores del tipo float64 es average_daily_rate, el cual es un valor de punto flotante.
+
+
 # Analisis multivariado
 ## Medicion de la correlacion entre las variables cuantitativas
 
@@ -1496,34 +1589,6 @@ hotelsdf.drop(a_eliminar_con_quince_o_mas_dias.index, inplace = True)
 hotelsdf.reset_index()
 ```
 
-Intentamos hacer un calculo de distancia Mahalanobis pero debido a la cantidad de datos, nos generaba errores, por ello lo dejamos comentado.
-
-"MemoryError: Unable to allocate 26.7 GiB for an array with shape (59903, 59903) and data type float64"
-
-```python
-# #Calulo el vector de medias
-# vmedias=np.mean(hotelsdf[['weekend_nights_num','week_nights_num']])
-
-# #Calculo la diferencia entre las observaciones y el vector de medias
-# weekend_nights_dif = hotelsdf[['weekend_nights_num','week_nights_num']] - vmedias
-
-# #Calculo matriz de covarianza y su inversa
-# cov=hotelsdf[['weekend_nights_num','week_nights_num']].cov().values
-# inv_cov = np.linalg.inv(cov)
-
-# #Calculamos el cuadrado de la distancia de mahalanobis
-# mahal =np.dot( np.dot(weekend_nights_dif, inv_cov) , weekend_nights_dif.T)
-
-# hotelsdf['mahal_week_weekend_nights']=mahal.diagonal()
-```
-
-```python
-sns.countplot(data = hotelsdf, x='dias_totales', hue='is_canceled')
-```
-
-Nos dio lo esperado. No hay datos incosistentes en cuanto a su comparacion con el numero de noches de semana.
-
-
 ```python
 sns.countplot(data = hotelsdf, x='meal_type', hue='is_canceled')
 plt.title("Tipo de comida en la reserva por cancelacion")
@@ -1543,6 +1608,96 @@ plt.show()
 
 Los dias totales y la cantidad de tiempo previo desde la reserva hasta la fecha de llegada se distribuyen de manera homogenea. No se identifican outliers
 
+#### ADR y Tipo de cliente
+
+```python 
+boxplot = hotelsdf.boxplot(column='average_daily_rate', by='customer_type')
+plt.title('Precio diario promedio por tipo de cliente')
+plt.suptitle("")
+plt.xlabel("Tipo de cliente")
+plt.ylabel("Precio diario promedio")
+```
+
+Se puede observar en las graficas que hay valores que se escapan de lo esperado cuando se hace la medicion en relacion al tipo de cliente, al contabilizar estas observaciones concluimos que son pocas y por lo tanto, eliminamos dichos registros que representan una desviacion. Tambien hay que considerar que la media de todos los registros es de aproximadamente 100 (en la unidad correspondiente) y por lo tanto la desviacion estandar es muy chica mostrando algunos valores como outliers a pesar de haber pasado por un tratamiento previo 
+
+```python
+#obtenemos los indices de los outliers
+indices_outliers = hotelsdf[(hotelsdf['customer_type'] == 'Group') & (hotelsdf['average_daily_rate'] > 200)].index
+hotelsdf.drop(indices_outliers, inplace = True)
+indices_outliers2 = hotelsdf[(hotelsdf['customer_type'] == 'Contract') & (hotelsdf['average_daily_rate'] > 200)].index
+hotelsdf.drop(indices_outliers2, inplace = True)
+hotelsdf.reset_index()
+```
+
+Graficamos nuevamente para verificar que dicho tratamiento no generara una desviacion considerable en el analisis
+
+ ```python 
+boxplot = hotelsdf.boxplot(column='average_daily_rate', by='customer_type')
+plt.title('Precio diario promedio por tipo de cliente')
+plt.suptitle("")
+plt.xlabel("Tipo de cliente")
+plt.ylabel("Precio diario promedio")
+```
+
+### ADR y Tipo de habitacion
+
+```python 
+boxplot = hotelsdf.boxplot(column='average_daily_rate', by='assigned_room_type')
+plt.title('Precio diario promedio por tipo de habitacion')
+plt.suptitle("")
+plt.xlabel("Tipo de cliente")
+plt.ylabel("Precio diario promedio")
+```
+
+Del grafico anterior es claro que aparecen outliers en el precio promedio diario de habitacion cuando este es agrupado por tipo de habitacion. Se identefican los conjuntos de datos que deben ser eliminados o tratados. 
+
+```python 
+indices_tipo_k = hotelsdf[(hotelsdf['assigned_room_type'] == 'K') & (hotelsdf['average_daily_rate'] > 160)].index
+indices_tipo_i = hotelsdf[(hotelsdf['assigned_room_type'] == 'I') & (hotelsdf['average_daily_rate'] > 210)].index
+indices_tipo_b = hotelsdf[(hotelsdf['assigned_room_type'] == 'B') & (hotelsdf['average_daily_rate'] < 30)].index
+indices_tipo_b2 = hotelsdf[(hotelsdf['assigned_room_type'] == 'B') & (hotelsdf['average_daily_rate'] > 210)].index
+print(f"El total de los datos a eliminar es {len(indices_tipo_k ) + len(indices_tipo_b) + len(indices_tipo_b2) + len(indices_tipo_i)}")
+```
+```python
+hotelsdf.drop(indices_tipo_k, inplace=True)
+hotelsdf.drop(indices_tipo_i, inplace=True)
+hotelsdf.drop(indices_tipo_b, inplace=True)
+hotelsdf.drop(indices_tipo_b2, inplace=True)
+hotelsdf.reset_index()
+```
+
+Mostramos nuevamente la distribucion de las variables alteradas
+
+```python 
+boxplot = hotelsdf.boxplot(column='average_daily_rate', by='assigned_room_type')
+plt.title('Precio diario promedio por tipo de habitacion')
+plt.suptitle("")
+plt.xlabel("Tipo de cliente")
+plt.ylabel("Precio diario promedio")
+```
+
+### Adult number, children number y babies number
+
+Realizamos un grafico con la intencion de detectar outliers 
+
+```python
+#Visualizacion 3D
+
+fig = plt.figure(figsize=(12, 8))
+ax = fig.add_subplot(projection='3d')
+x1 = hotelsdf.adult_num
+y1 = hotelsdf.children_num
+z1 = hotelsdf.babies_num
+ax.scatter(x1,y1,z1, label = 'No cancelados')
+ax.set_xlabel('Adultos')
+ax.set_ylabel('Niños')
+ax.set_zlabel('Bebes')
+ax.elev = 5  
+ax.azim = -75
+plt.title('Comparacion adultos, niños y bebes')
+```
+
+A partir del grafico anterior no se puede hacer una observacion relevante en la deteccion de outliers
 
 ## Relacion contra el target: is_canceled
 
@@ -1560,3 +1715,4 @@ sns.kdeplot(data= hotelsdf, x = "previous_cancellations_num", hue= "is_canceled"
 
 ```python
 sns.countplot(data= hotelsdf, x="previous_cancellations_num",  hue= "is_canceled")
+```
