@@ -208,7 +208,7 @@ Eliminamos dichos valores que representan un porcentaje infimo y pueden llegar a
 ```python
 hotelsdf.drop(a_eliminar_con_cero.index, inplace = True)
 hotelsdf.drop(a_eliminar_mayores_3.index, inplace = True)
-hotelsdf.reset_index()
+hotelsdf.reset_index(drop=True)
 hotelsdf[(hotelsdf["adult_num"] > 4) | hotelsdf['adult_num'] == 0]
 ```
 
@@ -371,7 +371,7 @@ desviacion_uno = hotelsdf[(hotelsdf['z_adr'] > 3)]
 desviacion_dos = hotelsdf[(hotelsdf['z_adr'] < -2)]
 hotelsdf.drop(desviacion_uno.index, inplace = True)
 hotelsdf.drop(desviacion_dos.index, inplace = True)
-hotelsdf.reset_index()
+hotelsdf.reset_index(drop=True)
 ```
 
 ```python
@@ -426,7 +426,7 @@ hotelsdf[(hotelsdf.babies_num >= 1) & (hotelsdf.adult_num < 1)]
 
 ```python
 hotelsdf.drop(hotelsdf[hotelsdf.babies_num == 9].index, inplace = True)
-hotelsdf.reset_index()
+hotelsdf.reset_index(drop=True)
 ```
 
 ### booking changes number 
@@ -583,7 +583,7 @@ Vamos a graficar los valores mayores a 0 para poder apreciar la distribucion de 
 
 ```python
 mayor0=hotelsdf[hotelsdf["days_in_waiting_list"] > 0]
-mayor0.reset_index()
+mayor0.reset_index(drop=True)
 plt.hist(mayor0.days_in_waiting_list)
 plt.title('Histograma dias en la lista de espera')
 plt.xlabel('Cantidad de dias')
@@ -685,7 +685,7 @@ Es un porcentaje lo suficientemente bajo para poder borrarlos
 
 ```python
 hotelsdf.drop(hotelsdf[hotelsdf["lead_time"] >= 400].index, inplace = True)
-hotelsdf.reset_index()
+hotelsdf.reset_index(drop=True)
 ```
 
 Vamos a observar como se ve nuestro grafico despues de sacar los outliers
@@ -732,7 +732,7 @@ Vamos a graficar los valores mayores a 0 para poder apreciar la distribucion de 
 
 ```python
 mayor0=hotelsdf[hotelsdf["previous_bookings_not_canceled_num"] > 0]
-mayor0.reset_index()
+mayor0.reset_index(drop=True)
 plt.hist(mayor0.days_in_waiting_list)
 plt.title('Histograma dias en la lista de espera mayor a 0')
 plt.xlabel('Cantidad de dias')
@@ -761,7 +761,7 @@ Considerando el bajo volumen que representan, decidimos dropearlos
 
 ```python
 hotelsdf.drop(hotelsdf[hotelsdf["previous_bookings_not_canceled_num"] > 0].index, inplace = True)
-hotelsdf.reset_index()
+hotelsdf.reset_index(drop=True)
 ```
 
 Sin embargo, al dropearlos, el resto de nuestros valores son 0. Esto quiere decir que todo el resto de las columnas presentan los mismos valores. \
@@ -769,7 +769,8 @@ Es por esto que decidimos eliminar la totalidad de la columna visto a que no nos
 
 ```python
 hotelsdf.drop("previous_bookings_not_canceled_num", axis=1, inplace=True)
-hotelsdf.reset_index()
+cuantitativas.remove("previous_bookings_not_canceled_num")
+hotelsdf.reset_index(drop=True)
 ```
 
 ### previous booking cancellation number
@@ -802,7 +803,7 @@ Vamos a graficar los valores mayores a 0 para poder apreciar la distribucion de 
 
 ```python
 mayor0=hotelsdf[hotelsdf["previous_cancellations_num"] > 0]
-mayor0.reset_index()
+mayor0.reset_index(drop=True)
 plt.hist(mayor0.days_in_waiting_list)
 plt.title('Histograma dias en la lista de espera mayor a 0')
 plt.xlabel('Cantidad de dias')
@@ -840,7 +841,7 @@ Al ser un porcentaje tan insignificante, decidimos eliminar esas
 
 ```python
 hotelsdf.drop(hotelsdf[hotelsdf["previous_cancellations_num"] >= 2].index, inplace = True)
-hotelsdf.reset_index()
+hotelsdf.reset_index(drop=True)
 ```
 
 #### Ajustes de valor
@@ -1033,7 +1034,7 @@ Son solo 13 registros, es decir, representan muy poca cantidad del total. Tomamo
 ```python
 mas_de_nueve_noches_finde = hotelsdf[hotelsdf["weekend_nights_num"]>=9]
 hotelsdf.drop(mas_de_nueve_noches_finde.index, inplace = True)
-hotelsdf.reset_index()
+hotelsdf.reset_index(drop=True)
 ```
 
 Hasta ahora analizamos las estadias con mas de 9 noches de fin de semana (al menos un mes de esatdia)
@@ -1594,7 +1595,7 @@ Procedemos a eliminarlos
 ```python
 a_eliminar_con_quince_o_mas_dias = hotelsdf[hotelsdf['dias_totales'] >= 15]
 hotelsdf.drop(a_eliminar_con_quince_o_mas_dias.index, inplace = True)
-hotelsdf.reset_index()
+hotelsdf.reset_index(drop=True)
 ```
 
 ```python
@@ -1634,7 +1635,7 @@ indices_outliers = hotelsdf[(hotelsdf['customer_type'] == 'Group') & (hotelsdf['
 hotelsdf.drop(indices_outliers, inplace = True)
 indices_outliers2 = hotelsdf[(hotelsdf['customer_type'] == 'Contract') & (hotelsdf['average_daily_rate'] > 200)].index
 hotelsdf.drop(indices_outliers2, inplace = True)
-hotelsdf.reset_index()
+hotelsdf.reset_index(drop=True)
 ```
 
 Graficamos nuevamente para verificar que dicho tratamiento no generara una desviacion considerable en el analisis
@@ -1671,7 +1672,7 @@ hotelsdf.drop(indices_tipo_k, inplace=True)
 hotelsdf.drop(indices_tipo_i, inplace=True)
 hotelsdf.drop(indices_tipo_b, inplace=True)
 hotelsdf.drop(indices_tipo_b2, inplace=True)
-hotelsdf.reset_index()
+hotelsdf.reset_index(drop=True)
 ```
 
 Mostramos nuevamente la distribucion de las variables alteradas
