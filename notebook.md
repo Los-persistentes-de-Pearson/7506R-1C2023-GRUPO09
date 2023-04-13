@@ -830,6 +830,19 @@ print(str((len(hotelsdf[hotelsdf["previous_cancellations_num"] > 0])*100)/len(ho
 Porcentaje que es demasiado elevado como para eliminar
 
 
+Sin embargo, la mayoria de estos datos estan concetrados en los registros con 1 cancelacion. Si tomamos un umbral un poco mayor podemos descartar los valores atipicos. Por ejemplo, los registros con 2 cancelaciones o mas represenan un
+
+```python
+print(str((len(hotelsdf[hotelsdf["previous_cancellations_num"] >= 2])*100)/len(hotelsdf)) + "%")
+```
+
+Al ser un porcentaje tan insignificante, decidimos eliminar esas
+
+```python
+hotelsdf.drop(hotelsdf[hotelsdf["previous_cancellations_num"] >= 2].index, inplace = True)
+hotelsdf.reset_index()
+```
+
 #### Ajustes de valor
 
 ### required car space number 
