@@ -102,35 +102,35 @@ Vamos a dividir las variables en cuantitativas y cualitativas.
 | ----------------------------------- | --------------- | ------------------------ |  
 | average_daily_rate                  | Cuantitativa    | Promedio de la ganancia diaria, por habitacion                              |
 | adult_num                           | Cuantitativa    |           Numero de adultos en la reserva              |
-| agent_id                            | Cualitativa     | ID de la agencia de viaje quer                         |
-| arrival_month_day                   | Cuantitativa    |                          |
-| arrival_month                       | Cualitativa     |                          |
-| arrival_week_number                 | Cuantitativa    |                          |
-| arrival_year                        | Cuantitativa    |                          |
-| assigned_room_type                  | Cualitativa     |                          |
-| babies_num                          | Cuantitativa    |                          |
-| booking_changes_num                 | Cuantitativa    |                          |
-| booking_id                          | Cualitativa     |                          |
-| children_num                        | Cuantitativa    |                          |
-| company_id                          | Cualitativa     |                          |
-| country                             | Cualitativa     |                          |
-| customer_type                       | Cualitativa     |                          |
-| days_in_waiting_list                | Cuantitativa    |                          |
-| deposit_type                        | Cualitativa     |                          |
-| distribution_channel                | Cualitativa     |                          |
-| hotel_name                          | Cualitativa     |                          |
-| is_canceled                         | Cualitativa     |                          |
-| is_repeated_guest                   | Cualitativa     |                          |
-| lead_time                           | Cuantitativa    |                          |
-| market_segment_type                 | Cualitativa     |                          |
-| meal_type                           | Cualitativa     |                          |
-| previous_bookings_not_canceled_num  | Cuantitativa    |                          |
-| previous_cancellations_num          | Cuantitativa    |                          |
-| required_car_parking_spaces_num     | Cuantitativa    |                          |
-| reserved_room_type                  | Cualitativa     |                          |
-| weekend_nights_num                  | Cuantitativa    |                          |
-| week_nights_num                     | Cuantitativa    |                          |
-| special_requests_num                | Cuantitativa    |                          |
+| agent_id                            | Cualitativa     | ID de la agencia de viaje que hizo la reserva                         |
+| arrival_month_day                   | Cuantitativa    | Dia del mes que llego                         |
+| arrival_month                       | Cualitativa     |  Mes de llegada                        |
+| arrival_week_number                 | Cuantitativa    |   Numero de la semana de llegada                       |
+| arrival_year                        | Cuantitativa    |    Año de llegada                      |
+| assigned_room_type                  | Cualitativa     |     Tipo de cuarto                    |
+| babies_num                          | Cuantitativa    |      Cantidad de bebes                     |
+| booking_changes_num                 | Cuantitativa    |      Cantidad de cambios a la reserva hasta el dia de llegada                    |
+| booking_id                          | Cualitativa     |        ID de la reserva                  |
+| children_num                        | Cuantitativa    |         Cantidad de niños                 |
+| company_id                          | Cualitativa     |         ID  de la compania que hizo la resreva                 |
+| country                             | Cualitativa     |        Pais de origen                  |
+| customer_type                       | Cualitativa     |         Tipos de reserva                 |
+| days_in_waiting_list                | Cuantitativa    |         Cantidad de dias en la lista de espera                 |
+| deposit_type                        | Cualitativa     |          Tipo de deposito para la reserva                |
+| distribution_channel                | Cualitativa     |  Medio por el cual se hizo la reserva                        |
+| hotel_name                          | Cualitativa     |  Nombre del hotel                        |
+| is_canceled                         | Cualitativa     |   Si la reserva fue cancelada o no                       |
+| is_repeated_guest                   | Cualitativa     |    Si el invitado ya habia ido al hotel                      |
+| lead_time                           | Cuantitativa    |   Cantidad de dias entre el dia que se realizo la reserva y el dia de llegada                       |
+| market_segment_type                 | Cualitativa     |       Categoria de mercado                   |
+| meal_type                           | Cualitativa     |       Tipo de comida pedida                   |
+| previous_bookings_not_canceled_num  | Cuantitativa    |       Cantidad de reservas previas no canceladas                   |
+| previous_cancellations_num          | Cuantitativa    |       Cantidad de reservas canceladas                   |
+| required_car_parking_spaces_num     | Cuantitativa    |       Cantidad de lugares de estacionamiento pedido                  |
+| reserved_room_type                  | Cualitativa     |       Tipo de cuarto reservado                   |
+| weekend_nights_num                  | Cuantitativa    |        Cantidad de noches de fin de semana que estuvo                  |
+| week_nights_num                     | Cuantitativa    |         Cantidad de noches de semana que estuvo                 |
+| special_requests_num                | Cuantitativa    |         Cantidad de pedidos especiales hechos                 |
 
 
 
