@@ -805,14 +805,10 @@ print()
 print("Y toma dichos valores con la siguiente frecuencia")
 hotelsdf["previous_cancellations_num"].value_counts()
 ```
-Vamos a graficar los valores mayores a 0 para poder apreciar la distribucion de los otros datos
-
 ```python
-mayor0=hotelsdf[hotelsdf["previous_cancellations_num"] > 0]
-mayor0.reset_index(drop=True)
-plt.hist(mayor0.days_in_waiting_list)
-plt.title('Histograma dias en la lista de espera mayor a 0')
-plt.xlabel('Cantidad de dias')
+sns.countplot(data = hotelsdf, x='previous_cancellations_num', palette='Set1')
+plt.title('Countplot reservas previas no canceladas')
+plt.xlabel('Cantidad de reservas')
 plt.show()
 ```
 
@@ -848,6 +844,15 @@ Al ser un porcentaje tan insignificante, decidimos eliminar esas
 ```python
 hotelsdf.drop(hotelsdf[hotelsdf["previous_cancellations_num"] >= 2].index, inplace = True)
 hotelsdf.reset_index(drop=True)
+```
+
+Observamos como nuestros valores cambiaron despues del ajuste
+
+```python
+sns.countplot(data = hotelsdf, x='previous_cancellations_num', palette='Set1')
+plt.title('Countplot reservas previas no canceladas')
+plt.xlabel('Cantidad de reservas')
+plt.show()
 ```
 
 #### Ajustes de valor
