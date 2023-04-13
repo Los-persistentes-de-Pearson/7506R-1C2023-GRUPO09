@@ -335,6 +335,7 @@ eliminar valores con 0
 ```python
 a_eliminar_con_cero = hotelsdf[hotelsdf['average_daily_rate'] <= 0].index
 hotelsdf.drop(a_eliminar_con_cero, inplace = True)
+hotelsdf.reset_index(drop=True)
 ```
 
 #### Ajustes de valor
@@ -394,6 +395,7 @@ plt.title('Distribucion del average daily rate')
 
 ```python
 hotelsdf.drop(labels = 'z_adr', inplace = True, axis = 1)
+hotelsdf.reset_index(drop=True)
 ```
 
 ### babies number 
@@ -480,6 +482,7 @@ print("Considerando que la cantidad de datos de children_num faltante es " + str
 ```python
 # Borramos las columnas sin valores
 hotelsdf.drop((hotelsdf[hotelsdf["children_num"].isna() == True].index.values),inplace=True)
+hotelsdf.reset_index(drop=True)
 ```
 
 ```python
@@ -522,6 +525,7 @@ Considerando que es un valor tanto mas alto que el resto, que es un unico caso y
 
 ```python
 hotelsdf.drop((hotelsdf[hotelsdf["children_num"] == 10].index.values),inplace=True)
+hotelsdf.reset_index(drop=True)
 ```
 
 Una vez ajustados los valores, nuestros valores toman la siguiente forma:
@@ -1164,6 +1168,7 @@ Viendo que la columna company_id tiene un 92% de valores faltantes es convenient
 
 ```python
 hotelsdf.drop("company_id", axis=1, inplace=True)
+hotelsdf.reset_index(drop=True)
 cualitativas.remove("company_id")
 ```
 
