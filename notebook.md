@@ -770,6 +770,13 @@ print(990*"DECIDIR SI BORRAR TODO")
 print(990*"DECIDIR SI BORRAR TODO")
 ```
 
+Sin embargo, al dropearlos, el resto de nuestros valores son 0. Esto quiere decir que todo el resto de las columnas presentan los mismos valores. \
+Es por esto que decidimos eliminar la totalidad de la columna visto a que no nos aporta informacion.
+
+```python
+hotelsdf.drop("company_id", axis=1, inplace=True)
+```
+
 ### previous booking cancellation number
 
 
@@ -796,9 +803,7 @@ print()
 print("Y toma dichos valores con la siguiente frecuencia")
 hotelsdf["previous_cancellations_num"].value_counts()
 ```
-```python
 Vamos a graficar los valores mayores a 0 para poder apreciar la distribucion de los otros datos
-```
 
 ```python
 mayor0=hotelsdf[hotelsdf["previous_cancellations_num"] > 0]
@@ -956,7 +961,7 @@ hotelsdf.loc[hotelsdf['special_requests_num'] >= 4, 'special_requests_num'] = me
 
 Graficamos nuevamente la distribucion de la variable para validar los cambios realizados 
 
-```python 
+```python
 sns.countplot(data = hotelsdf, x='special_requests_num', palette='Set1')
 plt.title("Reservas por cantidad de requisitos especiales")
 plt.xlabel("Cantidad requerimiento especiales")
@@ -1138,7 +1143,7 @@ plt.show()
 
 Viendo que la columna company_id tiene un 92% de valores faltantes es conveniente para el analisis eliminar la columna 
 
-```python 
+```python
 hotelsdf.drop("company_id", axis=1, inplace=True)
 cualitativas.remove("company_id")
 ```
@@ -1188,7 +1193,7 @@ El resto de valores tienen representaciones de ids validas pero aparecen de mane
 
 #### Valores que toma
 
-```python 
+```python
 arrival_month_valores = (hotelsdf["arrival_month"].unique())
 month_lookup = list(month_name)
 months = arrival_month_valores
@@ -1628,3 +1633,4 @@ sns.kdeplot(data= hotelsdf, x = "previous_cancellations_num", hue= "is_canceled"
 
 ```python
 sns.countplot(data= hotelsdf, x="previous_cancellations_num",  hue= "is_canceled")
+```
