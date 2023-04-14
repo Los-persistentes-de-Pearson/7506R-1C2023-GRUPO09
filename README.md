@@ -4,6 +4,8 @@
 
 Persistentes de pearson AKA LOS sospechosos S.A
 
+![Karl Pearson](informe/images/Karl_Pearson.jpg)
+
 
 
 
