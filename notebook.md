@@ -1812,3 +1812,4 @@ Podemos ver que no existe una relacion directa entre el tipo de habitacion elegi
 
 Como conclusión de esta primera etapa podríamos decir que la única variable que parece tener cierta influencia sobre el target es "lead_time".
 Para el resto de las variables, no podemos afirmar que existe una correlación directa entre ellas y el target. Esto se puede observar en sus graficas de distribución en las cuales la cantidad de reservas canceladas es practicamente igual a las no canceladas para casi la totalidad del rango.
+
