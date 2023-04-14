@@ -87,24 +87,24 @@ Listamos las variables y las dividimos en Cualitativas y Cuantitativas. De las 3
 \subsection*{Cuantitativas}
 Para cada una de ellas:
 \begin{itemize}
-	\item Vemos sus valores estadísticos más relevantes;
-	\item Detectamos la cantidad de valores nulos;
-	\item Construimos una gráfica de distribución de sus valores en algunos casos gráficas de tipo boxplot para identificar más fácilmente valores atípicos (Outliers) y en el caso de la variable “average\_daily\_rate” agregamos un análisis con Z\_score;
+	\item Vemos sus valores estadísticos más relevantes.
+	\item Detectamos la cantidad de valores nulos.
+	\item Construimos una gráfica de distribución de sus valores en algunos casos gráficas de tipo boxplot para identificar más fácilmente valores atípicos (Outliers) y en el caso de la variable “average\_daily\_rate” agregamos un análisis con Z\_score.
 	\item Realizamos un tratamiento sobre dichos valores eliminando sus registros o reemplazando los valores atípicos por otros.
 \end{itemize} 
 Para estas variables concluimos lo siguiente:
 \begin{itemize}
-	\item La única variable con datos nulos o faltantes es “babies\_number”;
-	\item  Decidimos eliminar la variable “previous booking not cancelled” debido a que, después de remover unos pocos valores outliers, todo el resto de los registros presentan el mismo valor. Esto no nos aporta ningún tipo de información
+	\item La única variable con datos nulos o faltantes es “babies\_number”.
+	\item  Decidimos eliminar la variable “previous booking not cancelled” debido a que, después de remover unos pocos valores outliers, todo el resto de los registros presentan el mismo valor. Esto no nos aporta ningún tipo de información.
 \end{itemize}
 
 \subsection*{Cualitativas}
 Para estas, en primer lugar analizamos las variables con valores nulos. Estas fueron: “agent\_id”, “company\_id” y “country” de las cuales se decidió eliminar company\_id  por contener un 92\% de valores faltantes.\\
 Para cada una de ellas:
 \begin{itemize}
-	\item Mostramos los valores que toman;
-	\item Realizamos una gráfica de distribución de sus valores
-	\item En el caso de “agent\_id” y “country” se corrigieron sus valores valores faltantes
+	\item Mostramos los valores que toman.
+	\item Realizamos una gráfica de distribución de sus valores.
+	\item En el caso de “agent\_id” y “country” se corrigieron sus valores valores faltantes.
 \end{itemize}
 
 \subsection*{Análisis multivariado}
