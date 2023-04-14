@@ -3,7 +3,3 @@
 ## Repo del equipo #9
 
 ![Karl Pearson](informe/images/Karl_Pearson.jpg)
-
-
-
-
