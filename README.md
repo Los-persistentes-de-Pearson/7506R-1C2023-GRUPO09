@@ -2,8 +2,6 @@
 
 ## Repo del equipo #9
 
-Persistentes de pearson AKA LOS sospechosos S.A
-
 ![Karl Pearson](informe/images/Karl_Pearson.jpg)
 
 
