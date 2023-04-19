@@ -7,6 +7,9 @@
 - [ ] Evaluar la performance del modelo en entrenamiento y validación, explicar todas las métricas y mostrar la matriz de confusión.
 - [ ] Generar predicciones con el conjunto de test y realizar los submits correspondientes en la competencia de Kaggle.
 
+### Plan
+1. Hacer el arbol bien grande sin ninguna optimizacion, sin poda ni nada, y despues hacer una optimizacion para comparar
+
 ## Repo del equipo #9
 
 ![Karl Pearson](informe/images/Karl_Pearson.jpg)
