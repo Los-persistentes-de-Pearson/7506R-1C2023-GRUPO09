@@ -2445,25 +2445,26 @@ Procedemos a dropear la columna de country
 
 ```python
 hotelsdfArbol=hotelsdfArbol.drop(['country'], axis='columns', inplace=False)
+valoresAConvertir.remove('country')
+valoresAConvertir.append('Continentes')
 hotelsdfArbol.reset_index(drop=True)
 ```
 
+### One hot encoding
 
 
-```python
 
-```
 
-```python
 
-```
-
-```python
-
-```
+Vamos a transformar dichas variables categoricas con la tecnica de one hot encoding. \
+Esto va a crear una serie de nuevas columnas con todos los posibles de la variable categorica. En cada columna va a haber un 1 o un 0 para indicar el valor del registro de esa variable. \
+Una de las columnas (en este caso la primera) es eliminada ya que, si todas las otras columnas son falsas, significa que la variable toma el valor de la columna eliminada. \
+Esto lo podemos hacer gracias a que eliminamos todos nuestros valores faltantes en las secciones anteriores.
 
 ```python
-
+#One hot encoding para variables categoricas, esto elimina las columnas categoricas y las reemplaza con el conjunto del hot encoding
+hotelsdfArbol = pd.get_dummies(hotelsdfArbol, columns=valoresAConvertir, drop_first=True)
+hotelsdfArbol.head()
 ```
 
 ```python
@@ -2480,16 +2481,6 @@ x_train, x_test, y_train, y_test = train_test_split(hotelsdfArbol_x,
                                                     random_state=9) #usamos la semilla 9 porque somos el grupo 9
 ```
 
-Vamos a transformar dichas variables categoricas con la tecnica de one hot encoding. \
-Esto va a crear una serie de nuevas columnas con todos los posibles de la variable categorica. En cada columna va a haber un 1 o un 0 para indicar el valor del registro de esa variable. \
-Una de las columnas (en este caso la primera) es eliminada ya que, si todas las otras columnas son falsas, significa que la variable toma el valor de la columna eliminada. \
-Esto lo podemos hacer gracias a que eliminamos todos nuestros valores faltantes en las secciones anteriores.
-
-
-Vamos a crear otro dataframe con estas nuevas columnas categoricas transformadas.
-
-@Ger @JI NO SE SI HACE FALTA, LO PUSE POR LAS DUDAS. DE ULTIMA LO SACAMOS DESPUES
-
 ```python
 
 ```
@@ -2499,9 +2490,7 @@ hotelsdfArbol.head()
 ```
 
 ```python
-#One hot encoding para variables categoricas
-#hotelsdfArbol = pd.get_dummies(hotelsdfArbol, columns=valoresAConvertir, drop_first=True)
-#hotelsdfArbol.head()
+hotelsdfArbol
 ```
 
 ```python
