@@ -5,6 +5,15 @@ Vamos a comenzar creando un arbol de decisiones que tenga en cuenta todas las co
 Luego, vamos a realizar una poda y vamos a optimizar dicho arbol para luego comparar resultados.
 
 
+# Importamos
+
+
+SUSUSUSUSU
+
+
+AMONGUS
+
+
 ## Creamos un nuevo Data frame
 
 
@@ -19,6 +28,9 @@ hotelsdfArbol = hotelsdf.copy()
 
 Para poder usar el arbol de sklearn, tenemos que transformar todas nuestras columnas no numericas a valores numericos. \
 Dichas columnas son las siguientes:
+
+
+AMONGUS
 
 ```python
 valoresAConvertir = hotelsdf.dtypes[(hotelsdf.dtypes !='int64') & (hotelsdf.dtypes !='float64')].index
@@ -169,6 +181,11 @@ model = tree_model.fit(X = x_train, y = y_train)
 ```python
 model
 ```
+
+IMPOSTOR AMONGUS
+
+
+BIG CHUNGUS
 
 ```python
 
