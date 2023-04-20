@@ -1859,7 +1859,36 @@ Dichas columnas son las siguientes:
 
 ```python
 valoresAConvertir = hotelsdf.dtypes[(hotelsdf.dtypes !='int64') & (hotelsdf.dtypes !='float64')].index
+valoresAConvertir = valoresAConvertir.to_list()
 valoresAConvertir
+```
+
+```python
+valoresAConvertir.remove('booking_id')
+```
+
+Vamos a transformar dichas variables categoricas con la tecnica de one hot encoding. \
+Esto va a crear una serie de nuevas columnas con todos los posibles de la variable categorica. En cada columna va a haber un 1 o un 0 para indicar el valor del registro de esa variable. \
+Una de las columnas (en este caso la primera) es eliminada ya que, si todas las otras columnas son falsas, significa que la variable toma el valor de la columna eliminada. \
+Esto lo podemos hacer gracias a que eliminamos todos nuestros valores faltantes en las secciones anteriores.
+
+
+Vamos a crear otro dataframe con estas nuevas columnas categoricas transformadas\
+
+@Ger @JI NO SE SI HACE FALTA, LO PUSE POR LAS DUDAS. DE ULTIMA LO SACAMOS DESPUES
+
+```python
+hotelsdfNumerico = hotelsdf.copy()
+```
+
+```python
+hotelsdfNumerico.head()
+```
+
+```python
+#One hot encoding para variables categoricas
+hotelsdfNumerico = pd.get_dummies(hotelsdfNumerico, columns=valoresAConvertir, drop_first=True)
+hotelsdfNumerico.head()
 ```
 
 ```python
