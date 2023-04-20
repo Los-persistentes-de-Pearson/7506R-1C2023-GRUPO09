@@ -1840,19 +1840,18 @@ Para el resto de las variables, no podemos afirmar que existe una correlación d
 Vamos a comenzar creando un arbol de decisiones que tenga en cuenta todas las columnas. \
 Luego, vamos a realizar una poda y vamos a optimizar dicho arbol para luego comparar resultados.
 
+
+## Creamos un nuevo Data frame
+
+
+Para esto vamos a crear una copia de nuestro dataframe para la creacion del arbol
+
 ```python
-#Creamos un dataset con los features que vamos a usar para tratar de predecir el target
-hotelsdf_x=hotelsdf.drop(['is_canceled'], axis='columns', inplace=False)
-
-#Creo un dataset con la variable target
-hotelsdf_y = hotelsdf['is_canceled'].copy()
-
-#Genero los conjuntos de train y de test
-x_train, x_test, y_train, y_test = train_test_split(hotelsdf_x,
-                                                    hotelsdf_y, 
-                                                    test_size=0.2,  #proporcion 80/20
-                                                    random_state=9) #usamos la semilla 9 porque somos el grupo 9
+hotelsdfArbol = hotelsdf.copy()
 ```
+
+## Transformacion de las columnas para la creacion del arbol
+
 
 Para poder usar el arbol de sklearn, tenemos que transformar todas nuestras columnas no numericas a valores numericos. \
 Dichas columnas son las siguientes:
@@ -1862,6 +1861,25 @@ valoresAConvertir = hotelsdf.dtypes[(hotelsdf.dtypes !='int64') & (hotelsdf.dtyp
 valoresAConvertir = valoresAConvertir.to_list()
 valoresAConvertir
 ```
+
+Sin embargo, no todas estas columnas nos van a servir para nuestro analisis.
+
+
+```python
+#Creamos un dataset con los features que vamos a usar para tratar de predecir el target
+hotelsdfArbol_x=hotelsdfArbol.drop(['is_canceled'], axis='columns', inplace=False)
+
+#Creo un dataset con la variable target
+hotelsdfArbol_y = hotelsdfArbol['is_canceled'].copy()
+
+#Genero los conjuntos de train y de test
+x_train, x_test, y_train, y_test = train_test_split(hotelsdf_x,
+                                                    hotelsdf_y, 
+                                                    test_size=0.2,  #proporcion 80/20
+                                                    random_state=9) #usamos la semilla 9 porque somos el grupo 9
+```
+
+Vamos a empezar removiendo booking\_id visto en como no la necesitamos para analisis
 
 ```python
 valoresAConvertir.remove('booking_id')
@@ -1873,12 +1891,12 @@ Una de las columnas (en este caso la primera) es eliminada ya que, si todas las 
 Esto lo podemos hacer gracias a que eliminamos todos nuestros valores faltantes en las secciones anteriores.
 
 
-Vamos a crear otro dataframe con estas nuevas columnas categoricas transformadas\
+Vamos a crear otro dataframe con estas nuevas columnas categoricas transformadas.
 
 @Ger @JI NO SE SI HACE FALTA, LO PUSE POR LAS DUDAS. DE ULTIMA LO SACAMOS DESPUES
 
 ```python
-hotelsdfNumerico = hotelsdf.copy()
+
 ```
 
 ```python
