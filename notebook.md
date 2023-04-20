@@ -2412,6 +2412,42 @@ country = hotelsdfArbol['Continentes'].unique().tolist()
 print(country) 
 ```
 
+Viendo estos resultados vemos que hay dos outliers que no logramos identificar en el analisis univariado.
+
+
+"ATA" refiere al **continente** de Antartida. Al ser un valor tan fuera de lo comun y tener una sola ocurrencia decidimos eliminarlo del dataframe
+
+```python
+hotelsdfArbol.drop((hotelsdfArbol[hotelsdfArbol["country"] == "ATA"].index.values),inplace=True)
+hotelsdfArbol.reset_index(drop=True)
+print() #Este print es para no mostrar el dataframe innecesariamente
+```
+
+"UMI" hace referenca a unas islas cerca de Hawaii. Al ser un unico caso y tener una poblacion de 300 habitantes, decidimos considerarlo como Estados Unidos, es decir America del Norte
+
+Fuentes:
+- https://www.iso.org/obp/ui/#iso:code:3166:UM
+- https://en.wikipedia.org/wiki/United_States_Minor_Outlying_Islands
+
+```python
+hotelsdfArbol.loc[hotelsdfArbol['country'] == "UMI", 'country'] = 'North America'
+hotelsdfArbol.loc[hotelsdfArbol['Continentes'] == "UMI", 'Continentes'] = 'North America'
+```
+
+Con estos nuevos cambios, la columna Continentes toma los siguientes valores
+
+```python
+country = hotelsdfArbol['Continentes'].unique().tolist()
+print(country) 
+```
+
+Procedemos a dropear la columna de country
+
+```python
+hotelsdfArbol=hotelsdfArbol.drop(['country'], axis='columns', inplace=False)
+hotelsdfArbol.reset_index(drop=True)
+```
+
 
 
 ```python
