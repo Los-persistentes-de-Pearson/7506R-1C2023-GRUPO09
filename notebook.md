@@ -1832,3 +1832,40 @@ Podemos ver que no existe una relacion directa entre el tipo de habitacion elegi
 Como conclusión de esta primera etapa podríamos decir que la única variable que parece tener cierta influencia sobre el target es "lead_time".
 Para el resto de las variables, no podemos afirmar que existe una correlación directa entre ellas y el target. Esto se puede observar en sus graficas de distribución en las cuales la cantidad de reservas canceladas es practicamente igual a las no canceladas para casi la totalidad del rango.
 
+
+
+# Arbol de decisiones
+
+
+Vamos a comenzar creando un arbol de decisiones que tenga en cuenta todas las columnas. \
+Luego, vamos a realizar una poda y vamos a optimizar dicho arbol para luego comparar resultados.
+
+```python
+#Creamos un dataset con los features que vamos a usar para tratar de predecir el target
+hotelsdf_x=hotelsdf.drop(['is_canceled'], axis='columns', inplace=False)
+
+#Creo un dataset con la variable target
+hotelsdf_y = hotelsdf['is_canceled'].copy()
+
+#Genero los conjuntos de train y de test
+x_train, x_test, y_train, y_test = train_test_split(hotelsdf_x,
+                                                    hotelsdf_y, 
+                                                    test_size=0.2,  #proporcion 80/20
+                                                    random_state=9) #usamos la semilla 9 porque somos el grupo 9
+```
+
+Para poder usar el arbol de sklearn, tenemos que transformar todas nuestras columnas no numericas a valores numericos. \
+Dichas columnas son las siguientes:
+
+```python
+valoresAConvertir = hotelsdf.dtypes[(hotelsdf.dtypes !='int64') & (hotelsdf.dtypes !='float64')].index
+valoresAConvertir
+```
+
+```python
+#Creo un clasificador
+tree_model = tree.DecisionTreeClassifier(max_depth = 10)
+
+#Entreno el modelo
+model = tree_model.fit(X = x_train, y = y_train) 
+```
