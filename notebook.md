@@ -1865,6 +1865,47 @@ valoresAConvertir
 Sin embargo, no todas estas columnas nos van a servir para nuestro analisis.
 
 
+
+### Booking ID
+
+
+Vamos a empezar removiendo booking\_id visto en como no la necesitamos para analisis
+
+```python
+hotelsdfArbol.drop("booking_id", axis=1, inplace=True)
+hotelsdfArbol.reset_index(drop=True)
+valoresAConvertir.remove('booking_id')
+```
+
+### Reservation Status & Reservation status date
+SI DROPEAMOS LAS COLUMNAS, SACAMOS ESTO. Pongo una mala palabra para que no nos olvidemos
+
+MIERDA MIERDA MIERDA MIERDA MIERDA MIERDA MIERDA MIERDA MIERDA MIERDA MIERDA MIERDA MIERDA MIERDA MIERDA MIERDA MIERDA MIERDA MIERDA MIERDA MIERDA MIERDA MIERDA MIERDA MIERDA MIERDA MIERDA MIERDA MIERDA MIERDA MIERDA MIERDA MIERDA MIERDA MIERDA MIERDA MIERDA MIERDA MIERDA MIERDA MIERDA MIERDA MIERDA MIERDA MIERDA 
+
+
+Reservation Status nos dice el estado de la reservacion, si fue cancelada o no y reservation status date nos marca la fecha en la que cambio el estado. 
+Estas dos columnas nos son redundantes
+
+```python
+hotelsdfArbol.drop("reservation_status", axis=1, inplace=True)
+hotelsdfArbol.reset_index(drop=True)
+valoresAConvertir.remove('reservation_status')
+```
+
+```python
+hotelsdfArbol.drop("reservation_status_date", axis=1, inplace=True)
+hotelsdfArbol.reset_index(drop=True)
+valoresAConvertir.remove('reservation_status_date')
+```
+
+```python
+
+```
+
+```python
+
+```
+
 ```python
 #Creamos un dataset con los features que vamos a usar para tratar de predecir el target
 hotelsdfArbol_x=hotelsdfArbol.drop(['is_canceled'], axis='columns', inplace=False)
@@ -1873,16 +1914,10 @@ hotelsdfArbol_x=hotelsdfArbol.drop(['is_canceled'], axis='columns', inplace=Fals
 hotelsdfArbol_y = hotelsdfArbol['is_canceled'].copy()
 
 #Genero los conjuntos de train y de test
-x_train, x_test, y_train, y_test = train_test_split(hotelsdf_x,
-                                                    hotelsdf_y, 
+x_train, x_test, y_train, y_test = train_test_split(hotelsdfArbol_x,
+                                                    hotelsdfArbol_y, 
                                                     test_size=0.2,  #proporcion 80/20
                                                     random_state=9) #usamos la semilla 9 porque somos el grupo 9
-```
-
-Vamos a empezar removiendo booking\_id visto en como no la necesitamos para analisis
-
-```python
-valoresAConvertir.remove('booking_id')
 ```
 
 Vamos a transformar dichas variables categoricas con la tecnica de one hot encoding. \
@@ -1900,13 +1935,13 @@ Vamos a crear otro dataframe con estas nuevas columnas categoricas transformadas
 ```
 
 ```python
-hotelsdfNumerico.head()
+hotelsdfArbol.head()
 ```
 
 ```python
 #One hot encoding para variables categoricas
-hotelsdfNumerico = pd.get_dummies(hotelsdfNumerico, columns=valoresAConvertir, drop_first=True)
-hotelsdfNumerico.head()
+#hotelsdfArbol = pd.get_dummies(hotelsdfArbol, columns=valoresAConvertir, drop_first=True)
+#hotelsdfArbol.head()
 ```
 
 ```python
@@ -1915,4 +1950,8 @@ tree_model = tree.DecisionTreeClassifier(max_depth = 10)
 
 #Entreno el modelo
 model = tree_model.fit(X = x_train, y = y_train) 
+```
+
+```python
+
 ```
