@@ -20,6 +20,13 @@ Importamos todas las librerías que vamos a usar
 
 
 ```python
+try:
+  import google.colab
+  IN_COLAB = True
+except:
+  IN_COLAB = False
+
+
 import pandas as pd 
 import numpy as np
 import sklearn as sk
@@ -27,6 +34,18 @@ import seaborn as sns
 from matplotlib import pyplot as plt
 import scipy.stats as st
 from calendar import month_name
+#Si estamos  en colab tenemos que instalar la libreria "dtreeviz" aparte. 
+if IN_COLAB == True:
+    !pip install 'dtreeviz'
+import dtreeviz.trees as dtreeviz
+from sklearn import tree
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import precision_score, recall_score, accuracy_score,f1_score
+from sklearn.metrics import confusion_matrix, classification_report
+from sklearn.preprocessing import MinMaxScaler
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
+warnings.simplefilter(action='ignore', category=UserWarning)
 ```
 
 ## Cargamos de datos a un dataframe
