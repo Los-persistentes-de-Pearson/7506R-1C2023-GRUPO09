@@ -1536,7 +1536,7 @@ Una vez hecho el tratado sobre outliers y datos faltantes medimos la correlacion
 
 ```python
 # Este if es se usa para evitar problemas de versiones de pandas entre la version local y la presente en Google Collab
-if (pd.__version__) == "1.5.2":
+if IN_COLAB == True:
     correlaciones = hotelsdf[cuantitativas].corr(numeric_only=True)
 
 else:
