@@ -20,12 +20,6 @@ Vamos a comenzar creando un arbol de decisiones que tenga en cuenta todas las co
 Luego, vamos a realizar una poda y vamos a optimizar dicho arbol para luego comparar resultados.
 
 
-efoefnjef
-
-
-frfrrfr
-
-
 ## Importamos
 ```python
 try:
@@ -557,7 +551,7 @@ Vamos a crear una copia de nuestro dataframe para la creacion del arbol
 ```python
 hotelsdfCheckpoint1 = pd.read_csv("./dataframeCheckpoint1.csv")
 hotelsdfArbol = hotelsdfCheckpoint1.copy()
-print("El data frame esta compuesto por "f"{hotelsdf.shape[0]}"" filas y "f"{hotelsdf.shape[1]}"" columnas")
+print("El data frame esta compuesto por "f"{hotelsdfArbol.shape[0]}"" filas y "f"{hotelsdfArbol.shape[1]}"" columnas")
 ```
 
 ## Transformacion de las columnas para la creacion del arbol
@@ -567,7 +561,7 @@ Para poder usar el arbol de sklearn, tenemos que transformar todas nuestras colu
 Dichas columnas son las siguientes:
 
 ```python
-valoresAConvertir = hotelsdf.dtypes[(hotelsdf.dtypes !='int64') & (hotelsdf.dtypes !='float64')].index
+valoresAConvertir = hotelsdfArbol.dtypes[(hotelsdfArbol.dtypes !='int64') & (hotelsdfArbol.dtypes !='float64')].index
 valoresAConvertir = valoresAConvertir.to_list()
 valoresAConvertir
 ```
@@ -614,7 +608,7 @@ hotelsdfArbol["Continentes"] = hotelsdfArbol["Continentes"].replace(COUNTRY_ALPH
 ```
 
 ```python
-country = hotelsdf['country'].unique().tolist()
+country = hotelsdfArbol['country'].unique().tolist()
 print(country) 
 ```
 
@@ -714,6 +708,10 @@ model = tree_model.fit(X = x_train, y = y_train)
 
 ```python
 model
+```
+
+```python
+
 ```
 
 ```python
