@@ -689,7 +689,7 @@ x_train, x_test, y_train, y_test = train_test_split(hotelsdfArbol_x,
 Ahora ya tenemos generados nuestros conjuntos de train y test; y tenemos nuesto dataframe con los datos numericos vamos a generar nuestro modelo
 
 ```python
-#Vamos a iniciar con una profundidad maxima no muy alta devido al gran numero de columnas
+#Vamos a iniciar con una profundidad maxima considerable para tener un arbol de dimesiones considerables
 PROFUNDIDAD_MAX = 20
 
 #Creamos un clasificador con hiperparámetros 
@@ -712,7 +712,10 @@ ds_resultados=pd.DataFrame(zip(y_test,y_pred),columns=['test','pred'])
 ds_resultados
 ```
 
-Estas columns representan 20% de nuestro dataframe que fue dedicado al 
+Estas columns representan 20% de nuestro dataframe que fue dedicado al testeo del modelo
+
+
+Vamos a graficar la matriz de confusion para visualizar los resultados de nuesto modelo:
 
 ```python
 #Creo la matriz de confusión
@@ -724,22 +727,8 @@ plt.xlabel('Predicted')
 plt.ylabel('True')
 ```
 
-```python
-#Calculo las métricas en el conjunto de evaluación
-accuracy=accuracy_score(y_test,y_pred)
-recall=recall_score(y_test,y_pred)
-f1=f1_score(y_test,y_pred,)
-precision=precision_score(y_test,y_pred)
-
-print("Accuracy: "+str(accuracy))
-print("Recall: "+str(recall))
-print("Precision: "+str(precision))
-print("f1 score: "+str(f1))
-```
-
-```python
-model.classes_
-```
+A continuacion vamos a graficar el arbol resultante: \
+(Advertencia: Suele tardar unos minutos en terminar de renderizar la imagen)
 
 ```python
 plt.figure(figsize=(100,100))
@@ -751,3 +740,22 @@ tree_plot_completo=tree.plot_tree(model,
                                  class_names=['Not Canceled','Is canceled']) #model.classes_
 plt.show(tree_plot_completo)
 ```
+
+Con la imagen se ve que el arbol resultante tiene unas dimensiones exageradas, vemos ademas que tiene una profundidad de 20 como especificamos
+
+
+Vemos que, sin ningun tipo de optimizacion y con un arbol de profundidad 20 y sin ningun tipo de poda obtenemos, en nuestro dataset de testeo:
+
+```python
+accuracy=accuracy_score(y_test,y_pred)
+recall=recall_score(y_test,y_pred)
+f1=f1_score(y_test,y_pred,)
+precision=precision_score(y_test,y_pred)
+
+print("Accuracy: "+str(accuracy))
+print("Recall: "+str(recall))
+print("Precision: "+str(precision))
+print("f1 score: "+str(f1))
+```
+
+Ahora vamos a compararlo con el dataset de testeo de verdad
