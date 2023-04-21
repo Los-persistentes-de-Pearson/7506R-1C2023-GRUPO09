@@ -13,13 +13,6 @@ jupyter:
     name: python3
 ---
 
-# Arbol de decisiones
-
-
-Vamos a comenzar creando un arbol de decisiones que tenga en cuenta todas las columnas. \
-Luego, vamos a realizar una poda y vamos a optimizar dicho arbol para luego comparar resultados.
-
-
 ## Importamos
 ```python
 try:
@@ -544,6 +537,13 @@ COUNTRY_ALPHA2_TO_CONTINENT = {
 }
 ```
 
+# Arbol de decisiones sin optimizacion
+
+
+Vamos a comenzar creando un arbol de decisiones que tenga en cuenta todas las columnas. \
+Luego, vamos a realizar una optimizacion y vamos a optimizar dicho arbol para luego comparar resultados.
+
+
 ## Cargamos nuestro dataframe del checkpoint pasado
 
 Vamos a crear una copia de nuestro dataframe para la creacion del arbol
@@ -686,34 +686,68 @@ x_train, x_test, y_train, y_test = train_test_split(hotelsdfArbol_x,
                                                     random_state=9) #usamos la semilla 9 porque somos el grupo 9
 ```
 
-```python
+Ahora ya tenemos generados nuestros conjuntos de train y test; y tenemos nuesto dataframe con los datos numericos vamos a generar nuestro modelo
 
+```python
+#Vamos a iniciar con una profundidad maxima no muy alta devido al gran numero de columnas
+PROFUNDIDAD_MAX = 20
+
+#Creamos un clasificador con hiperparámetros 
+tree_model = tree.DecisionTreeClassifier(criterion="gini", #Gini es el criterio por defecto
+                                         max_depth = PROFUNDIDAD_MAX) 
+
+#Entrenamos el modelo con el conjunto de entrenamiento
+model = tree_model.fit(X = x_train, y = y_train)
 ```
 
 ```python
-hotelsdfArbol.head()
+#Realizamos una predicción sobre el set de test
+y_pred = model.predict(x_test)
+#Valores Predichos
+y_pred
 ```
 
 ```python
-hotelsdfArbol
+ds_resultados=pd.DataFrame(zip(y_test,y_pred),columns=['test','pred'])
+ds_resultados
+```
+
+Estas columns representan 20% de nuestro dataframe que fue dedicado al 
+
+```python
+#Creo la matriz de confusión
+tabla=confusion_matrix(y_test, y_pred)
+
+#Grafico la matriz de confusión
+sns.heatmap(tabla,cmap='GnBu',annot=True,fmt='g')
+plt.xlabel('Predicted')
+plt.ylabel('True')
 ```
 
 ```python
-#Creo un clasificador
-tree_model = tree.DecisionTreeClassifier(max_depth = 10)
+#Calculo las métricas en el conjunto de evaluación
+accuracy=accuracy_score(y_test,y_pred)
+recall=recall_score(y_test,y_pred)
+f1=f1_score(y_test,y_pred,)
+precision=precision_score(y_test,y_pred)
 
-#Entreno el modelo
-model = tree_model.fit(X = x_train, y = y_train) 
+print("Accuracy: "+str(accuracy))
+print("Recall: "+str(recall))
+print("Precision: "+str(precision))
+print("f1 score: "+str(f1))
 ```
 
 ```python
-model
+model.classes_
 ```
 
 ```python
+plt.figure(figsize=(100,100))
 
-```
-
-```python
-
+tree_plot_completo=tree.plot_tree(model,
+                                 feature_names=hotelsdfArbol_x.columns.to_list(),
+                                 filled=True,
+                                 rounded=True,
+                                 class_names=['Not Canceled','Is canceled']) #model.classes_
+plt.show(tree_plot_completo)
 ```
