@@ -541,8 +541,8 @@ COUNTRY_ALPHA2_TO_CONTINENT = {
 ## Cargamos el dataframe de testeo
 
 ```python
-hotelsdfTesteo = pd.read_csv("./hotels_test.csv")
-
+hotelsdfTesteoOriginal = pd.read_csv("./hotels_test.csv")
+hotelsdfTesteo = hotelsdfTesteoOriginal.copy()
 ```
 
 # Arbol de decisiones sin optimizacion
@@ -1136,6 +1136,10 @@ y_pred
 ```
 
 ```python
-df_submission = pd.DataFrame({'id': df_test['id'], 'is_canceled': y_pred})
+df_submission = pd.DataFrame({'id': hotelsdfTesteoOriginal['id'], 'is_canceled': y_pred})
 df_submission.head()
+```
+
+```python
+df_submission.to_csv('submissions/logistic-regression/initial_submission.csv', index=False)
 ```
