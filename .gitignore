@@ -1,5 +1,5 @@
 .ipynb_checkpoints/*
-notebook.ipynb
+*.ipynb
 *.aux
 *.log
 *.toc
