@@ -262,6 +262,7 @@ COUNTRY_ALPHA3_TO_COUNTRY_ALPHA2 = {
     'TKL': 'TK',
     'TKM': 'TM',
     'TON': 'TO',
+    'TMP': 'TP',
     'TTO': 'TT',
     'TUN': 'TN',
     'TUR': 'TR',
@@ -677,16 +678,16 @@ Esto lo podemos hacer gracias a que eliminamos todos nuestros valores faltantes 
 ```python
 #One hot encoding para variables categoricas, esto elimina las columnas categoricas y las reemplaza con el conjunto del hot encoding
 hotelsdfArbol = pd.get_dummies(hotelsdfArbol, columns=valoresAConvertir, drop_first=True)
+```
+
+Vamos a observar como nos quedo el dataframe despues del one hot encoding
+
+```python
 hotelsdfArbol.head()
 ```
 
-```python
-hotelsdfArbol
-```
+Observamos que hay una **gran** cantidad de columnas
 
-```python
-hotelsdfArbol.columns
-```
 
 ### Aplicamos mismas modificaciones al dataset de testeo
 
@@ -742,8 +743,6 @@ Antes de nada, vamos a procesar todos los datos faltantes del dataframe.
 hotelsdfTesteo.isnull().sum()
 ```
 
-##### company_id
-
 ```python
 print("Vemos que 'company id' tiene un " + str( (hotelsdfTesteo["company_id"].isnull().sum() * 100) / len(hotelsdfTesteo)  ) + "% de datos faltantes.")
 print("Por esto decidimos eliminar la columna (tanto en el dataset de testeo como en el de entrenamiento)")
@@ -758,65 +757,38 @@ hotelsdfTesteo.reset_index(drop=True)
 #Nosotros ya teniamos company_id dropeado del checkpoint anterior
 ```
 
-##### agent id
+### Valores a convertir
 
 
-Vamos a aplicar el mismo criterio que en el checkpoint 1
-
-```python
-#Reemplazamos valores faltantes por 0 ya que no existe previamente y servira para regular los tipos de atos de la columna
-hotelsdfTesteo.loc[hotelsdfTesteo['agent_id'].isnull(), 'agent_id'] = 0
-hotelsdfTesteo[hotelsdfTesteo.agent_id.isnull()]
-hotelsdfTesteo['agent_id'] = hotelsdfTesteo['agent_id'].astype(int)
-```
-
-##### country
-
-
-Vamos a aplicar el mismo criterio que en el checkpoint 1
+Siempre posible, vamos a aplicar el mismo criterio que arriba
 
 ```python
-#Para evitar la eliminacion de los registros y debido a la muy marcada tendencia de las reservas a venir de Portugal.
-hotelsdfTesteo.loc[hotelsdfTesteo['country'].isnull(), 'country'] = 'PRT'
+valoresAConvertirTesteo = hotelsdfTesteo.dtypes[(hotelsdfTesteo.dtypes !='int64') & (hotelsdfTesteo.dtypes !='float64')].index
+valoresAConvertirTesteo = valoresAConvertirTesteo.to_list()
+valoresAConvertirTesteo
 ```
 
-#### Transformamos las columnas cualitativas a numericas
-
-
-Tomamos el mismo criterio que en la seccion sobre el set de entrenamiento
-
-```python
-# valoresAConvertir = hotelsdfTesteo.dtypes[(hotelsdfTesteo.dtypes !='int64') & (hotelsdfTesteo.dtypes !='float64')].index
-# valoresAConvertir = valoresAConvertir.to_list()
-# valoresAConvertir
-```
-
-### Booking ID
+#### Booking ID
 
 ```python
 hotelsdfTesteo.drop("booking_id", axis=1, inplace=True)
 hotelsdfTesteo.reset_index(drop=True)
-#valoresAConvertir.remove('booking_id')
+valoresAConvertirTesteo.remove('booking_id')
 ```
 
-### Reservation Status & Reservation status date
-Po ahora la bajamos ver si dsps asumimos q noi viene con test
-TODO
+#### Reservation Status & Reservation status date
+
+
+
+Dropeamos estas columnas debido a que no nos dan ninguna informacion adicional
 
 ```python
 hotelsdfTesteo.drop("reservation_status_date", axis=1, inplace=True)
 hotelsdfTesteo.reset_index(drop=True)
-# valoresAConvertir.remove('reservation_status_date')
+valoresAConvertirTesteo.remove('reservation_status_date')
 ```
 
-### OJO RAAARO EN EL TEST NO ESTA SATATUS  PERO SI STATUS DFATE POR AHORA NO SE DROPEA
-
-```python
-# hotelsdfTesteo.drop("reservation_status_date", axis=1, inplace=True)
-# hotelsdfTesteo.reset_index(drop=True)
-```
-
-### Country y Continents
+#### Country y Continents
 
 ```python
 hotelsdfTesteo["continente"] = hotelsdfTesteo["country"].replace(COUNTRY_ALPHA3_TO_COUNTRY_ALPHA2)
@@ -840,7 +812,10 @@ Los estudiamos
 hotelsdfTesteo[ hotelsdfTesteo['continente'] =="ATA"]
 ```
 
-Hay un registro correspondiente a "antartida". como no podemos dropearlo, le ponemos de continente "north america"
+Hay un registro correspondiente a "antartida". como no podemos dropearlo, le ponemos de continente "north america".\
+Le asignamos el valor de America del norte debido a que estados unidos es el pais con mas bases en la antartica
+
+**TODO:CHEUQUEAR LO DE ARRIBA**
 
 ```python
 hotelsdfTesteo.loc[hotelsdfTesteo['continente'] == "ATA", 'continente'] = "North America"
@@ -850,24 +825,37 @@ hotelsdfTesteo.loc[hotelsdfTesteo['continente'] == "ATA", 'continente'] = "North
 hotelsdfTesteo[ hotelsdfTesteo['continente'] =="ATF"]
 ```
 
-Hay otro que es "ATF", que es la sigla de Fr. So. Ant. Tr )Frencha southern and antartic lands) Ponemos su contienente en Europa. 
+"ATF", que es la sigla de Fr. So. Ant. Tr (French southern and antartic lands).
+Ponemos su contienente en Europa. 
 
 ```python
 hotelsdfTesteo.loc[hotelsdfTesteo['continente'] == "ATF", 'continente'] = "Europe"
 ```
 
 ```python
-hotelsdfTesteo[ hotelsdfTesteo['continente'] =="ATF"]
+hotelsdfTesteo[hotelsdfTesteo['continente'] =="ATF"]
 ```
 
-Hay 2 registros correspondinetes a timor oriental. Le asignamos Asia
+#### Analisis de valores faltantes de continente
 
 ```python
-hotelsdfTesteo.loc[hotelsdfTesteo['continente'] == "TMP", 'continente'] = "Asia"
+hotelsdfTesteo[hotelsdfTesteo['continente'].isna()]
 ```
 
-## hay un nan, no se q onda. No tuve t de sacarlo
+Vemos que hay una serie de registros que no tienen el dato del pais. Sin embargo, no son muchos. Debido a esto, vamos a asignarle estos registros el valor de aquel contiente que tenga la mayor cantidad de registros
 
+```python
+sns.countplot(data = hotelsdfTesteo, x = 'continente', palette= 'Set2')
+plt.title('Cantidad de registros por continente')
+plt.xlabel('Continente')
+plt.ylabel('Cantidad de registros')
+```
+
+Vemos que el continente con mayor cantidad de registros es europa, asique lo asignamos a ese valor
+
+```python
+hotelsdfTesteo.loc[hotelsdfTesteo['continente'].isna()] = "Europe"
+```
 
 Miro q se hayan cambiado bien todos los continentes y no haya valores raros
 
@@ -877,14 +865,15 @@ print(continentes)
 #OJO CON EL NAN
 ```
 
-Como hicimos con el dataset de train, dropeamos la columna conutry
+Como hicimos con el dataset de train, y ya habiendo procesado la columna continente, dropeamos la columna country
 
 ```python
 hotelsdfTesteo=hotelsdfTesteo.drop(['country'], axis='columns', inplace=False)
 hotelsdfTesteo.reset_index(drop=True)
+valoresAConvertirTesteo.remove('country')
 ```
 
-### previous bookings not cancelled
+#### previous bookings not cancelled
 
 
 Al igual q en el train, dropeamos esta col
@@ -895,7 +884,7 @@ hotelsdfTesteo.reset_index(drop=True)
 ```
 
 ```python
-valoresAConvertir
+valoresAConvertirTesteo
 ```
 
 CREAMOS LAS DUMMIES EN EL DE TESTEO
@@ -906,7 +895,7 @@ hotelsdfTesteo.head()
 
 ```python
 #One hot encoding para variables categoricas, esto elimina las columnas categoricas y las reemplaza con el conjunto del hot encoding
-hotelsdfTesteo = pd.get_dummies(hotelsdfTesteo, columns=valoresAConvertir, drop_first=True)
+hotelsdfTesteo = pd.get_dummies(hotelsdfTesteo, columns=valoresAConvertirTesteo, drop_first=True)
 hotelsdfTesteo.head()
 ```
 
@@ -918,18 +907,8 @@ missing = list(sorted(set_test - set_arbol))
 added = list(sorted(set_arbol - set_test))
 
 print('missing:', missing)
-print('added:', added)
-```
-
-"ATF" hace referencia a islas francesas
-"TMP" hace referencia a timor oriental
-- https://www.iso.org/obp/ui#iso:code:3166:FQHH
-- https://www.iso.org/obp/ui#iso:code:3166:TP
-
-```python
-
-hotelsdfArbol.loc[hotelsdfArbol['country'] == "UMI", 'country'] = 'North America'
-hotelsdfArbol.loc[hotelsdfArbol['Continentes'] == "UMI", 'Continentes'] = 'North America'
+print('added:', added)-- https://www.iso.org/obp/ui#iso:code:3166:FQHH
+-- https://www.iso.org/obp/ui#iso:code:3166:TP
 ```
 
 ## Entrenamiento del modelo
