@@ -1099,14 +1099,14 @@ A continuacion vamos a graficar el arbol resultante: \
 (Advertencia: Suele tardar unos minutos en terminar de renderizar la imagen)
 
 ```python
-# plt.figure(figsize=(100,100))
+plt.figure(figsize=(100,100))
 
-# tree_plot_completo=tree.plot_tree(model,
-#                                  feature_names=hotelsdfArbol_x.columns.to_list(),
-#                                  filled=True,
-#                                  rounded=True,
-#                                  class_names=['Not Canceled','Is canceled']) #model.classes_
-# plt.show(tree_plot_completo)
+tree_plot_completo=tree.plot_tree(model,
+                                 feature_names=hotelsdfArbol_x.columns.to_list(),
+                                 filled=True,
+                                 rounded=True,
+                                 class_names=['Not Canceled','Is canceled']) #model.classes_
+plt.show(tree_plot_completo)
 ```
 
 Con la imagen se ve que el arbol resultante tiene unas dimensiones exageradas, vemos ademas que tiene una profundidad de 20 como especificamos
@@ -1141,5 +1141,5 @@ df_submission.head()
 ```
 
 ```python
-df_submission.to_csv('submissions/logistic-regression/initial_submission.csv', index=False)
+df_submission.to_csv('submissions/arbol_decisiones_ineficiente.csv', index=False)
 ```
