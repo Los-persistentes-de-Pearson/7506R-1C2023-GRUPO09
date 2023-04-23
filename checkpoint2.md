@@ -542,6 +542,7 @@ COUNTRY_ALPHA2_TO_CONTINENT = {
 
 ```python
 hotelsdfTesteo = pd.read_csv("./hotels_test.csv")
+
 ```
 
 # Arbol de decisiones sin optimizacion
@@ -1132,4 +1133,9 @@ print("f1 score: "+str(f1))
 y_pred = model.predict(hotelsdfTesteo)
 #Valores Predichos
 y_pred
+```
+
+```python
+df_submission = pd.DataFrame({'id': df_test['id'], 'is_canceled': y_pred})
+df_submission.head()
 ```
