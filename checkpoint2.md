@@ -13,7 +13,7 @@ jupyter:
     name: python3
 ---
 
-## Importamos
+# Importamos
 ```python
 try:
   import google.colab
@@ -262,6 +262,7 @@ COUNTRY_ALPHA3_TO_COUNTRY_ALPHA2 = {
     'TKL': 'TK',
     'TKM': 'TM',
     'TON': 'TO',
+    'TMP': 'TP',
     'TTO': 'TT',
     'TUN': 'TN',
     'TUR': 'TR',
@@ -537,6 +538,12 @@ COUNTRY_ALPHA2_TO_CONTINENT = {
 }
 ```
 
+## Cargamos el dataframe de testeo
+
+```python
+hotelsdfTesteo = pd.read_csv("./hotels_test.csv")
+```
+
 # Arbol de decisiones sin optimizacion
 
 
@@ -552,6 +559,20 @@ Vamos a crear una copia de nuestro dataframe para la creacion del arbol
 hotelsdfCheckpoint1 = pd.read_csv("./dataframeCheckpoint1.csv")
 hotelsdfArbol = hotelsdfCheckpoint1.copy()
 print("El data frame esta compuesto por "f"{hotelsdfArbol.shape[0]}"" filas y "f"{hotelsdfArbol.shape[1]}"" columnas")
+```
+
+Un vistazo básico a la información contenida en el dataframe:
+
+```python
+pd.concat([hotelsdfArbol.head(2), hotelsdfArbol.sample(5), hotelsdfArbol.tail(2)])
+```
+
+Vemos que tenemos una columa extra "Unnamed: 0". Esta hace referencia la columna de origen del registro. Procedemos a borrarla
+
+```python
+hotelsdfArbol.drop("Unnamed: 0", axis=1, inplace=True)
+hotelsdfArbol.reset_index(drop=True)
+print()
 ```
 
 ## Transformacion de las columnas para la creacion del arbol
@@ -600,11 +621,11 @@ valoresAConvertir.remove('reservation_status_date')
 ```
 
 ### Country
-Country toma una amplia cantidad de valores como vimos en el analisis univariado. Asique decidimos agrupar los paises por continentes para poder usar la variable
+Country toma una amplia cantidad de valores como vimos en el analisis univariado. Asique decidimos agrupar los paises por continente para poder usar la variable
 
 ```python
-hotelsdfArbol["Continentes"] = hotelsdfArbol["country"].replace(COUNTRY_ALPHA3_TO_COUNTRY_ALPHA2)
-hotelsdfArbol["Continentes"] = hotelsdfArbol["Continentes"].replace(COUNTRY_ALPHA2_TO_CONTINENT)
+hotelsdfArbol["continente"] = hotelsdfArbol["country"].replace(COUNTRY_ALPHA3_TO_COUNTRY_ALPHA2)
+hotelsdfArbol["continente"] = hotelsdfArbol["continente"].replace(COUNTRY_ALPHA2_TO_CONTINENT)
 ```
 
 ```python
@@ -613,7 +634,7 @@ print(country)
 ```
 
 ```python
-country = hotelsdfArbol['Continentes'].unique().tolist()
+country = hotelsdfArbol['continente'].unique().tolist()
 print(country) 
 ```
 
@@ -636,14 +657,14 @@ Fuentes:
 
 ```python
 hotelsdfArbol.loc[hotelsdfArbol['country'] == "UMI", 'country'] = 'North America'
-hotelsdfArbol.loc[hotelsdfArbol['Continentes'] == "UMI", 'Continentes'] = 'North America'
+hotelsdfArbol.loc[hotelsdfArbol['continente'] == "UMI", 'continente'] = 'North America'
 ```
 
-Con estos nuevos cambios, la columna Continentes toma los siguientes valores
+Con estos nuevos cambios, la columna continente toma los siguientes valores
 
 ```python
-country = hotelsdfArbol['Continentes'].unique().tolist()
-print(country) 
+continente = hotelsdfArbol['continente'].unique().tolist()
+print(continente) 
 ```
 
 Procedemos a dropear la columna de country
@@ -651,14 +672,15 @@ Procedemos a dropear la columna de country
 ```python
 hotelsdfArbol=hotelsdfArbol.drop(['country'], axis='columns', inplace=False)
 valoresAConvertir.remove('country')
-valoresAConvertir.append('Continentes')
+valoresAConvertir.append('continente')
 hotelsdfArbol.reset_index(drop=True)
 ```
 
+```python
+valoresAConvertir
+```
+
 ### One hot encoding
-
-
-
 
 
 Vamos a transformar dichas variables categoricas con la tecnica de one hot encoding. \
@@ -669,8 +691,333 @@ Esto lo podemos hacer gracias a que eliminamos todos nuestros valores faltantes 
 ```python
 #One hot encoding para variables categoricas, esto elimina las columnas categoricas y las reemplaza con el conjunto del hot encoding
 hotelsdfArbol = pd.get_dummies(hotelsdfArbol, columns=valoresAConvertir, drop_first=True)
+```
+
+Vamos a observar como nos quedo el dataframe despues del one hot encoding
+
+```python
 hotelsdfArbol.head()
 ```
+
+Observamos que hay una **gran** cantidad de columnas
+
+
+### Aplicamos mismas modificaciones al dataset de testeo
+
+
+Ahora vamos a aplicar las mismas modificaciones y encodings al dataframe de testeo para poder aplicarle el modelo
+
+
+Empezamos cambiando el nombre de las columnas para que coincida con el de nuestro dataframe
+
+```python
+nuevas_columnas = {
+    'adr':'average_daily_rate',
+    'adults':'adult_num',
+    'agent':'agent_id',
+    'arrival_date_day_of_month':'arrival_month_day',
+    'arrival_date_month':'arrival_month',
+    'arrival_date_week_number':'arrival_week_number',
+    'arrival_date_year':'arrival_year',
+    'assigned_room_type':'assigned_room_type',
+    'babies':'babies_num',
+    'booking_changes':'booking_changes_num',
+    'children':'children_num',
+    'company':'company_id',
+    'country':'country',
+    'customer_type':'customer_type',
+    'days_in_waiting_list':'days_in_waiting_list',
+    'deposit_type':'deposit_type',
+    'distribution_channel':'distribution_channel',
+    'hotel':'hotel_name',
+    'id':'booking_id',
+    'is_repeated_guest':'is_repeated_guest',
+    'lead_time':'lead_time',
+    'market_segment':'market_segment_type',
+    'meal':'meal_type',
+    'previous_bookings_not_canceled':'previous_bookings_not_canceled_num',
+    'previous_cancellations':'previous_cancellations_num',
+    'required_car_parking_spaces':'required_car_parking_spaces_num',
+    'reserved_room_type':'reserved_room_type',
+    'stays_in_weekend_nights':'weekend_nights_num',
+    'stays_in_week_nights':'week_nights_num',
+    'total_of_special_requests':'special_requests_num',
+}
+
+hotelsdfTesteo.rename(columns = nuevas_columnas, inplace = True)
+```
+
+Antes de nada, vamos a procesar todos los datos faltantes del dataframe.
+
+
+#### Dias Totales
+
+
+Anadimos la columna que creamos en el checkpoint 1
+
+```python
+hotelsdfTesteo["dias_totales"] = hotelsdfTesteo["week_nights_num"] + hotelsdfTesteo["weekend_nights_num"]
+```
+
+#### Datos faltantes
+
+```python
+hotelsdfTesteo.isnull().sum()
+```
+
+```python
+print("Vemos que 'company id' tiene un " + str( (hotelsdfTesteo["company_id"].isnull().sum() * 100) / len(hotelsdfTesteo)  ) + "% de datos faltantes.")
+print("Por esto decidimos eliminar la columna (tanto en el dataset de testeo como en el de entrenamiento)")
+```
+
+```python
+hotelsdfTesteo.drop("company_id", axis=1, inplace=True)
+hotelsdfTesteo.reset_index(drop=True)
+
+#hotelsdfArbol.drop("company_id", axis=1, inplace=True)
+#hotelsdfArbol.reset_index(drop=True)
+#Nosotros ya teniamos company_id dropeado del checkpoint anterior
+```
+
+### Valores a convertir
+
+
+Siempre posible, vamos a aplicar el mismo criterio que arriba
+
+```python
+valoresAConvertirTesteo = hotelsdfTesteo.dtypes[(hotelsdfTesteo.dtypes !='int64') & (hotelsdfTesteo.dtypes !='float64')].index
+valoresAConvertirTesteo = valoresAConvertirTesteo.to_list()
+valoresAConvertirTesteo
+```
+
+#### Booking ID
+
+```python
+hotelsdfTesteo.drop("booking_id", axis=1, inplace=True)
+hotelsdfTesteo.reset_index(drop=True)
+valoresAConvertirTesteo.remove('booking_id')
+```
+
+#### Reservation Status & Reservation status date
+
+
+
+Dropeamos estas columnas debido a que no nos dan ninguna informacion adicional
+
+```python
+hotelsdfTesteo.drop("reservation_status_date", axis=1, inplace=True)
+hotelsdfTesteo.reset_index(drop=True)
+valoresAConvertirTesteo.remove('reservation_status_date')
+```
+
+#### Country y Continents
+
+```python
+hotelsdfTesteo["continente"] = hotelsdfTesteo["country"].replace(COUNTRY_ALPHA3_TO_COUNTRY_ALPHA2)
+hotelsdfTesteo["continente"] = hotelsdfTesteo["continente"].replace(COUNTRY_ALPHA2_TO_CONTINENT)
+```
+
+```python
+country = hotelsdfTesteo['country'].unique().tolist()
+valoresAConvertirTesteo.append("continente")
+print(country) 
+```
+
+```python
+continentes = hotelsdfTesteo['continente'].unique().tolist()
+print(continentes) 
+```
+
+Tal como ocurrio con el dataset de Train, observamos que hay algunos continente (y por tanto sus paises y registros asociados) que parecen ser outliers.
+Los estudiamos
+
+```python
+hotelsdfTesteo[ hotelsdfTesteo['continente'] =="ATA"]
+```
+
+Hay un registro correspondiente a "antartida". como no podemos dropearlo, le ponemos de continente "north america".\
+Le asignamos el valor de America del norte debido a que estados unidos es el pais con mas bases en la antartica
+
+**TODO:CHEUQUEAR LO DE ARRIBA**
+
+```python
+hotelsdfTesteo.loc[hotelsdfTesteo['continente'] == "ATA", 'continente'] = "North America"
+```
+
+```python
+hotelsdfTesteo[ hotelsdfTesteo['continente'] =="ATF"]
+```
+
+"ATF", que es la sigla de Fr. So. Ant. Tr (French southern and antartic lands).
+Ponemos su contienente en Europa. 
+
+```python
+hotelsdfTesteo.loc[hotelsdfTesteo['continente'] == "ATF", 'continente'] = "Europe"
+```
+
+```python
+hotelsdfTesteo[hotelsdfTesteo['continente'] =="ATF"]
+```
+
+#### Analisis de valores faltantes de continente
+
+```python
+hotelsdfTesteo[hotelsdfTesteo['continente'].isna()]
+```
+
+Vemos que hay una serie de registros que no tienen el dato del pais. Sin embargo, no son muchos. Debido a esto, vamos a asignarle estos registros el valor de aquel contiente que tenga la mayor cantidad de registros
+
+```python
+sns.countplot(data = hotelsdfTesteo, x = 'continente', palette= 'Set2')
+plt.title('Cantidad de registros por continente')
+plt.xlabel('Continente')
+plt.ylabel('Cantidad de registros')
+```
+
+Vemos que el continente con mayor cantidad de registros es europa, asique lo asignamos a ese valor
+
+```python
+#hotelsdfTesteo.loc[hotelsdfTesteo['continente'].isna()] = "Europe"
+hotelsdfTesteo.loc[hotelsdfTesteo['continente'].isnull(), 'country'] = 'Europe'
+```
+
+Miro q se hayan cambiado bien todos los continentes y no haya valores raros
+
+```python
+continentes = hotelsdfTesteo['continente'].unique().tolist()
+print(continentes)
+#OJO CON EL NAN
+```
+
+Como hicimos con el dataset de train, y ya habiendo procesado la columna continente, dropeamos la columna country
+
+```python
+hotelsdfTesteo=hotelsdfTesteo.drop(['country'], axis='columns', inplace=False)
+hotelsdfTesteo.reset_index(drop=True)
+valoresAConvertirTesteo.remove('country')
+```
+
+#### previous bookings not cancelled
+
+
+Al igual q en el train, dropeamos esta col
+
+```python
+hotelsdfTesteo=hotelsdfTesteo.drop(['previous_bookings_not_canceled_num'], axis='columns', inplace=False)
+hotelsdfTesteo.reset_index(drop=True)
+```
+
+### One hot encoding del testeo
+
+```python
+#One hot encoding para variables categoricas, esto elimina las columnas categoricas y las reemplaza con el conjunto del hot encoding
+hotelsdfTesteo = pd.get_dummies(hotelsdfTesteo, columns=valoresAConvertirTesteo, drop_first=True)
+hotelsdfTesteo.head()
+```
+
+### Corroboracion de columnas
+
+
+Despues de todas estas transformaciones vamos a corrobar que los dataframes tengan la misma cantidad de columnas.
+
+```python
+set_test = set(hotelsdfTesteo.columns)
+set_arbol = set(hotelsdfArbol.columns)
+
+missing = list(sorted(set_test - set_arbol))
+added = list(sorted(set_arbol - set_test))
+
+print('Faltan en arbol:', missing)
+print('Sobran en arbol:', added)
+```
+
+Vemos que en el dataframe del arbol nos sobra la columna "is canceled", cosa que hace sentido ya que esa es la columna con la que vamos a entrenar al dataset. Sin embargo, vemos que tambien hay 3 columnas que faltan en el dataset de arbol. 
+
+
+Vamos a reasignar los valores de las columnas de test para que coincidan.
+
+El siguiente codigo nos calcula cuantas personas tiene cada tipo de cuarto
+
+```python
+cantDeCuartos = {}
+cantidadDeCasosSumados = 0
+
+cantDeCuartos["A"] = 0 #Arrancamos asignado 0 a los cuartos de A. Estos fueron removidos por el one hot. Lo vamos a calcular al final.
+for letra in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']:
+    tipoDeCuarto = 'reserved_room_type_' + letra
+    cantidadDeCasosSumados += 1
+    if tipoDeCuarto not in hotelsdfTesteo.columns:
+        continue
+    hotelsdfTesteo[tipoDeCuarto]
+    #print("SSUS")
+    resultado = hotelsdfTesteo[hotelsdfTesteo[tipoDeCuarto] == 1][tipoDeCuarto].sum()
+    cantDeCuartos[letra] = resultado
+
+cuartosA = len(hotelsdfTesteo) - cantidadDeCasosSumados
+cantDeCuartos["A"] = cuartosA
+
+
+cantDeCuartos
+```
+
+Vemos que L y P tienen una extremadamente pequena cantidad de apariciones. \
+Lo vamos a anadir al roomtype A al ser el que tiene la mayor cantidad de apariciones.
+
+Para anadirlos a la columna a, simplemente tenemos que eliminar las columnas L y P (ya que la columna A es la eliminada por el one hot)
+
+```python
+hotelsdfTesteo.drop("reserved_room_type_L", axis=1, inplace=True)
+hotelsdfTesteo.drop("reserved_room_type_P", axis=1, inplace=True)
+hotelsdfTesteo.reset_index(drop=True)
+print()
+```
+
+Vamos a aplicar el mismo criterio a assigned room type
+
+```python
+cantDeCuartos = {}
+cantidadDeCasosSumados = 0
+
+cantDeCuartos["A"] = 0 #Arrancamos asignado 0 a los cuartos de A. Estos fueron removidos por el one hot. Lo vamos a calcular al final.
+for letra in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']:
+    tipoDeCuarto = 'assigned_room_type_' + letra
+    cantidadDeCasosSumados += 1
+    if tipoDeCuarto not in hotelsdfTesteo.columns:
+        continue
+    hotelsdfTesteo[tipoDeCuarto]
+    #print("SSUS")
+    resultado = hotelsdfTesteo[hotelsdfTesteo[tipoDeCuarto] == 1][tipoDeCuarto].sum()
+    cantDeCuartos[letra] = resultado
+
+cuartosA = len(hotelsdfTesteo) - cantidadDeCasosSumados
+cantDeCuartos["A"] = cuartosA
+
+
+cantDeCuartos
+```
+
+Aca tambien vemos que P tiene muy pocas aparciones. Asique aplicamos el mismo criterio de antes
+
+```python
+hotelsdfTesteo.drop("assigned_room_type_P", axis=1, inplace=True)
+hotelsdfTesteo.reset_index(drop=True)
+print()
+```
+
+Vemos ahora que nuestras columnas coinciden
+
+```python
+set_test = set(hotelsdfTesteo.columns)
+set_arbol = set(hotelsdfArbol.columns)
+
+missing = list(sorted(set_test - set_arbol))
+added = list(sorted(set_arbol - set_test))
+
+print('Faltan en arbol:', missing)
+print('Sobran en arbol:', added)
+```
+
+## Entrenamiento del modelo
 
 ```python
 #Creamos un dataset con los features que vamos a usar para tratar de predecir el target
@@ -731,14 +1078,14 @@ A continuacion vamos a graficar el arbol resultante: \
 (Advertencia: Suele tardar unos minutos en terminar de renderizar la imagen)
 
 ```python
-plt.figure(figsize=(100,100))
+# plt.figure(figsize=(100,100))
 
-tree_plot_completo=tree.plot_tree(model,
-                                 feature_names=hotelsdfArbol_x.columns.to_list(),
-                                 filled=True,
-                                 rounded=True,
-                                 class_names=['Not Canceled','Is canceled']) #model.classes_
-plt.show(tree_plot_completo)
+# tree_plot_completo=tree.plot_tree(model,
+#                                  feature_names=hotelsdfArbol_x.columns.to_list(),
+#                                  filled=True,
+#                                  rounded=True,
+#                                  class_names=['Not Canceled','Is canceled']) #model.classes_
+# plt.show(tree_plot_completo)
 ```
 
 Con la imagen se ve que el arbol resultante tiene unas dimensiones exageradas, vemos ademas que tiene una profundidad de 20 como especificamos
@@ -759,3 +1106,38 @@ print("f1 score: "+str(f1))
 ```
 
 Ahora vamos a compararlo con el dataset de testeo de verdad
+
+```python
+#Creamos un dataset con los features que vamos a usar para tratar de predecir el target
+hotelsdfArbol_x=hotelsdfArbol.drop(['is_canceled'], axis='columns', inplace=False)
+
+#Creo un dataset con la variable target
+hotelsdfTesteo_predecir = hotelsdfTesteo['is_canceled'].copy()
+
+#Genero los conjuntos de train y de test
+x_train, x_test, y_train, y_test = train_test_split(hotelsdfArbol_x,
+                                                    hotelsdfArbol_y, 
+                                                    test_size=0.2,  #proporcion 80/20
+                                                    random_state=9) #usamos la semilla 9 porque somos el grupo 9
+```
+
+```python
+#Realizamos una predicción sobre el set de test
+y_pred = model.predict(hotelsdfTesteo)
+#Valores Predichos
+y_pred
+```
+
+```python
+hotelsdfTesteo
+```
+
+
+
+```python
+hotelsdfArbol
+```
+
+```python
+
+```
