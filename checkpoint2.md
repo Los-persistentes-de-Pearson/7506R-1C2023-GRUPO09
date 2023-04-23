@@ -726,12 +726,11 @@ Antes de nada, vamos a procesar todos los datos faltantes del dataframe.
 
 #### Datos faltantes
 
-
-##### 
-
 ```python
 hotelsdfTesteo.isnull().sum()
 ```
+
+##### company_id
 
 ```python
 print("Vemos que 'company id' tiene un " + str( (hotelsdfTesteo["company_id"].isnull().sum() * 100) / len(hotelsdfTesteo)  ) + "% de datos faltantes.")
@@ -747,9 +746,32 @@ hotelsdfTesteo.reset_index(drop=True)
 #Nosotros ya teniamos company_id dropeado del checkpoint anterior
 ```
 
-```python
+##### agent id
 
+
+Vamos a aplicar el mismo criterio que en el checkpoint 1
+
+```python
+#Reemplazamos valores faltantes por 0 ya que no existe previamente y servira para regular los tipos de atos de la columna
+hotelsdfTesteo.loc[hotelsdfTesteo['agent_id'].isnull(), 'agent_id'] = 0
+hotelsdfTesteo[hotelsdfTesteo.agent_id.isnull()]
+hotelsdfTesteo['agent_id'] = hotelsdfTesteo['agent_id'].astype(int)
 ```
+
+##### country
+
+
+Vamos a aplicar el mismo criterio que en el checkpoint 1
+
+```python
+#Para evitar la eliminacion de los registros y debido a la muy marcada tendencia de las reservas a venir de Portugal.
+hotelsdfTesteo.loc[hotelsdfTesteo['country'].isnull(), 'country'] = 'PRT'
+```
+
+#### Transformamos las columnas cualitativas a numericas
+
+
+Tomamos el mismo criterio que en la seccion sobre el set de entrenamiento
 
 ```python
 valoresAConvertir = hotelsdfTesteo.dtypes[(hotelsdfTesteo.dtypes !='int64') & (hotelsdfTesteo.dtypes !='float64')].index
@@ -782,6 +804,17 @@ print(country)
 ```python
 country = hotelsdfTesteo['Continentes'].unique().tolist()
 print(country) 
+```
+
+"ATF" hace referencia a islas francesas
+"TMP" hace referencia a timor oriental
+- https://www.iso.org/obp/ui#iso:code:3166:FQHH
+- https://www.iso.org/obp/ui#iso:code:3166:TP
+
+```python
+
+hotelsdfArbol.loc[hotelsdfArbol['country'] == "UMI", 'country'] = 'North America'
+hotelsdfArbol.loc[hotelsdfArbol['Continentes'] == "UMI", 'Continentes'] = 'North America'
 ```
 
 ## Entrenamiento del modelo
