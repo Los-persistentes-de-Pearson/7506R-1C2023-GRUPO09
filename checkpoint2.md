@@ -798,6 +798,15 @@ hotelsdfTesteo.reset_index(drop=True)
 valoresAConvertirTesteo.remove('booking_id')
 ```
 
+#### Agent ID
+
+
+Tomamos el mismo criterio que el checkpoint 1. Transformamos a 0
+
+```python
+hotelsdfTesteo.loc[hotelsdfTesteo['agent_id'].isnull(), 'agent_id'] = 0
+```
+
 #### Reservation Status & Reservation status date
 
 
@@ -811,6 +820,13 @@ valoresAConvertirTesteo.remove('reservation_status_date')
 ```
 
 #### Country y Continents
+
+
+Para los valores faltantes de country tomamos el mismo criterio del checkpoint 1. Los convertimos en portugal
+
+```python
+hotelsdfTesteo.loc[hotelsdfTesteo['country'].isnull(), 'country'] = 'PRT'
+```
 
 ```python
 hotelsdfTesteo["continente"] = hotelsdfTesteo["country"].replace(COUNTRY_ALPHA3_TO_COUNTRY_ALPHA2)
@@ -905,6 +921,10 @@ Al igual q en el train, dropeamos esta col
 ```python
 hotelsdfTesteo=hotelsdfTesteo.drop(['previous_bookings_not_canceled_num'], axis='columns', inplace=False)
 hotelsdfTesteo.reset_index(drop=True)
+```
+
+```python
+hotelsdfTesteo.isnull().sum() #AMONGUS
 ```
 
 ### One hot encoding del testeo
@@ -1105,39 +1125,11 @@ print("Precision: "+str(precision))
 print("f1 score: "+str(f1))
 ```
 
-Ahora vamos a compararlo con el dataset de testeo de verdad
-
-```python
-#Creamos un dataset con los features que vamos a usar para tratar de predecir el target
-hotelsdfArbol_x=hotelsdfArbol.drop(['is_canceled'], axis='columns', inplace=False)
-
-#Creo un dataset con la variable target
-hotelsdfTesteo_predecir = hotelsdfTesteo['is_canceled'].copy()
-
-#Genero los conjuntos de train y de test
-x_train, x_test, y_train, y_test = train_test_split(hotelsdfArbol_x,
-                                                    hotelsdfArbol_y, 
-                                                    test_size=0.2,  #proporcion 80/20
-                                                    random_state=9) #usamos la semilla 9 porque somos el grupo 9
-```
+## Ahora vamos a compararlo con el dataset de testeo de verdad
 
 ```python
 #Realizamos una predicción sobre el set de test
 y_pred = model.predict(hotelsdfTesteo)
 #Valores Predichos
 y_pred
-```
-
-```python
-hotelsdfTesteo
-```
-
-
-
-```python
-hotelsdfArbol
-```
-
-```python
-
 ```
