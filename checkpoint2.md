@@ -1040,6 +1040,10 @@ print('Sobran en arbol:', added)
 
 ## Entrenamiento del modelo
 
+
+### Nosotros elejimos como "features" todas las columnas entonces?? Se supone q ese decarte de cols fue el checkpoint 1 y lo de arriba?
+TODO
+
 ```python
 #Creamos un dataset con los features que vamos a usar para tratar de predecir el target
 hotelsdfArbol_x=hotelsdfArbol.drop(['is_canceled'], axis='columns', inplace=False)
@@ -1124,6 +1128,140 @@ print("Accuracy: "+str(accuracy))
 print("Recall: "+str(recall))
 print("Precision: "+str(precision))
 print("f1 score: "+str(f1))
+```
+
+## Randomized Serach Cross Validation
+
+
+### OJOOOOO TODOOO PUSE 1, 30 NO ES UNA BANDA!!!??
+
+```python
+##KFOLD CV Random Search para buscar el mejor arbol (los mejores atributos, hiperparametros,etc)
+from sklearn.model_selection import StratifiedKFold, KFold,RandomizedSearchCV
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import make_scorer
+
+#Cantidad de combinaciones que quiero porbar
+n=10 
+
+#Conjunto de parámetros que quiero usar
+params_grid = {'criterion':['gini','entropy'],
+               #'min_samples_leaf':list(range(1,10)),
+               #'min_samples_split': list(range(2,20)),
+               'ccp_alpha':np.linspace(0,0.005,n), 
+               'max_depth':list(range(1,30))}
+
+#-------OJOOOOO TODOOO PUSE 1, 30 NO ES UNA BANDA!!!??                
+#CON 30 ---> F1 SCORE = 0,8
+#CON 10 ---> F1 SCORE = 0,75 q es mas bajo q el arbol gigante....
+
+#Cantidad de splits para el Cross Validation
+folds=5
+
+#Kfold estratificado
+kfoldcv = StratifiedKFold(n_splits=folds)
+
+#Clasificador
+base_tree = DecisionTreeClassifier() 
+
+#Metrica que quiero optimizar F1 Score
+scorer_fn = make_scorer(sk.metrics.f1_score)
+
+#Random Search Cross Validation
+randomcv = RandomizedSearchCV(estimator=base_tree,
+                              param_distributions = params_grid,
+                              scoring=scorer_fn,
+                              cv=kfoldcv,
+                              n_iter=n) 
+
+#Busco los hiperparamtros que optimizan F1 Score
+randomcv.fit(x_train,y_train);
+```
+
+```python
+#Mejores hiperparametros del arbol
+print(randomcv.best_params_)
+#Mejor métrica
+print(randomcv.best_score_)
+```
+
+```python
+randomcv.cv_results_['mean_test_score']
+```
+
+#### Atributos considerados y su importancia
+
+```python
+#Atributos considerados y su importancia
+features_considerados = hotelsdfArbol_x.columns.to_list()
+
+best_tree = randomcv.best_estimator_
+feat_imps = best_tree.feature_importances_
+
+for feat_imp,feat in sorted(zip(feat_imps,features_considerados)):
+  if feat_imp>0:
+    print('{}: {}'.format(feat,feat_imp))
+```
+
+## Predicción y Evaluación del Modelo con mejores hiperparámetros
+
+```python
+#Creo el árbol con los mejores hiperparámetros
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.tree import export_text
+
+arbol=DecisionTreeClassifier().set_params(**randomcv.best_params_)
+
+#Entreno el arbol en todo el set
+arbol.fit(x_train,y_train)
+
+reglas = export_text(arbol, feature_names=list(features_considerados))
+print(reglas)
+```
+
+## Arbol pero mas lindo
+
+```python
+# from six import StringIO
+# from IPython.display import Image  
+# from sklearn.tree import export_graphviz
+# import pydotplus
+# import matplotlib.pyplot as plt
+
+# dot_data = StringIO()
+# export_graphviz(arbol, out_file=dot_data,  
+#                 filled=True, rounded=True,
+#                 special_characters=True,
+#                 feature_names=features_considerados,
+#                 class_names=['good','bad'])
+
+# graph = pydotplus.graph_from_dot_data(dot_data.getvalue())  
+# Image(graph.create_png())
+```
+
+### Prediccion con split de train
+
+```python
+#Evalúo el Arbol con los mejores hiperparámetros
+from sklearn.metrics import confusion_matrix, classification_report , f1_score
+
+#Hago predicción sobre el set de evaluacion
+y_pred= arbol.predict(x_test)
+
+#Arbol Reporte y Matriz de Confusion
+#print(classification_report(y_test,y_pred))
+print('F1-Score: {}'.format(f1_score(y_test, y_pred, average='binary'))) #binary considera la clase positiva por defecto 1
+
+cm = confusion_matrix(y_test,y_pred)
+sns.heatmap(cm, cmap='Blues',annot=True,fmt='g')
+plt.xlabel('Predicted')
+plt.ylabel('True')
+```
+
+### Muestro Output feo
+
+```python
+arbol.predict_proba(x_test)
 ```
 
 ## Ahora vamos a compararlo con el dataset de testeo de verdad
