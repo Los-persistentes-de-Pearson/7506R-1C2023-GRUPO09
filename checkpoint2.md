@@ -542,7 +542,6 @@ COUNTRY_ALPHA2_TO_CONTINENT = {
 
 ```python
 hotelsdfTesteo = pd.read_csv("./hotels_test.csv")
-
 ```
 
 # Arbol de decisiones sin optimizacion
@@ -560,6 +559,20 @@ Vamos a crear una copia de nuestro dataframe para la creacion del arbol
 hotelsdfCheckpoint1 = pd.read_csv("./dataframeCheckpoint1.csv")
 hotelsdfArbol = hotelsdfCheckpoint1.copy()
 print("El data frame esta compuesto por "f"{hotelsdfArbol.shape[0]}"" filas y "f"{hotelsdfArbol.shape[1]}"" columnas")
+```
+
+Un vistazo básico a la información contenida en el dataframe:
+
+```python
+pd.concat([hotelsdfArbol.head(2), hotelsdfArbol.sample(5), hotelsdfArbol.tail(2)])
+```
+
+Vemos que tenemos una columa extra "Unnamed: 0". Esta hace referencia la columna de origen del registro. Procedemos a borrarla
+
+```python
+hotelsdfArbol.drop("Unnamed: 0", axis=1, inplace=True)
+hotelsdfArbol.reset_index(drop=True)
+print()
 ```
 
 ## Transformacion de las columnas para la creacion del arbol
@@ -737,6 +750,15 @@ hotelsdfTesteo.rename(columns = nuevas_columnas, inplace = True)
 Antes de nada, vamos a procesar todos los datos faltantes del dataframe.
 
 
+#### Dias Totales
+
+
+Anadimos la columna que creamos en el checkpoint 1
+
+```python
+hotelsdfTesteo["dias_totales"] = hotelsdfTesteo["week_nights_num"] + hotelsdfTesteo["weekend_nights_num"]
+```
+
 #### Datos faltantes
 
 ```python
@@ -797,6 +819,7 @@ hotelsdfTesteo["continente"] = hotelsdfTesteo["continente"].replace(COUNTRY_ALPH
 
 ```python
 country = hotelsdfTesteo['country'].unique().tolist()
+valoresAConvertirTesteo.append("continente")
 print(country) 
 ```
 
@@ -854,7 +877,8 @@ plt.ylabel('Cantidad de registros')
 Vemos que el continente con mayor cantidad de registros es europa, asique lo asignamos a ese valor
 
 ```python
-hotelsdfTesteo.loc[hotelsdfTesteo['continente'].isna()] = "Europe"
+#hotelsdfTesteo.loc[hotelsdfTesteo['continente'].isna()] = "Europe"
+hotelsdfTesteo.loc[hotelsdfTesteo['continente'].isnull(), 'country'] = 'Europe'
 ```
 
 Miro q se hayan cambiado bien todos los continentes y no haya valores raros
@@ -883,21 +907,18 @@ hotelsdfTesteo=hotelsdfTesteo.drop(['previous_bookings_not_canceled_num'], axis=
 hotelsdfTesteo.reset_index(drop=True)
 ```
 
-```python
-valoresAConvertirTesteo
-```
-
-CREAMOS LAS DUMMIES EN EL DE TESTEO
-
-```python
-hotelsdfTesteo.head()
-```
+### One hot encoding del testeo
 
 ```python
 #One hot encoding para variables categoricas, esto elimina las columnas categoricas y las reemplaza con el conjunto del hot encoding
 hotelsdfTesteo = pd.get_dummies(hotelsdfTesteo, columns=valoresAConvertirTesteo, drop_first=True)
 hotelsdfTesteo.head()
 ```
+
+### Corroboracion de columnas
+
+
+Despues de todas estas transformaciones vamos a corrobar que los dataframes tengan la misma cantidad de columnas.
 
 ```python
 set_test = set(hotelsdfTesteo.columns)
@@ -906,9 +927,94 @@ set_arbol = set(hotelsdfArbol.columns)
 missing = list(sorted(set_test - set_arbol))
 added = list(sorted(set_arbol - set_test))
 
-print('missing:', missing)
-print('added:', added)-- https://www.iso.org/obp/ui#iso:code:3166:FQHH
--- https://www.iso.org/obp/ui#iso:code:3166:TP
+print('Faltan en arbol:', missing)
+print('Sobran en arbol:', added)
+```
+
+Vemos que en el dataframe del arbol nos sobra la columna "is canceled", cosa que hace sentido ya que esa es la columna con la que vamos a entrenar al dataset. Sin embargo, vemos que tambien hay 3 columnas que faltan en el dataset de arbol. 
+
+
+Vamos a reasignar los valores de las columnas de test para que coincidan.
+
+El siguiente codigo nos calcula cuantas personas tiene cada tipo de cuarto
+
+```python
+cantDeCuartos = {}
+cantidadDeCasosSumados = 0
+
+cantDeCuartos["A"] = 0 #Arrancamos asignado 0 a los cuartos de A. Estos fueron removidos por el one hot. Lo vamos a calcular al final.
+for letra in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']:
+    tipoDeCuarto = 'reserved_room_type_' + letra
+    cantidadDeCasosSumados += 1
+    if tipoDeCuarto not in hotelsdfTesteo.columns:
+        continue
+    hotelsdfTesteo[tipoDeCuarto]
+    #print("SSUS")
+    resultado = hotelsdfTesteo[hotelsdfTesteo[tipoDeCuarto] == 1][tipoDeCuarto].sum()
+    cantDeCuartos[letra] = resultado
+
+cuartosA = len(hotelsdfTesteo) - cantidadDeCasosSumados
+cantDeCuartos["A"] = cuartosA
+
+
+cantDeCuartos
+```
+
+Vemos que L y P tienen una extremadamente pequena cantidad de apariciones. \
+Lo vamos a anadir al roomtype A al ser el que tiene la mayor cantidad de apariciones.
+
+Para anadirlos a la columna a, simplemente tenemos que eliminar las columnas L y P (ya que la columna A es la eliminada por el one hot)
+
+```python
+hotelsdfTesteo.drop("reserved_room_type_L", axis=1, inplace=True)
+hotelsdfTesteo.drop("reserved_room_type_P", axis=1, inplace=True)
+hotelsdfTesteo.reset_index(drop=True)
+print()
+```
+
+Vamos a aplicar el mismo criterio a assigned room type
+
+```python
+cantDeCuartos = {}
+cantidadDeCasosSumados = 0
+
+cantDeCuartos["A"] = 0 #Arrancamos asignado 0 a los cuartos de A. Estos fueron removidos por el one hot. Lo vamos a calcular al final.
+for letra in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']:
+    tipoDeCuarto = 'assigned_room_type_' + letra
+    cantidadDeCasosSumados += 1
+    if tipoDeCuarto not in hotelsdfTesteo.columns:
+        continue
+    hotelsdfTesteo[tipoDeCuarto]
+    #print("SSUS")
+    resultado = hotelsdfTesteo[hotelsdfTesteo[tipoDeCuarto] == 1][tipoDeCuarto].sum()
+    cantDeCuartos[letra] = resultado
+
+cuartosA = len(hotelsdfTesteo) - cantidadDeCasosSumados
+cantDeCuartos["A"] = cuartosA
+
+
+cantDeCuartos
+```
+
+Aca tambien vemos que P tiene muy pocas aparciones. Asique aplicamos el mismo criterio de antes
+
+```python
+hotelsdfTesteo.drop("assigned_room_type_P", axis=1, inplace=True)
+hotelsdfTesteo.reset_index(drop=True)
+print()
+```
+
+Vemos ahora que nuestras columnas coinciden
+
+```python
+set_test = set(hotelsdfTesteo.columns)
+set_arbol = set(hotelsdfArbol.columns)
+
+missing = list(sorted(set_test - set_arbol))
+added = list(sorted(set_arbol - set_test))
+
+print('Faltan en arbol:', missing)
+print('Sobran en arbol:', added)
 ```
 
 ## Entrenamiento del modelo
