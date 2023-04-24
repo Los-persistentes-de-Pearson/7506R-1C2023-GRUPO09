@@ -1103,14 +1103,14 @@ A continuacion vamos a graficar el arbol resultante: \
 (Advertencia: Suele tardar unos minutos en terminar de renderizar la imagen)
 
 ```python
-plt.figure(figsize=(100,100))
+# plt.figure(figsize=(100,100))
 
-tree_plot_completo=tree.plot_tree(model,
-                                 feature_names=hotelsdfArbol_x.columns.to_list(),
-                                 filled=True,
-                                 rounded=True,
-                                 class_names=['Not Canceled','Is canceled']) #model.classes_
-plt.show(tree_plot_completo)
+# tree_plot_completo=tree.plot_tree(model,
+#                                  feature_names=hotelsdfArbol_x.columns.to_list(),
+#                                  filled=True,
+#                                  rounded=True,
+#                                  class_names=['Not Canceled','Is canceled']) #model.classes_
+# plt.show(tree_plot_completo)
 ```
 
 Con la imagen se ve que el arbol resultante tiene unas dimensiones exageradas, vemos ademas que tiene una profundidad de 20 como especificamos
@@ -1133,7 +1133,7 @@ print("f1 score: "+str(f1))
 ## Randomized Serach Cross Validation
 
 
-### OJOOOOO TODOOO PUSE 1, 30 NO ES UNA BANDA!!!??
+### OJOOOOO TODOOO PUSE 2, 30 NO ES UNA BANDA!!!??
 
 ```python
 ##KFOLD CV Random Search para buscar el mejor arbol (los mejores atributos, hiperparametros,etc)
@@ -1142,17 +1142,18 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import make_scorer
 
 #Cantidad de combinaciones que quiero porbar
-n=10 
+n=10
 
 #Conjunto de parámetros que quiero usar
 params_grid = {'criterion':['gini','entropy'],
-               #'min_samples_leaf':list(range(1,10)),
+               #'min_samples_leaf':list(range(2,12)),
                #'min_samples_split': list(range(2,20)),
-               'ccp_alpha':np.linspace(0,0.005,n), 
-               'max_depth':list(range(1,30))}
+               'ccp_alpha':np.linspace(0,0.0007,n), 
+               #(0,0.0007)
+               'max_depth':list(range(2,50))}
+                #CON 2, 50 ---> F1 SCORE = 0,81
 
-#-------OJOOOOO TODOOO PUSE 1, 30 NO ES UNA BANDA!!!??                
-#CON 30 ---> F1 SCORE = 0,8
+#-------OJOOOOO TODOOO PUSE 1,resultados = cross_validate(arbolcv,x_train, y_train, cv=kfoldcv,scoring=scorer_fn,return_estimator=True) 30 NO ES UNA BANDA!!!??                
 #CON 10 ---> F1 SCORE = 0,75 q es mas bajo q el arbol gigante....
 
 #Cantidad de splits para el Cross Validation
@@ -1258,19 +1259,97 @@ plt.xlabel('Predicted')
 plt.ylabel('True')
 ```
 
+```python
+len(x_test)
+
+```
+
 ### Muestro Output feo
 
 ```python
 arbol.predict_proba(x_test)
 ```
 
+## Entrenamiento Cross Validation
+
+```python
+#Entrenamiento con 10 Fold Cross Validation 
+from sklearn.model_selection import cross_validate, StratifiedKFold
+
+# # Spits que respeten la proporción delas clases
+# kfoldcv =StratifiedKFold(n_splits=10) 
+ 
+# #Creo árbol con los mejores hiperparámetros 
+# arbolcv=DecisionTreeClassifier().set_params(**randomcv.best_params_)
+
+# #Selecciono métrica F1-Score
+# scorer_fn = make_scorer(sk.metrics.f1_score)
+
+#Hago CV
+#resultados = cross_validate(arbolcv,x_train, y_train, cv=kfoldcv,scoring=scorer_fn,return_estimator=True)
+
+resultados = cross_validate(arbol,x_train, y_train, cv=kfoldcv,scoring=scorer_fn,return_estimator=True)
+
+metricsCV=resultados['test_score']
+mejor_performance=resultados['estimator'][np.where(metricsCV==max(metricsCV))[0][0]]
+
+```
+
+```python
+#Grafico Boxplot -Entrenado con 50 Fold Cross Validation
+
+metric_labelsCV = ['F1 Score']*len(metricsCV) 
+sns.set_context('talk')
+sns.set_style("darkgrid")
+plt.figure(figsize=(8,8))
+sns.boxplot(metricsCV)
+#sns.boxplot(metric_labelsCV,metricsCV)
+```
+
+## Predicción y Evaluación del Modelo
+
+```python
+len(y_pred)
+
+```
+
+```python
+#Arbol CV set de evaluación
+
+from sklearn.metrics import confusion_matrix, classification_report
+from sklearn.tree import DecisionTreeClassifier
+
+#Predicción sobre el set de evaluacion
+y_pred= mejor_performance.predict(x_test)
+
+
+#Arbol Reporte y Matriz de Confusion
+print(classification_report(y_test,y_pred))
+
+print('F1-Score: {}'.format(f1_score(y_test, y_pred, average='binary'))) #binary considera la clase positiva por defecto 1
+
+
+cm = confusion_matrix(y_test,y_pred)
+sns.heatmap(cm, cmap='Blues',annot=True,fmt='g')
+plt.xlabel('Predicted')
+plt.ylabel('True')
+```
+
+```python
+len(y_pred)
+
+```
+
 ## Ahora vamos a compararlo con el dataset de testeo de verdad
 
 ```python
 #Realizamos una predicción sobre el set de test
-y_pred = model.predict(hotelsdfTesteo)
+#y_pred = model.predict(hotelsdfTesteo)
+#la de abajo #0,81
+y_pred= mejor_performance.predict(hotelsdfTesteo)
+
 #Valores Predichos
-y_pred
+len(y_pred)
 ```
 
 ```python
