@@ -1040,10 +1040,6 @@ print('Sobran en arbol:', added)
 
 ## Entrenamiento del modelo
 
-
-### Nosotros elejimos como "features" todas las columnas entonces?? Se supone q ese decarte de cols fue el checkpoint 1 y lo de arriba?
-TODO
-
 ```python
 #Creamos un dataset con los features que vamos a usar para tratar de predecir el target
 hotelsdfArbol_x=hotelsdfArbol.drop(['is_canceled'], axis='columns', inplace=False)
@@ -1103,14 +1099,14 @@ A continuacion vamos a graficar el arbol resultante: \
 (Advertencia: Suele tardar unos minutos en terminar de renderizar la imagen)
 
 ```python
-# plt.figure(figsize=(100,100))
+plt.figure(figsize=(100,100))
 
-# tree_plot_completo=tree.plot_tree(model,
-#                                  feature_names=hotelsdfArbol_x.columns.to_list(),
-#                                  filled=True,
-#                                  rounded=True,
-#                                  class_names=['Not Canceled','Is canceled']) #model.classes_
-# plt.show(tree_plot_completo)
+tree_plot_completo=tree.plot_tree(model,
+                                 feature_names=hotelsdfArbol_x.columns.to_list(),
+                                 filled=True,
+                                 rounded=True,
+                                 class_names=['Not Canceled','Is canceled']) #model.classes_
+plt.show(tree_plot_completo)
 ```
 
 Con la imagen se ve que el arbol resultante tiene unas dimensiones exageradas, vemos ademas que tiene una profundidad de 20 como especificamos
@@ -1133,7 +1129,7 @@ print("f1 score: "+str(f1))
 ## Randomized Serach Cross Validation
 
 
-### OJOOOOO TODOOO PUSE 2, 30 NO ES UNA BANDA!!!??
+### OJOOOOO TODOOO PUSE 2, 50 NO ES UNA BANDA!!!??
 
 ```python
 ##KFOLD CV Random Search para buscar el mejor arbol (los mejores atributos, hiperparametros,etc)
@@ -1146,14 +1142,14 @@ n=10
 
 #Conjunto de parámetros que quiero usar
 params_grid = {'criterion':['gini','entropy'],
-               #'min_samples_leaf':list(range(2,12)),
-               #'min_samples_split': list(range(2,20)),
-               'ccp_alpha':np.linspace(0,0.0007,n), 
+               #'min_samples_leaf':list(range(2,12)), #cantidad de datos que puede tener una hoja
+               #'min_samples_split': list(range(2,20)), #cantidad de datos que puede tener un nodo
+               'ccp_alpha':np.linspace(0,0.0007,n), #poda
                #(0,0.0007)
                'max_depth':list(range(2,50))}
                 #CON 2, 50 ---> F1 SCORE = 0,81
 
-#-------OJOOOOO TODOOO PUSE 1,resultados = cross_validate(arbolcv,x_train, y_train, cv=kfoldcv,scoring=scorer_fn,return_estimator=True) 30 NO ES UNA BANDA!!!??                
+#-------OJOOOOO TODO PUSE 2, 50 NO ES UNA BANDA!!!??                
 #CON 10 ---> F1 SCORE = 0,75 q es mas bajo q el arbol gigante....
 
 #Cantidad de splits para el Cross Validation
@@ -1176,24 +1172,29 @@ randomcv = RandomizedSearchCV(estimator=base_tree,
                               n_iter=n) 
 
 #Busco los hiperparamtros que optimizan F1 Score
-randomcv.fit(x_train,y_train);
+randomcv.fit(x_train,y_train)
 ```
+
+Mostramos los mejores hiperparametros devueltos por el arbol y el valor del f1_score
 
 ```python
 #Mejores hiperparametros del arbol
 print(randomcv.best_params_)
 #Mejor métrica
-print(randomcv.best_score_)
+print("f1_score = ",randomcv.best_score_)
 ```
+
+Algunos valores obtenidos del algorimo
 
 ```python
 randomcv.cv_results_['mean_test_score']
 ```
 
-#### Atributos considerados y su importancia
+Atributos considerados y su importancia
 
 ```python
 #Atributos considerados y su importancia
+#TODO poner features considerados con una minu explicacion antes de fabricacion de arbol
 features_considerados = hotelsdfArbol_x.columns.to_list()
 
 best_tree = randomcv.best_estimator_
@@ -1206,21 +1207,27 @@ for feat_imp,feat in sorted(zip(feat_imps,features_considerados)):
 
 ## Predicción y Evaluación del Modelo con mejores hiperparámetros
 
+
+Creo el árbol con los mejores hiperparámetros
+
 ```python
 #Creo el árbol con los mejores hiperparámetros
-from sklearn.tree import DecisionTreeClassifier
+#TODO "Mostrar una porcion significativa"
+
 from sklearn.tree import export_text
 
-arbol=DecisionTreeClassifier().set_params(**randomcv.best_params_)
+arbol_mejores_parametros=DecisionTreeClassifier().set_params(**randomcv.best_params_)
 
 #Entreno el arbol en todo el set
-arbol.fit(x_train,y_train)
+arbol_mejores_parametros.fit(x_train,y_train)
 
-reglas = export_text(arbol, feature_names=list(features_considerados))
+reglas = export_text(arbol_mejores_parametros, feature_names=list(features_considerados))
 print(reglas)
 ```
 
-## Arbol pero mas lindo
+### Arbol pero mas lindo
+###TODO SI se desea hacer funcar la libreria
+
 
 ```python
 # from six import StringIO
@@ -1242,12 +1249,15 @@ print(reglas)
 
 ### Prediccion con split de train
 
+
+Evalúo el Arbol con los mejores hiperparámetros
+
 ```python
 #Evalúo el Arbol con los mejores hiperparámetros
 from sklearn.metrics import confusion_matrix, classification_report , f1_score
 
 #Hago predicción sobre el set de evaluacion
-y_pred= arbol.predict(x_test)
+y_pred= arbol_mejores_parametros.predict(x_test)
 
 #Arbol Reporte y Matriz de Confusion
 #print(classification_report(y_test,y_pred))
@@ -1257,17 +1267,14 @@ cm = confusion_matrix(y_test,y_pred)
 sns.heatmap(cm, cmap='Blues',annot=True,fmt='g')
 plt.xlabel('Predicted')
 plt.ylabel('True')
+
+#TODO Mostrar todas las metricas xa q quede mas lindo
 ```
 
-```python
-len(x_test)
-
-```
-
-### Muestro Output feo
+Muestro array de predcciones
 
 ```python
-arbol.predict_proba(x_test)
+arbol_mejores_parametros.predict_proba(x_test)
 ```
 
 ## Entrenamiento Cross Validation
@@ -1276,22 +1283,21 @@ arbol.predict_proba(x_test)
 #Entrenamiento con 10 Fold Cross Validation 
 from sklearn.model_selection import cross_validate, StratifiedKFold
 
-# # Spits que respeten la proporción delas clases
-# kfoldcv =StratifiedKFold(n_splits=10) 
- 
-# #Creo árbol con los mejores hiperparámetros 
-# arbolcv=DecisionTreeClassifier().set_params(**randomcv.best_params_)
+#Spits que respeten la proporción delas clases
+#TODO
+kfoldcv =StratifiedKFold(n_splits=10) 
 
-# #Selecciono métrica F1-Score
-# scorer_fn = make_scorer(sk.metrics.f1_score)
+#Selecciono métrica F1-Score (misma que antes)
+scorer_fn = make_scorer(sk.metrics.f1_score)
 
 #Hago CV
 #resultados = cross_validate(arbolcv,x_train, y_train, cv=kfoldcv,scoring=scorer_fn,return_estimator=True)
 
-resultados = cross_validate(arbol,x_train, y_train, cv=kfoldcv,scoring=scorer_fn,return_estimator=True)
+resultados = cross_validate(arbol_mejores_parametros,x_train, y_train, cv=kfoldcv,scoring=scorer_fn,return_estimator=True)
 
-metricsCV=resultados['test_score']
-mejor_performance=resultados['estimator'][np.where(metricsCV==max(metricsCV))[0][0]]
+metricsCV = resultados['test_score']
+
+arbol_mejor_performance = resultados['estimator'][np.where(metricsCV==max(metricsCV))[0][0]]
 
 ```
 
@@ -1306,12 +1312,13 @@ sns.boxplot(metricsCV)
 #sns.boxplot(metric_labelsCV,metricsCV)
 ```
 
+### Reglas del arbol
+
+
+### Grafico del arbol
+
+
 ## Predicción y Evaluación del Modelo
-
-```python
-len(y_pred)
-
-```
 
 ```python
 #Arbol CV set de evaluación
@@ -1320,7 +1327,7 @@ from sklearn.metrics import confusion_matrix, classification_report
 from sklearn.tree import DecisionTreeClassifier
 
 #Predicción sobre el set de evaluacion
-y_pred= mejor_performance.predict(x_test)
+y_pred= arbol_mejor_performance.predict(x_test)
 
 
 #Arbol Reporte y Matriz de Confusion
@@ -1335,18 +1342,13 @@ plt.xlabel('Predicted')
 plt.ylabel('True')
 ```
 
-```python
-len(y_pred)
-
-```
-
 ## Ahora vamos a compararlo con el dataset de testeo de verdad
 
 ```python
 #Realizamos una predicción sobre el set de test
 #y_pred = model.predict(hotelsdfTesteo)
 #la de abajo #0,81
-y_pred= mejor_performance.predict(hotelsdfTesteo)
+y_pred= arbol_mejor_performance.predict(hotelsdfTesteo)
 
 #Valores Predichos
 len(y_pred)
