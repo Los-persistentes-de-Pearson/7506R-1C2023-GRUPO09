@@ -1126,13 +1126,232 @@ print("Precision: "+str(precision))
 print("f1 score: "+str(f1))
 ```
 
+## Randomized Serach Cross Validation
+
+
+### OJOOOOO TODOOO PUSE 2, 50 NO ES UNA BANDA!!!??
+
+```python
+##KFOLD CV Random Search para buscar el mejor arbol (los mejores atributos, hiperparametros,etc)
+from sklearn.model_selection import StratifiedKFold, KFold,RandomizedSearchCV
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import make_scorer
+
+#Cantidad de combinaciones que quiero porbar
+n=10
+
+#Conjunto de parámetros que quiero usar
+params_grid = {'criterion':['gini','entropy'],
+               #'min_samples_leaf':list(range(2,12)), #cantidad de datos que puede tener una hoja
+               #'min_samples_split': list(range(2,20)), #cantidad de datos que puede tener un nodo
+               'ccp_alpha':np.linspace(0,0.0007,n), #poda
+               #(0,0.0007)
+               'max_depth':list(range(2,50))}
+                #CON 2, 50 ---> F1 SCORE = 0,81
+
+#-------OJOOOOO TODO PUSE 2, 50 NO ES UNA BANDA!!!??                
+#CON 10 ---> F1 SCORE = 0,75 q es mas bajo q el arbol gigante....
+
+#Cantidad de splits para el Cross Validation
+folds=5
+
+#Kfold estratificado
+kfoldcv = StratifiedKFold(n_splits=folds)
+
+#Clasificador
+base_tree = DecisionTreeClassifier() 
+
+#Metrica que quiero optimizar F1 Score
+scorer_fn = make_scorer(sk.metrics.f1_score)
+
+#Random Search Cross Validation
+randomcv = RandomizedSearchCV(estimator=base_tree,
+                              param_distributions = params_grid,
+                              scoring=scorer_fn,
+                              cv=kfoldcv,
+                              n_iter=n) 
+
+#Busco los hiperparamtros que optimizan F1 Score
+randomcv.fit(x_train,y_train)
+```
+
+Mostramos los mejores hiperparametros devueltos por el arbol y el valor del f1_score
+
+```python
+#Mejores hiperparametros del arbol
+print(randomcv.best_params_)
+#Mejor métrica
+print("f1_score = ",randomcv.best_score_)
+```
+
+Algunos valores obtenidos del algorimo
+
+```python
+randomcv.cv_results_['mean_test_score']
+```
+
+Atributos considerados y su importancia
+
+```python
+#Atributos considerados y su importancia
+#TODO poner features considerados con una minu explicacion antes de fabricacion de arbol
+features_considerados = hotelsdfArbol_x.columns.to_list()
+
+best_tree = randomcv.best_estimator_
+feat_imps = best_tree.feature_importances_
+
+for feat_imp,feat in sorted(zip(feat_imps,features_considerados)):
+  if feat_imp>0:
+    print('{}: {}'.format(feat,feat_imp))
+```
+
+## Predicción y Evaluación del Modelo con mejores hiperparámetros
+
+
+Creo el árbol con los mejores hiperparámetros
+
+```python
+#Creo el árbol con los mejores hiperparámetros
+#TODO "Mostrar una porcion significativa"
+
+from sklearn.tree import export_text
+
+arbol_mejores_parametros=DecisionTreeClassifier().set_params(**randomcv.best_params_)
+
+#Entreno el arbol en todo el set
+arbol_mejores_parametros.fit(x_train,y_train)
+
+reglas = export_text(arbol_mejores_parametros, feature_names=list(features_considerados))
+print(reglas)
+```
+
+### Arbol pero mas lindo
+###TODO SI se desea hacer funcar la libreria
+
+
+```python
+# from six import StringIO
+# from IPython.display import Image  
+# from sklearn.tree import export_graphviz
+# import pydotplus
+# import matplotlib.pyplot as plt
+
+# dot_data = StringIO()
+# export_graphviz(arbol, out_file=dot_data,  
+#                 filled=True, rounded=True,
+#                 special_characters=True,
+#                 feature_names=features_considerados,
+#                 class_names=['good','bad'])
+
+# graph = pydotplus.graph_from_dot_data(dot_data.getvalue())  
+# Image(graph.create_png())
+```
+
+### Prediccion con split de train
+
+
+Evalúo el Arbol con los mejores hiperparámetros
+
+```python
+#Evalúo el Arbol con los mejores hiperparámetros
+from sklearn.metrics import confusion_matrix, classification_report , f1_score
+
+#Hago predicción sobre el set de evaluacion
+y_pred= arbol_mejores_parametros.predict(x_test)
+
+#Arbol Reporte y Matriz de Confusion
+#print(classification_report(y_test,y_pred))
+print('F1-Score: {}'.format(f1_score(y_test, y_pred, average='binary'))) #binary considera la clase positiva por defecto 1
+
+cm = confusion_matrix(y_test,y_pred)
+sns.heatmap(cm, cmap='Blues',annot=True,fmt='g')
+plt.xlabel('Predicted')
+plt.ylabel('True')
+
+#TODO Mostrar todas las metricas xa q quede mas lindo
+```
+
+Muestro array de predcciones
+
+```python
+arbol_mejores_parametros.predict_proba(x_test)
+```
+
+## Entrenamiento Cross Validation
+
+```python
+#Entrenamiento con 10 Fold Cross Validation 
+from sklearn.model_selection import cross_validate, StratifiedKFold
+
+#Spits que respeten la proporción delas clases
+#TODO
+kfoldcv =StratifiedKFold(n_splits=10) 
+
+#Selecciono métrica F1-Score (misma que antes)
+scorer_fn = make_scorer(sk.metrics.f1_score)
+
+#Hago CV
+#resultados = cross_validate(arbolcv,x_train, y_train, cv=kfoldcv,scoring=scorer_fn,return_estimator=True)
+
+resultados = cross_validate(arbol_mejores_parametros,x_train, y_train, cv=kfoldcv,scoring=scorer_fn,return_estimator=True)
+
+metricsCV = resultados['test_score']
+
+arbol_mejor_performance = resultados['estimator'][np.where(metricsCV==max(metricsCV))[0][0]]
+
+```
+
+```python
+#Grafico Boxplot -Entrenado con 50 Fold Cross Validation
+
+metric_labelsCV = ['F1 Score']*len(metricsCV) 
+sns.set_context('talk')
+sns.set_style("darkgrid")
+plt.figure(figsize=(8,8))
+sns.boxplot(metricsCV)
+#sns.boxplot(metric_labelsCV,metricsCV)
+```
+
+### Reglas del arbol
+
+
+### Grafico del arbol
+
+
+## Predicción y Evaluación del Modelo
+
+```python
+#Arbol CV set de evaluación
+
+from sklearn.metrics import confusion_matrix, classification_report
+from sklearn.tree import DecisionTreeClassifier
+
+#Predicción sobre el set de evaluacion
+y_pred= arbol_mejor_performance.predict(x_test)
+
+
+#Arbol Reporte y Matriz de Confusion
+print(classification_report(y_test,y_pred))
+
+print('F1-Score: {}'.format(f1_score(y_test, y_pred, average='binary'))) #binary considera la clase positiva por defecto 1
+
+
+cm = confusion_matrix(y_test,y_pred)
+sns.heatmap(cm, cmap='Blues',annot=True,fmt='g')
+plt.xlabel('Predicted')
+plt.ylabel('True')
+```
+
 ## Ahora vamos a compararlo con el dataset de testeo de verdad
 
 ```python
 #Realizamos una predicción sobre el set de test
-y_pred = model.predict(hotelsdfTesteo)
+#y_pred = model.predict(hotelsdfTesteo)
+#la de abajo #0,81
+y_pred= arbol_mejor_performance.predict(hotelsdfTesteo)
+
 #Valores Predichos
-y_pred
+len(y_pred)
 ```
 
 ```python
