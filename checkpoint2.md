@@ -31,7 +31,7 @@ from IPython.display import Image
 from matplotlib import pyplot as plt
 
 from sklearn.model_selection import StratifiedKFold, KFold,RandomizedSearchCV, train_test_split
-from sklearn.tree import DecisionTreeClassifier, export_graphviz
+from sklearn.tree import DecisionTreeClassifier, export_graphviz, export_text
 from sklearn.metrics import confusion_matrix, classification_report , f1_score, make_scorer, precision_score, recall_score, accuracy_score,f1_score
 from sklearn.preprocessing import MinMaxScaler
 
@@ -1141,6 +1141,8 @@ combinaciones=15
 limite_hojas_nodos = list(range(2, 50))
 valor_poda = 0.0001 #0.0007
 profundidad = list(range(0,40))
+folds=10
+
 
 params_grid = {'criterion':['gini','entropy'],
                'min_samples_leaf':limite_hojas_nodos,
@@ -1148,7 +1150,6 @@ params_grid = {'criterion':['gini','entropy'],
                'ccp_alpha':np.linspace(0,valor_poda,combinaciones),
                'max_depth':profundidad}
 
-folds=10
 
 kfoldcv = StratifiedKFold(n_splits=folds)
 
@@ -1175,19 +1176,16 @@ print("Mostramos el mejor resultado obtenido de busqueda aleatoria: ")
 print("f1_score = ",randomcv.best_score_)
 ```
 
-Algunos valores obtenidos del algorimo
+Algunos valores obtenidos del algoritmo
 
 ```python
 randomcv.cv_results_['mean_test_score']
 ```
 
-Atributos considerados y su importancia
+Mostramos todos los atributos considerados en la construcción y optimización del árbol, como también, vemos la información que aportan en el analísis 
 
 ```python
-#Atributos considerados y su importancia
-#TODO poner features considerados con una minu explicacion antes de fabricacion de arbol
 features_considerados = hotelsdfArbol_x.columns.to_list()
-
 best_tree = randomcv.best_estimator_
 feat_imps = best_tree.feature_importances_
 
@@ -1202,63 +1200,44 @@ for feat_imp,feat in sorted(zip(feat_imps,features_considerados)):
 Creo el árbol con los mejores hiperparámetros
 
 ```python
-#Creo el árbol con los mejores hiperparámetros
-#TODO "Mostrar una porcion significativa"
-
-from sklearn.tree import export_text
-
 arbol_mejores_parametros=DecisionTreeClassifier().set_params(**randomcv.best_params_)
 
-#Entreno el arbol en todo el set
 arbol_mejores_parametros.fit(x_train,y_train)
 
 reglas = export_text(arbol_mejores_parametros, feature_names=list(features_considerados))
 print(reglas)
 ```
 
-### Arbol pero mas lindo
+### Grafica representativa del árbol optimizado
 ###TODO SI se desea hacer funcar la libreria
 
 
 ```python
-# from six import StringIO
-# from IPython.display import Image  
-# from sklearn.tree import export_graphviz
-# import pydotplus
-# import matplotlib.pyplot as plt
+dot_data = StringIO()
+export_graphviz(arbol_mejores_parametros, out_file=dot_data,  
+                 filled=True, rounded=True,
+                 special_characters=True,
+                 feature_names=features_considerados,
+                 class_names=['no cancelo','cancelo'],
+                 max_depth=6)
 
-# dot_data = StringIO()
-# export_graphviz(arbol, out_file=dot_data,  
-#                 filled=True, rounded=True,
-#                 special_characters=True,
-#                 feature_names=features_considerados,
-#                 class_names=['good','bad'])
-
-# graph = pydotplus.graph_from_dot_data(dot_data.getvalue())  
-# Image(graph.create_png())
+graph = pydotplus.graph_from_dot_data(dot_data.getvalue())  
+Image(graph.create_png())
 ```
 
 ### Prediccion con split de train
 
 
-Evalúo el Arbol con los mejores hiperparámetros
+Evalúo el Arbol con los mejores hiperparámetros y hacemos predicciones sobre el dataset de evaluacion
 
 ```python
-#Evalúo el Arbol con los mejores hiperparámetros
-
-#Hago predicción sobre el set de evaluacion
 y_pred= arbol_mejores_parametros.predict(x_test)
-
-#Arbol Reporte y Matriz de Confusion
-#print(classification_report(y_test,y_pred))
 print('F1-Score: {}'.format(f1_score(y_test, y_pred, average='binary'))) #binary considera la clase positiva por defecto 1
-
 cm = confusion_matrix(y_test,y_pred)
 sns.heatmap(cm, cmap='Blues',annot=True,fmt='g')
-plt.xlabel('Predicted')
-plt.ylabel('True')
+plt.xlabel('Predecidos')
+plt.ylabel('Verdaderos')
 
-#TODO Mostrar todas las metricas xa q quede mas lindo
 ```
 
 Muestro array de predcciones
@@ -1269,17 +1248,11 @@ arbol_mejores_parametros.predict_proba(x_test)
 
 ## Entrenamiento Cross Validation
 
+Procedemos a realizar entrenamiento del árbol mediante el metodo de la validación cruzada en 10 folds considerando que fue como se entreno previamente el árbol mas optimo. Esto buscando siempre mantener la metrica F1 en su valor más alto
+
 ```python
-
-#Spits que respeten la proporción delas clases
-#TODO
-kfoldcv =StratifiedKFold(n_splits=10) 
-
-#Selecciono métrica F1-Score (misma que antes)
+kfoldcv =StratifiedKFold(n_splits=folds) 
 scorer_fn = make_scorer(sk.metrics.f1_score)
-
-#Hago CV
-#resultados = cross_validate(arbolcv,x_train, y_train, cv=kfoldcv,scoring=scorer_fn,return_estimator=True)
 
 resultados = cross_validate(arbol_mejores_parametros,x_train, y_train, cv=kfoldcv,scoring=scorer_fn,return_estimator=True)
 
@@ -1290,32 +1263,24 @@ arbol_mejor_performance = resultados['estimator'][np.where(metricsCV==max(metric
 ```
 
 ```python
-#Grafico Boxplot -Entrenado con 50 Fold Cross Validation
 
 metric_labelsCV = ['F1 Score']*len(metricsCV) 
 sns.set_context('talk')
 sns.set_style("darkgrid")
 plt.figure(figsize=(8,8))
 sns.boxplot(metricsCV)
-#sns.boxplot(metric_labelsCV,metricsCV)
+plt.title("Modelo entrenado con 15 folds")
 ```
 
-### Reglas del arbol
+### Reglas del arbol ##To do Por ver
 
-
-### Grafico del arbol
-
+### Grafico del arbol ##To do Por ver
 
 ## Predicción y Evaluación del Modelo
 
 ```python
-#Arbol CV set de evaluación
-
-#Predicción sobre el set de evaluacion
 y_pred= arbol_mejor_performance.predict(x_test)
 
-
-#Arbol Reporte y Matriz de Confusion
 print(classification_report(y_test,y_pred))
 
 print('F1-Score: {}'.format(f1_score(y_test, y_pred, average='binary'))) #binary considera la clase positiva por defecto 1
@@ -1326,6 +1291,21 @@ sns.heatmap(cm, cmap='Blues',annot=True,fmt='g')
 plt.xlabel('Predicted')
 plt.ylabel('True')
 ```
+
+---
+
+# Conclusión
+
+1. Al comparar los dos modelos construidos, se observó una mejora considerable en el segundo modelo en factores como la performance y las métricas en comparación con el primero. Esto sugiere que se pudo optimizar significativamente el modelo mediante la incorporación de tecnicas como: ramdomized cross search
+2. Las métricas del árbol se mejoraron mediante la optimización del F1 score, el cual fue seleccionado debido a la naturaleza del problema en el que no había un motivo particular para seleccionar una métrica específica (como recall o precision).
+3. A pesar de la poda y la reducción de la libertad del árbol para extenderse, se logró una mejora significativa en su métrica F1. Esto demuestra que la poda y la limitación de la extensión del árbol no necesariamente afectan negativamente su rendimiento, sino que pueden mejorar la capacidad de generalización del modelo.
+
+
+----
+
+De aca para abajo se borra #To do
+
+Observamos las metricas post entrenamiento mediante validación cruzada y obten
 
 ## Ahora vamos a compararlo con el dataset de testeo de verdad
 
