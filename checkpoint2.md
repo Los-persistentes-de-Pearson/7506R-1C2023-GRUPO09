@@ -1125,6 +1125,27 @@ print("Precision: "+str(precision))
 print("f1 score: "+str(f1))
 ```
 
+```python
+#Realizamos una predicción sobre el set de test
+y_pred = model.predict(hotelsdfTesteo)
+#Valores Predichos
+y_pred
+```
+
+```python
+df_submission = pd.DataFrame({'id': hotelsdfTesteoOriginal['id'], 'is_canceled': y_pred})
+df_submission.head()
+```
+
+```python
+df_submission.to_csv('submissions/arbol_decisiones_ineficiente.csv', index=False)
+```
+
+Con este modelo, obtuvimos el siguiente resultado:
+
+
+![PrimeraEntrega](informe/images/primeraPrediccion.jpg)
+
 # Mejoras en Performance, Cross Validation y poda
 
 ## Randomized Serach Cross Validation
@@ -1325,5 +1346,15 @@ df_submission.head()
 ```
 
 ```python
-df_submission.to_csv('submissions/arbol_decisiones_ineficiente.csv', index=False)
+df_submission.to_csv('submissions/arbol_decisiones_eficiente.csv', index=False)
 ```
+
+Con este modelo, obtuvimos el siguiente resultado:
+
+
+![SegundaEntrega](informe/images/segundaPrediccion.jpg)
+
+
+Vemos que obtuvimos un resultado terriblemente similar (sino mejor), usando muchos menos parametros
+
+##TODO Expandir
