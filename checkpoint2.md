@@ -652,7 +652,7 @@ Viendo estos resultados vemos que hay dos outliers que no logramos identificar e
 ```python
 hotelsdfArbol.drop((hotelsdfArbol[hotelsdfArbol["country"] == "ATA"].index.values),inplace=True)
 hotelsdfArbol.reset_index(drop=True)
-print() #Este print es para no mostrar el dataframe innecesariamente
+print()
 ```
 
 "UMI" hace referenca a unas islas cerca de Hawaii. Al ser un unico caso y tener una poblacion de 300 habitantes, decidimos considerarlo como Estados Unidos, es decir America del Norte
@@ -695,7 +695,6 @@ Una de las columnas (en este caso la primera) es eliminada ya que, si todas las 
 Esto lo podemos hacer gracias a que eliminamos todos nuestros valores faltantes en las secciones anteriores.
 
 ```python
-#One hot encoding para variables categoricas, esto elimina las columnas categoricas y las reemplaza con el conjunto del hot encoding
 hotelsdfArbol = pd.get_dummies(hotelsdfArbol, columns=valoresAConvertir, drop_first=True)
 ```
 
@@ -853,10 +852,10 @@ Los estudiamos
 hotelsdfTesteo[ hotelsdfTesteo['continente'] =="ATA"]
 ```
 
-Hay un registro correspondiente a "antartida". como no podemos dropearlo, le ponemos de continente "north america".\
+Hay un registro correspondiente a "Antartida". como no podemos dropearlo, le ponemos de continente "north america".\
 Le asignamos el valor de America del norte debido a que estados unidos es el pais con mas bases en la antartica
 
-**TODO:CHEUQUEAR LO DE ARRIBA**
+**TO DO -> Revisar**
 
 ```python
 hotelsdfTesteo.loc[hotelsdfTesteo['continente'] == "ATA", 'continente'] = "North America"
@@ -895,7 +894,6 @@ plt.ylabel('Cantidad de registros')
 Vemos que el continente con mayor cantidad de registros es europa, asique lo asignamos a ese valor
 
 ```python
-#hotelsdfTesteo.loc[hotelsdfTesteo['continente'].isna()] = "Europe"
 hotelsdfTesteo.loc[hotelsdfTesteo['continente'].isnull(), 'country'] = 'Europe'
 ```
 
@@ -904,7 +902,6 @@ Miro q se hayan cambiado bien todos los continentes y no haya valores raros
 ```python
 continentes = hotelsdfTesteo['continente'].unique().tolist()
 print(continentes)
-#OJO CON EL NAN
 ```
 
 Como hicimos con el dataset de train, y ya habiendo procesado la columna continente, dropeamos la columna country
@@ -926,13 +923,14 @@ hotelsdfTesteo.reset_index(drop=True)
 ```
 
 ```python
-hotelsdfTesteo.isnull().sum() #AMONGUS
+hotelsdfTesteo.isnull().sum()
 ```
 
 ### One hot encoding del testeo
 
+De la misma manera al dataset de pruebas aplicamos one hot encoding sobre las columnas de variables cualitativas
+
 ```python
-#One hot encoding para variables categoricas, esto elimina las columnas categoricas y las reemplaza con el conjunto del hot encoding
 hotelsdfTesteo = pd.get_dummies(hotelsdfTesteo, columns=valoresAConvertirTesteo, drop_first=True)
 hotelsdfTesteo.head()
 ```
@@ -955,7 +953,6 @@ print('Sobran en arbol:', added)
 
 Vemos que en el dataframe del arbol nos sobra la columna "is canceled", cosa que hace sentido ya que esa es la columna con la que vamos a entrenar al dataset. Sin embargo, vemos que tambien hay 3 columnas que faltan en el dataset de arbol. 
 
-
 Vamos a reasignar los valores de las columnas de test para que coincidan.
 
 El siguiente codigo nos calcula cuantas personas tiene cada tipo de cuarto
@@ -971,7 +968,6 @@ for letra in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', '
     if tipoDeCuarto not in hotelsdfTesteo.columns:
         continue
     hotelsdfTesteo[tipoDeCuarto]
-    #print("SSUS")
     resultado = hotelsdfTesteo[hotelsdfTesteo[tipoDeCuarto] == 1][tipoDeCuarto].sum()
     cantDeCuartos[letra] = resultado
 
@@ -1007,7 +1003,6 @@ for letra in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', '
     if tipoDeCuarto not in hotelsdfTesteo.columns:
         continue
     hotelsdfTesteo[tipoDeCuarto]
-    #print("SSUS")
     resultado = hotelsdfTesteo[hotelsdfTesteo[tipoDeCuarto] == 1][tipoDeCuarto].sum()
     cantDeCuartos[letra] = resultado
 
@@ -1041,37 +1036,42 @@ print('Sobran en arbol:', added)
 
 ## Entrenamiento del modelo
 
+Se genera un data set con los datos necesarios para predecir la cancelacion y creamos un dataset conteniendo el target, para luego, generar conjuntos de test y train
+
 ```python
-#Creamos un dataset con los features que vamos a usar para tratar de predecir el target
 hotelsdfArbol_x=hotelsdfArbol.drop(['is_canceled'], axis='columns', inplace=False)
 
-#Creo un dataset con la variable target
+
 hotelsdfArbol_y = hotelsdfArbol['is_canceled'].copy()
 
-#Genero los conjuntos de train y de test
 x_train, x_test, y_train, y_test = train_test_split(hotelsdfArbol_x,
                                                     hotelsdfArbol_y, 
                                                     test_size=0.2,  #proporcion 80/20
-                                                    random_state=9) #usamos la semilla 9 porque somos el grupo 9
+                                                    random_state=9) #Semilla 9, como el Equipo !!
 ```
 
 Ahora ya tenemos generados nuestros conjuntos de train y test; y tenemos nuesto dataframe con los datos numericos vamos a generar nuestro modelo
 
+
+Iniciamos con una profundidad maxima de 20 y creamos un arbol utilizando el criterio **Gini** 
+
+
+Dicho modelo sera uno generado directamente tomando en cuenta todos los valores y sin generar ningun tipo de poda, para observar como se comporta un modelo sin tratar
+
 ```python
-#Vamos a iniciar con una profundidad maxima considerable para tener un arbol de dimesiones considerables
 PROFUNDIDAD_MAX = 20
 
-#Creamos un clasificador con hiperparámetros 
 tree_model = tree.DecisionTreeClassifier(criterion="gini", #Gini es el criterio por defecto
                                          max_depth = PROFUNDIDAD_MAX) 
 
-#Entrenamos el modelo con el conjunto de entrenamiento
 model = tree_model.fit(X = x_train, y = y_train)
 ```
 
+Una vez entrenado el modelo realizamos una predicción con el mismo
+
 ```python
-#Realizamos una predicción sobre el set de test
 y_pred = model.predict(x_test)
+
 #Valores Predichos
 y_pred
 ```
@@ -1087,17 +1087,15 @@ Estas columns representan 20% de nuestro dataframe que fue dedicado al testeo de
 Vamos a graficar la matriz de confusion para visualizar los resultados de nuesto modelo:
 
 ```python
-#Creo la matriz de confusión
 tabla=confusion_matrix(y_test, y_pred)
 
-#Grafico la matriz de confusión
 sns.heatmap(tabla,cmap='GnBu',annot=True,fmt='g')
 plt.xlabel('Predicted')
 plt.ylabel('True')
 ```
 
 A continuacion vamos a graficar el arbol resultante: \
-(Advertencia: Suele tardar unos minutos en terminar de renderizar la imagen)
+(**Advertencia**: Suele tardar unos minutos en terminar de renderizar la imagen)
 
 ```python
 plt.figure(figsize=(100,100))
@@ -1131,13 +1129,12 @@ print("f1 score: "+str(f1))
 
 ## Randomized Serach Cross Validation
 
+Buscamos los mejores atributos que generen una optimizacion en la predicción de nuestro árbol
 
-### OJOOOOO TODOOO PUSE 2, 50 NO ES UNA BANDA!!!??
 
+Tomamos unas 30 combinaciones posibles n
 ```python
-##KFOLD CV Random Search para buscar el mejor arbol (los mejores atributos, hiperparametros,etc)
 
-#Cantidad de combinaciones que quiero porbar
 n=10
 
 #Conjunto de parámetros que quiero usar
