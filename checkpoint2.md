@@ -779,10 +779,6 @@ print("Por esto decidimos eliminar la columna (tanto en el dataset de testeo com
 ```python
 hotelsdfTesteo.drop("company_id", axis=1, inplace=True)
 hotelsdfTesteo.reset_index(drop=True)
-
-#hotelsdfArbol.drop("company_id", axis=1, inplace=True)
-#hotelsdfArbol.reset_index(drop=True)
-#Nosotros ya teniamos company_id dropeado del checkpoint anterior
 ```
 
 ### Valores a convertir
