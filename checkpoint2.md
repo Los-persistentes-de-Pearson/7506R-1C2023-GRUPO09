@@ -30,7 +30,7 @@ from six import StringIO
 from IPython.display import Image  
 from matplotlib import pyplot as plt
 
-from sklearn.model_selection import StratifiedKFold, KFold,RandomizedSearchCV, train_test_split
+from sklearn.model_selection import StratifiedKFold, KFold,RandomizedSearchCV, train_test_split, cross_validate
 from sklearn.tree import DecisionTreeClassifier, export_graphviz, export_text
 from sklearn.metrics import confusion_matrix, classification_report , f1_score, make_scorer, precision_score, recall_score, accuracy_score,f1_score
 from sklearn.preprocessing import MinMaxScaler
@@ -1241,7 +1241,7 @@ export_graphviz(arbol_mejores_parametros, out_file=dot_data,
                  special_characters=True,
                  feature_names=features_considerados,
                  class_names=['no cancelo','cancelo'],
-                 max_depth=6)
+                 max_depth=5)
 
 graph = pydotplus.graph_from_dot_data(dot_data.getvalue())  
 Image(graph.create_png())
