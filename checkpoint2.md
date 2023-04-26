@@ -1132,52 +1132,46 @@ print("f1 score: "+str(f1))
 Buscamos los mejores atributos que generen una optimizacion en la predicción de nuestro árbol
 
 
-Tomamos unas 30 combinaciones posibles n
+Tomamos unas 15 combinaciones posibles entre los parametros existentes y buscamos la mejor entre todas ellas. Para el cross validation hacemos una partición de 10 folds considerando el gran tamaño del dataset
+
+
 ```python
 
-n=10
+combinaciones=15
+limite_hojas_nodos = list(range(2, 50))
+valor_poda = 0.0001 #0.0007
+profundidad = list(range(0,40))
 
-#Conjunto de parámetros que quiero usar
 params_grid = {'criterion':['gini','entropy'],
-               #'min_samples_leaf':list(range(2,12)), #cantidad de datos que puede tener una hoja
-               #'min_samples_split': list(range(2,20)), #cantidad de datos que puede tener un nodo
-               'ccp_alpha':np.linspace(0,0.0007,n), #poda
-               #(0,0.0007)
-               'max_depth':list(range(2,50))}
-                #CON 2, 50 ---> F1 SCORE = 0,81
+               'min_samples_leaf':limite_hojas_nodos,
+               'min_samples_split': limite_hojas_nodos, 
+               'ccp_alpha':np.linspace(0,valor_poda,combinaciones),
+               'max_depth':profundidad}
 
-#-------OJOOOOO TODO PUSE 2, 50 NO ES UNA BANDA!!!??                
-#CON 10 ---> F1 SCORE = 0,75 q es mas bajo q el arbol gigante....
+folds=10
 
-#Cantidad de splits para el Cross Validation
-folds=5
-
-#Kfold estratificado
 kfoldcv = StratifiedKFold(n_splits=folds)
 
-#Clasificador
 base_tree = DecisionTreeClassifier() 
 
-#Metrica que quiero optimizar F1 Score
 scorer_fn = make_scorer(sk.metrics.f1_score)
 
-#Random Search Cross Validation
 randomcv = RandomizedSearchCV(estimator=base_tree,
                               param_distributions = params_grid,
                               scoring=scorer_fn,
                               cv=kfoldcv,
-                              n_iter=n) 
+                              n_iter=combinaciones) 
 
-#Busco los hiperparamtros que optimizan F1 Score
 randomcv.fit(x_train,y_train)
 ```
 
 Mostramos los mejores hiperparametros devueltos por el arbol y el valor del f1_score
 
 ```python
-#Mejores hiperparametros del arbol
+print("Mostramos los mejores resultados: ")
 print(randomcv.best_params_)
-#Mejor métrica
+print()
+print("Mostramos el mejor resultado obtenido de busqueda aleatoria: ")
 print("f1_score = ",randomcv.best_score_)
 ```
 
