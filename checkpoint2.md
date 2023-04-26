@@ -1391,19 +1391,6 @@ Con este modelo, obtuvimos el siguiente resultado:
 ![SegundaEntrega](informe/images/segundaPrediccion.jpg)
 
 
-Vemos que obtuvimos un resultado terriblemente similar (sino mejor) 
+Vemos que obtuvimos un resultado terriblemente similar (sino mejor), usando muchos menos parametros
 
-```python
-plt.figure(figsize=(100,100))
-
-tree_plot_completo=tree.plot_tree(arbol_mejor_performance,
-                                 feature_names=hotelsdfArbol_x.columns.to_list(),
-                                 filled=True,
-                                 rounded=True,
-                                 class_names=['Not Canceled','Is canceled']) #model.classes_
-plt.show(tree_plot_completo)
-```
-
-```python
-
-```
+##TODO Expandir
