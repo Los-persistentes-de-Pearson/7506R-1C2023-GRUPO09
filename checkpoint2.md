@@ -25,17 +25,22 @@ import pandas as pd
 import numpy as np
 import sklearn as sk
 import seaborn as sns
+import pydotplus
+from six import StringIO
+from IPython.display import Image  
 from matplotlib import pyplot as plt
+
+from sklearn.model_selection import StratifiedKFold, KFold,RandomizedSearchCV, train_test_split
+from sklearn.tree import DecisionTreeClassifier, export_graphviz
+from sklearn.metrics import confusion_matrix, classification_report , f1_score, make_scorer, precision_score, recall_score, accuracy_score,f1_score
+from sklearn.preprocessing import MinMaxScaler
 
 #Si estamos  en colab tenemos que instalar la libreria "dtreeviz" aparte. 
 if IN_COLAB == True:
     !pip install 'dtreeviz'
-import dtreeviz.trees as dtreeviz
-from sklearn import tree
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import precision_score, recall_score, accuracy_score,f1_score
-from sklearn.metrics import confusion_matrix, classification_report
-from sklearn.preprocessing import MinMaxScaler
+import dtreeviz.trees as 
+
+#Para eliminar los warnings
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 warnings.simplefilter(action='ignore', category=UserWarning)
@@ -774,10 +779,6 @@ print("Por esto decidimos eliminar la columna (tanto en el dataset de testeo com
 ```python
 hotelsdfTesteo.drop("company_id", axis=1, inplace=True)
 hotelsdfTesteo.reset_index(drop=True)
-
-#hotelsdfArbol.drop("company_id", axis=1, inplace=True)
-#hotelsdfArbol.reset_index(drop=True)
-#Nosotros ya teniamos company_id dropeado del checkpoint anterior
 ```
 
 ### Valores a convertir
@@ -1147,6 +1148,7 @@ Con este modelo, obtuvimos el siguiente resultado:
 
 ![PrimeraEntrega](informe/images/primeraPrediccion.jpg)
 
+# Mejoras en Performance, Cross Validation y poda
 
 ## Randomized Serach Cross Validation
 
@@ -1155,9 +1157,6 @@ Con este modelo, obtuvimos el siguiente resultado:
 
 ```python
 ##KFOLD CV Random Search para buscar el mejor arbol (los mejores atributos, hiperparametros,etc)
-from sklearn.model_selection import StratifiedKFold, KFold,RandomizedSearchCV
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.metrics import make_scorer
 
 #Cantidad de combinaciones que quiero porbar
 n=10
@@ -1276,7 +1275,6 @@ Evalúo el Arbol con los mejores hiperparámetros
 
 ```python
 #Evalúo el Arbol con los mejores hiperparámetros
-from sklearn.metrics import confusion_matrix, classification_report , f1_score
 
 #Hago predicción sobre el set de evaluacion
 y_pred= arbol_mejores_parametros.predict(x_test)
@@ -1302,8 +1300,6 @@ arbol_mejores_parametros.predict_proba(x_test)
 ## Entrenamiento Cross Validation
 
 ```python
-#Entrenamiento con 10 Fold Cross Validation 
-from sklearn.model_selection import cross_validate, StratifiedKFold
 
 #Spits que respeten la proporción delas clases
 #TODO
@@ -1344,9 +1340,6 @@ sns.boxplot(metricsCV)
 
 ```python
 #Arbol CV set de evaluación
-
-from sklearn.metrics import confusion_matrix, classification_report
-from sklearn.tree import DecisionTreeClassifier
 
 #Predicción sobre el set de evaluacion
 y_pred= arbol_mejor_performance.predict(x_test)
