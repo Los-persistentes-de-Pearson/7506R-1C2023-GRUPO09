@@ -38,7 +38,7 @@ from sklearn.preprocessing import MinMaxScaler
 #Si estamos  en colab tenemos que instalar la libreria "dtreeviz" aparte. 
 if IN_COLAB == True:
     !pip install 'dtreeviz'
-import dtreeviz.trees as 
+import dtreeviz.trees as dtreeviz
 
 #Para eliminar los warnings
 import warnings
