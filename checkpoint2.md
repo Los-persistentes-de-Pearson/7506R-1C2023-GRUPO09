@@ -25,22 +25,22 @@ import pandas as pd
 import numpy as np
 import sklearn as sk
 import seaborn as sns
+import pydotplus
+from six import StringIO
+from IPython.display import Image  
 from matplotlib import pyplot as plt
-from sklearn.model_selection import StratifiedKFold, KFold,RandomizedSearchCV
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.metrics import make_scorer
-from sklearn.metrics import confusion_matrix, classification_report , f1_score
-from sklearn.tree import DecisionTreeClassifier
+
+from sklearn.model_selection import StratifiedKFold, KFold,RandomizedSearchCV, train_test_split
+from sklearn.tree import DecisionTreeClassifier, export_graphviz
+from sklearn.metrics import confusion_matrix, classification_report , f1_score, make_scorer, precision_score, recall_score, accuracy_score,f1_score
+from sklearn.preprocessing import MinMaxScaler
 
 #Si estamos  en colab tenemos que instalar la libreria "dtreeviz" aparte. 
 if IN_COLAB == True:
     !pip install 'dtreeviz'
-import dtreeviz.trees as dtreeviz
-from sklearn import tree
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import precision_score, recall_score, accuracy_score,f1_score
-from sklearn.metrics import confusion_matrix, classification_report
-from sklearn.preprocessing import MinMaxScaler
+import dtreeviz.trees as 
+
+#Para eliminar los warnings
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 warnings.simplefilter(action='ignore', category=UserWarning)
@@ -1126,6 +1126,8 @@ print("Recall: "+str(recall))
 print("Precision: "+str(precision))
 print("f1 score: "+str(f1))
 ```
+
+# Mejoras en Performance, Cross Validation y poda
 
 ## Randomized Serach Cross Validation
 
