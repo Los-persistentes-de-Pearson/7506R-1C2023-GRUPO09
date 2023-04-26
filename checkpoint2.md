@@ -34,6 +34,7 @@ from sklearn.model_selection import StratifiedKFold, KFold,RandomizedSearchCV, t
 from sklearn.tree import DecisionTreeClassifier, export_graphviz, export_text
 from sklearn.metrics import confusion_matrix, classification_report , f1_score, make_scorer, precision_score, recall_score, accuracy_score,f1_score
 from sklearn.preprocessing import MinMaxScaler
+from sklearn import tree 
 
 #Si estamos  en colab tenemos que instalar la libreria "dtreeviz" aparte. 
 if IN_COLAB == True:
