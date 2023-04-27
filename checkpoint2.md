@@ -634,11 +634,10 @@ y_pred = model.predict(hotelsdfTesteo)
 #Valores Predichos
 y_pred
 ```
-# TODO
-
 Con este modelo, obtuvimos el siguiente resultado:
 
 ![PrimeraEntrega](informe/images/primeraPrediccion.jpg)
+
 
 # Busqueda de hiperparametros, poda y validación cruzada
 
