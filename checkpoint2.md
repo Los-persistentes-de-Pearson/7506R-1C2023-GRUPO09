@@ -30,6 +30,7 @@ from six import StringIO
 from IPython.display import Image  
 from matplotlib import pyplot as plt
 from dict_paises import COUNTRY_ALPHA3_TO_COUNTRY_ALPHA2, COUNTRY_ALPHA2_TO_CONTINENT
+from joblib import dump, load
 
 from sklearn.model_selection import StratifiedKFold, KFold,RandomizedSearchCV, train_test_split, cross_validate
 from sklearn.tree import DecisionTreeClassifier, export_graphviz, export_text
@@ -560,11 +561,12 @@ Iniciamos con una profundidad maxima arbitraria, en este caso 20 y creamos un ar
 Dicho modelo sera uno generado directamente tomando en cuenta todos los valores y sin generar ningun tipo de poda, para observar como se comporta un modelo sin tratar
 
 ```python
-PROFUNDIDAD_MAX = 20
+#TODO: DESCOMENTAR
+#PROFUNDIDAD_MAX = 20
 
-tree_model = tree.DecisionTreeClassifier(criterion="gini",
-                                         max_depth = PROFUNDIDAD_MAX) 
-model = tree_model.fit(X = x_train, y = y_train)
+#tree_model = tree.DecisionTreeClassifier(criterion="gini",
+#                                         max_depth = PROFUNDIDAD_MAX) 
+#model = tree_model.fit(X = x_train, y = y_train)
 ```
 
 Una vez entrenado el modelo realizamos una predicción con el mismo
@@ -602,14 +604,20 @@ A continuacion vamos a graficar el arbol resultante: \
 (**Advertencia**: Suele tardar unos minutos en terminar de renderizar la imagen)
 
 ```python
-plt.figure(figsize=(100,100))
+#TODO: DESCOMENTAR
 
-tree_plot_completo=tree.plot_tree(model,
-                                 feature_names=hotelsdfArbol_x.columns.to_list(),
-                                 filled=True,
-                                 rounded=True,
-                                 class_names=['Not Canceled','Is canceled']) #model.classes_
-plt.show(tree_plot_completo)
+#plt.figure(figsize=(100,100))
+
+#tree_plot_completo=tree.plot_tree(model,
+#                                 feature_names=hotelsdfArbol_x.columns.to_list(),
+#                                 filled=True,
+#                                 rounded=True,
+#                                 class_names=['Not Canceled','Is canceled']) #model.classes_
+#plt.show(tree_plot_completo)
+```
+
+```python
+dump(model, 'modelos/arbolIneficiente.joblib') 
 ```
 
 Con la imagen se ve que el arbol resultante tiene unas dimensiones exageradas, vemos ademas que tiene una profundidad de 20 como especificamos
