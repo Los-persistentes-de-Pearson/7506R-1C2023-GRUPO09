@@ -25,517 +25,27 @@ import pandas as pd
 import numpy as np
 import sklearn as sk
 import seaborn as sns
+import pydotplus
+from six import StringIO
+from IPython.display import Image  
 from matplotlib import pyplot as plt
+from dict_paises import COUNTRY_ALPHA3_TO_COUNTRY_ALPHA2, COUNTRY_ALPHA2_TO_CONTINENT
+
+from sklearn.model_selection import StratifiedKFold, KFold,RandomizedSearchCV, train_test_split, cross_validate
+from sklearn.tree import DecisionTreeClassifier, export_graphviz, export_text
+from sklearn.metrics import confusion_matrix, classification_report , f1_score, make_scorer, precision_score, recall_score, accuracy_score,f1_score
+from sklearn.preprocessing import MinMaxScaler
+from sklearn import tree 
 
 #Si estamos  en colab tenemos que instalar la libreria "dtreeviz" aparte. 
 if IN_COLAB == True:
     !pip install 'dtreeviz'
 import dtreeviz.trees as dtreeviz
-from sklearn import tree
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import precision_score, recall_score, accuracy_score,f1_score
-from sklearn.metrics import confusion_matrix, classification_report
-from sklearn.preprocessing import MinMaxScaler
+
+#Para eliminar los warnings
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 warnings.simplefilter(action='ignore', category=UserWarning)
-```
-
-```python
-#Diccionarios tomados de la libreria pycountry-convert: https://github.com/jefftune/pycountry-convert
-COUNTRY_ALPHA3_TO_COUNTRY_ALPHA2 = {
-    'ABH': 'AB',
-    'ABW': 'AW',
-    'AFG': 'AF',
-    'AGO': 'AO',
-    'AIA': 'AI',
-    'ALA': 'AX',
-    'ALB': 'AL',
-    'AND': 'AD',
-    'ARE': 'AE',
-    'ARG': 'AR',
-    'ARM': 'AM',
-    'ASM': 'AS',
-    'ATG': 'AG',
-    'AUS': 'AU',
-    'AUT': 'AT',
-    'AZE': 'AZ',
-    'BDI': 'BI',
-    'BEL': 'BE',
-    'BEN': 'BJ',
-    'BFA': 'BF',
-    'BGD': 'BD',
-    'BGR': 'BG',
-    'BHR': 'BH',
-    'BHS': 'BS',
-    'BIH': 'BA',
-    'BLM': 'BL',
-    'BLR': 'BY',
-    'BLZ': 'BZ',
-    'BMU': 'BM',
-    'BOL': 'BO',
-    'BRA': 'BR',
-    'BRB': 'BB',
-    'BRN': 'BN',
-    'BTN': 'BT',
-    'BVT': 'BV',
-    'BWA': 'BW',
-    'CAF': 'CF',
-    'CAN': 'CA',
-    'CCK': 'CC',
-    'CHE': 'CH',
-    'CHL': 'CL',
-    'CHN': 'CN',
-    'CIV': 'CI',
-    'CMR': 'CM',
-    'COD': 'CD',
-    'COG': 'CG',
-    'COK': 'CK',
-    'COL': 'CO',
-    'COM': 'KM',
-    'CPV': 'CV',
-    'CRI': 'CR',
-    'CUB': 'CU',
-    'CUW': 'CW',
-    'CXR': 'CX',
-    'CYM': 'KY',
-    'CYP': 'CY',
-    'CZE': 'CZ',
-    'DEU': 'DE',
-    'DJI': 'DJ',
-    'DMA': 'DM',
-    'DNK': 'DK',
-    'DOM': 'DO',
-    'DZA': 'DZ',
-    'ECU': 'EC',
-    'EGY': 'EG',
-    'ERI': 'ER',
-    'ESP': 'ES',
-    'EST': 'EE',
-    'ETH': 'ET',
-    'FIN': 'FI',
-    'FJI': 'FJ',
-    'FLK': 'FK',
-    'FRA': 'FR',
-    'FRO': 'FO',
-    'FSM': 'FM',
-    'GAB': 'GA',
-    'GBR': 'GB',
-    'GEO': 'GE',
-    'GGY': 'GG',
-    'GHA': 'GH',
-    'GIB': 'GI',
-    'GIN': 'GN',
-    'GLP': 'GP',
-    'GMB': 'GM',
-    'GNB': 'GW',
-    'GNQ': 'GQ',
-    'GRC': 'GR',
-    'GRD': 'GD',
-    'GRL': 'GL',
-    'GTM': 'GT',
-    'GUF': 'GF',
-    'GUM': 'GU',
-    'GUY': 'GY',
-    'HKG': 'HK',
-    'HMD': 'HM',
-    'HND': 'HN',
-    'HRV': 'HR',
-    'HTI': 'HT',
-    'HUN': 'HU',
-    'IDN': 'ID',
-    'IMN': 'IM',
-    'IND': 'IN',
-    'IOT': 'IO',
-    'IRL': 'IE',
-    'IRN': 'IR',
-    'IRQ': 'IQ',
-    'ISL': 'IS',
-    'ISR': 'IL',
-    'ITA': 'IT',
-    'JAM': 'JM',
-    'JEY': 'JE',
-    'JOR': 'JO',
-    'JPN': 'JP',
-    'KAZ': 'KZ',
-    'KEN': 'KE',
-    'KGZ': 'KG',
-    'KHM': 'KH',
-    'KIR': 'KI',
-    'KNA': 'KN',
-    'KOR': 'KR',
-    'KWT': 'KW',
-    'LAO': 'LA',
-    'LBN': 'LB',
-    'LBR': 'LR',
-    'LBY': 'LY',
-    'LCA': 'LC',
-    'LIE': 'LI',
-    'LKA': 'LK',
-    'LSO': 'LS',
-    'LTU': 'LT',
-    'LUX': 'LU',
-    'LVA': 'LV',
-    'MAC': 'MO',
-    'MAF': 'MF',
-    'MAR': 'MA',
-    'MCO': 'MC',
-    'MDA': 'MD',
-    'MDG': 'MG',
-    'MDV': 'MV',
-    'MEX': 'MX',
-    'MHL': 'MH',
-    'MKD': 'MK',
-    'MLI': 'ML',
-    'MLT': 'MT',
-    'MMR': 'MM',
-    'MNE': 'ME',
-    'MNG': 'MN',
-    'MNP': 'MP',
-    'MOZ': 'MZ',
-    'MRT': 'MR',
-    'MSR': 'MS',
-    'MTQ': 'MQ',
-    'MUS': 'MU',
-    'MWI': 'MW',
-    'MYS': 'MY',
-    'MYT': 'YT',
-    'NAM': 'NA',
-    'NCL': 'NC',
-    'NER': 'NE',
-    'NFK': 'NF',
-    'NGA': 'NG',
-    'NIC': 'NI',
-    'NIU': 'NU',
-    'NLD': 'NL',
-    'NOR': 'NO',
-    'NPL': 'NP',
-    'NRU': 'NR',
-    'NZL': 'NZ',
-    'OMN': 'OM',
-    'OST': 'OS',
-    'PAK': 'PK',
-    'PAN': 'PA',
-    'PER': 'PE',
-    'PHL': 'PH',
-    'PLW': 'PW',
-    'PNG': 'PG',
-    'POL': 'PL',
-    'PRI': 'PR',
-    'PRK': 'KP',
-    'PRT': 'PT',
-    'PRY': 'PY',
-    'PSE': 'PS',
-    'PYF': 'PF',
-    'QAT': 'QA',
-    'REU': 'RE',
-    'ROU': 'RO',
-    'RUS': 'RU',
-    'RWA': 'RW',
-    'SAU': 'SA',
-    'SDN': 'SD',
-    'SEN': 'SN',
-    'SGP': 'SG',
-    'SGS': 'GS',
-    'SHN': 'SH',
-    'SLB': 'SB',
-    'SLE': 'SL',
-    'SLV': 'SV',
-    'SMR': 'SM',
-    'SOM': 'SO',
-    'SPM': 'PM',
-    'SRB': 'RS',
-    'SSD': 'SS',
-    'STP': 'ST',
-    'SUR': 'SR',
-    'SVK': 'SK',
-    'SVN': 'SI',
-    'SWE': 'SE',
-    'SWZ': 'SZ',
-    'SYC': 'SC',
-    'SYR': 'SY',
-    'TCA': 'TC',
-    'TCD': 'TD',
-    'TGO': 'TG',
-    'THA': 'TH',
-    'TJK': 'TJ',
-    'TKL': 'TK',
-    'TKM': 'TM',
-    'TON': 'TO',
-    'TMP': 'TP',
-    'TTO': 'TT',
-    'TUN': 'TN',
-    'TUR': 'TR',
-    'TUV': 'TV',
-    'TWN': 'TW',
-    'TZA': 'TZ',
-    'UAE': 'AE',
-    'UGA': 'UG',
-    'UKR': 'UA',
-    'URY': 'UY',
-    'USA': 'US',
-    'UZB': 'UZ',
-    'VCT': 'VC',
-    'VEN': 'VE',
-    'VGB': 'VG',
-    'VIR': 'VI',
-    'VNM': 'VN',
-    'VUT': 'VU',
-    'WLF': 'WF',
-    'WSM': 'WS',
-    'YEM': 'YE',
-    'ZAF': 'ZA',
-    'ZMB': 'ZM',
-    'ZWE': 'ZW',
-}
-
-COUNTRY_ALPHA2_TO_CONTINENT = {
-    'AB': 'Asia',
-    'AD': 'Europe',
-    'AE': 'Asia',
-    'AF': 'Asia',
-    'AG': 'North America',
-    'AI': 'North America',
-    'AL': 'Europe',
-    'AM': 'Asia',
-    'AO': 'Africa',
-    'AR': 'South America',
-    'AS': 'Oceania',
-    'AT': 'Europe',
-    'AU': 'Oceania',
-    'AW': 'North America',
-    'AX': 'Europe',
-    'AZ': 'Asia',
-    'BA': 'Europe',
-    'BB': 'North America',
-    'BD': 'Asia',
-    'BE': 'Europe',
-    'BF': 'Africa',
-    'BG': 'Europe',
-    'BH': 'Asia',
-    'BI': 'Africa',
-    'BJ': 'Africa',
-    'BL': 'North America',
-    'BM': 'North America',
-    'BN': 'Asia',
-    'BO': 'South America',
-    'BQ': 'North America',
-    'BR': 'South America',
-    'BS': 'North America',
-    'BT': 'Asia',
-    'BV': 'Antarctica',
-    'BW': 'Africa',
-    'BY': 'Europe',
-    'BZ': 'North America',
-    'CA': 'North America',
-    'CC': 'Asia',
-    'CD': 'Africa',
-    'CF': 'Africa',
-    'CG': 'Africa',
-    'CH': 'Europe',
-    'CI': 'Africa',
-    'CK': 'Oceania',
-    'CL': 'South America',
-    'CM': 'Africa',
-    'CN': 'Asia',
-    'CO': 'South America',
-    'CR': 'North America',
-    'CU': 'North America',
-    'CV': 'Africa',
-    'CW': 'North America',
-    'CX': 'Asia',
-    'CY': 'Asia',
-    'CZ': 'Europe',
-    'DE': 'Europe',
-    'DJ': 'Africa',
-    'DK': 'Europe',
-    'DM': 'North America',
-    'DO': 'North America',
-    'DZ': 'Africa',
-    'EC': 'South America',
-    'EE': 'Europe',
-    'EG': 'Africa',
-    'ER': 'Africa',
-    'ES': 'Europe',
-    'ET': 'Africa',
-    'FI': 'Europe',
-    'FJ': 'Oceania',
-    'FK': 'South America',
-    'FM': 'Oceania',
-    'FO': 'Europe',
-    'FR': 'Europe',
-    'GA': 'Africa',
-    'GB': 'Europe',
-    'GD': 'North America',
-    'GE': 'Asia',
-    'GF': 'South America',
-    'GG': 'Europe',
-    'GH': 'Africa',
-    'GI': 'Europe',
-    'GL': 'North America',
-    'GM': 'Africa',
-    'GN': 'Africa',
-    'GP': 'North America',
-    'GQ': 'Africa',
-    'GR': 'Europe',
-    'GS': 'South America',
-    'GT': 'North America',
-    'GU': 'Oceania',
-    'GW': 'Africa',
-    'GY': 'South America',
-    'HK': 'Asia',
-    'HM': 'Antarctica',
-    'HN': 'North America',
-    'HR': 'Europe',
-    'HT': 'North America',
-    'HU': 'Europe',
-    'ID': 'Asia',
-    'IE': 'Europe',
-    'IL': 'Asia',
-    'IM': 'Europe',
-    'IN': 'Asia',
-    'IO': 'Asia',
-    'IQ': 'Asia',
-    'IR': 'Asia',
-    'IS': 'Europe',
-    'IT': 'Europe',
-    'JE': 'Europe',
-    'JM': 'North America',
-    'JO': 'Asia',
-    'JP': 'Asia',
-    'KE': 'Africa',
-    'KG': 'Asia',
-    'KH': 'Asia',
-    'KI': 'Oceania',
-    'KM': 'Africa',
-    'KN': 'North America',
-    'KP': 'Asia',
-    'KR': 'Asia',
-    'KW': 'Asia',
-    'KY': 'North America',
-    'KZ': 'Asia',
-    'LA': 'Asia',
-    'LB': 'Asia',
-    'LC': 'North America',
-    'LI': 'Europe',
-    'LK': 'Asia',
-    'LR': 'Africa',
-    'LS': 'Africa',
-    'LT': 'Europe',
-    'LU': 'Europe',
-    'LV': 'Europe',
-    'LY': 'Africa',
-    'MA': 'Africa',
-    'MC': 'Europe',
-    'MD': 'Europe',
-    'ME': 'Europe',
-    'MF': 'North America',
-    'MG': 'Africa',
-    'MH': 'Oceania',
-    'MK': 'Europe',
-    'ML': 'Africa',
-    'MM': 'Asia',
-    'MN': 'Asia',
-    'MO': 'Asia',
-    'MP': 'Oceania',
-    'MQ': 'North America',
-    'MR': 'Africa',
-    'MS': 'North America',
-    'MT': 'Europe',
-    'MU': 'Africa',
-    'MV': 'Asia',
-    'MW': 'Africa',
-    'MX': 'North America',
-    'MY': 'Asia',
-    'MZ': 'Africa',
-    'NA': 'Africa',
-    'NC': 'Oceania',
-    'NE': 'Africa',
-    'NF': 'Oceania',
-    'NG': 'Africa',
-    'NI': 'North America',
-    'NL': 'Europe',
-    'NO': 'Europe',
-    'NP': 'Asia',
-    'NR': 'Oceania',
-    'NU': 'Oceania',
-    'NZ': 'Oceania',
-    'OM': 'Asia',
-    'OS': 'Asia',
-    'PA': 'North America',
-    'PE': 'South America',
-    'PF': 'Oceania',
-    'PG': 'Oceania',
-    'PH': 'Asia',
-    'PK': 'Asia',
-    'PL': 'Europe',
-    'PM': 'North America',
-    'PR': 'North America',
-    'PS': 'Asia',
-    'PT': 'Europe',
-    'PW': 'Oceania',
-    'PY': 'South America',
-    'QA': 'Asia',
-    'RE': 'Africa',
-    'RO': 'Europe',
-    'RS': 'Europe',
-    'RU': 'Europe',
-    'RW': 'Africa',
-    'SA': 'Asia',
-    'SB': 'Oceania',
-    'SC': 'Africa',
-    'SD': 'Africa',
-    'SE': 'Europe',
-    'SG': 'Asia',
-    'SH': 'Africa',
-    'SI': 'Europe',
-    'SJ': 'Europe',
-    'SK': 'Europe',
-    'SL': 'Africa',
-    'SM': 'Europe',
-    'SN': 'Africa',
-    'SO': 'Africa',
-    'SR': 'South America',
-    'SS': 'Africa',
-    'ST': 'Africa',
-    'SV': 'North America',
-    'SY': 'Asia',
-    'SZ': 'Africa',
-    'TC': 'North America',
-    'TD': 'Africa',
-    'TG': 'Africa',
-    'TH': 'Asia',
-    'TJ': 'Asia',
-    'TK': 'Oceania',
-    'TM': 'Asia',
-    'TN': 'Africa',
-    'TO': 'Oceania',
-    'TP': 'Asia',
-    'TR': 'Asia',
-    'TT': 'North America',
-    'TV': 'Oceania',
-    'TW': 'Asia',
-    'TZ': 'Africa',
-    'UA': 'Europe',
-    'UG': 'Africa',
-    'US': 'North America',
-    'UY': 'South America',
-    'UZ': 'Asia',
-    'VC': 'North America',
-    'VE': 'South America',
-    'VG': 'North America',
-    'VI': 'North America',
-    'VN': 'Asia',
-    'VU': 'Oceania',
-    'WF': 'Oceania',
-    'WS': 'Oceania',
-    'XK': 'Europe',
-    'YE': 'Asia',
-    'YT': 'Africa',
-    'ZA': 'Africa',
-    'ZM': 'Africa',
-    'ZW': 'Africa',
-}
 ```
 
 ## Cargamos el dataframe de testeo
@@ -647,7 +157,7 @@ Viendo estos resultados vemos que hay dos outliers que no logramos identificar e
 ```python
 hotelsdfArbol.drop((hotelsdfArbol[hotelsdfArbol["country"] == "ATA"].index.values),inplace=True)
 hotelsdfArbol.reset_index(drop=True)
-print() #Este print es para no mostrar el dataframe innecesariamente
+print()
 ```
 
 "UMI" hace referenca a unas islas cerca de Hawaii. Al ser un unico caso y tener una poblacion de 300 habitantes, decidimos considerarlo como Estados Unidos, es decir America del Norte
@@ -690,7 +200,6 @@ Una de las columnas (en este caso la primera) es eliminada ya que, si todas las 
 Esto lo podemos hacer gracias a que eliminamos todos nuestros valores faltantes en las secciones anteriores.
 
 ```python
-#One hot encoding para variables categoricas, esto elimina las columnas categoricas y las reemplaza con el conjunto del hot encoding
 hotelsdfArbol = pd.get_dummies(hotelsdfArbol, columns=valoresAConvertir, drop_first=True)
 ```
 
@@ -774,10 +283,6 @@ print("Por esto decidimos eliminar la columna (tanto en el dataset de testeo com
 ```python
 hotelsdfTesteo.drop("company_id", axis=1, inplace=True)
 hotelsdfTesteo.reset_index(drop=True)
-
-#hotelsdfArbol.drop("company_id", axis=1, inplace=True)
-#hotelsdfArbol.reset_index(drop=True)
-#Nosotros ya teniamos company_id dropeado del checkpoint anterior
 ```
 
 ### Valores a convertir
@@ -852,10 +357,8 @@ Los estudiamos
 hotelsdfTesteo[ hotelsdfTesteo['continente'] =="ATA"]
 ```
 
-Hay un registro correspondiente a "antartida". como no podemos dropearlo, le ponemos de continente "north america".\
+Hay un registro correspondiente a "Antartida". como no podemos dropearlo, le ponemos de continente "north america".\
 Le asignamos el valor de America del norte debido a que estados unidos es el pais con mas bases en la antartica
-
-**TODO:CHEUQUEAR LO DE ARRIBA**
 
 ```python
 hotelsdfTesteo.loc[hotelsdfTesteo['continente'] == "ATA", 'continente'] = "North America"
@@ -894,7 +397,6 @@ plt.ylabel('Cantidad de registros')
 Vemos que el continente con mayor cantidad de registros es europa, asique lo asignamos a ese valor
 
 ```python
-#hotelsdfTesteo.loc[hotelsdfTesteo['continente'].isna()] = "Europe"
 hotelsdfTesteo.loc[hotelsdfTesteo['continente'].isnull(), 'country'] = 'Europe'
 ```
 
@@ -903,7 +405,6 @@ Miro q se hayan cambiado bien todos los continentes y no haya valores raros
 ```python
 continentes = hotelsdfTesteo['continente'].unique().tolist()
 print(continentes)
-#OJO CON EL NAN
 ```
 
 Como hicimos con el dataset de train, y ya habiendo procesado la columna continente, dropeamos la columna country
@@ -925,13 +426,14 @@ hotelsdfTesteo.reset_index(drop=True)
 ```
 
 ```python
-hotelsdfTesteo.isnull().sum() #AMONGUS
+hotelsdfTesteo.isnull().sum()
 ```
 
 ### One hot encoding del testeo
 
+De la misma manera al dataset de pruebas aplicamos one hot encoding sobre las columnas de variables cualitativas
+
 ```python
-#One hot encoding para variables categoricas, esto elimina las columnas categoricas y las reemplaza con el conjunto del hot encoding
 hotelsdfTesteo = pd.get_dummies(hotelsdfTesteo, columns=valoresAConvertirTesteo, drop_first=True)
 hotelsdfTesteo.head()
 ```
@@ -954,7 +456,6 @@ print('Sobran en arbol:', added)
 
 Vemos que en el dataframe del arbol nos sobra la columna "is canceled", cosa que hace sentido ya que esa es la columna con la que vamos a entrenar al dataset. Sin embargo, vemos que tambien hay 3 columnas que faltan en el dataset de arbol. 
 
-
 Vamos a reasignar los valores de las columnas de test para que coincidan.
 
 El siguiente codigo nos calcula cuantas personas tiene cada tipo de cuarto
@@ -970,7 +471,6 @@ for letra in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', '
     if tipoDeCuarto not in hotelsdfTesteo.columns:
         continue
     hotelsdfTesteo[tipoDeCuarto]
-    #print("SSUS")
     resultado = hotelsdfTesteo[hotelsdfTesteo[tipoDeCuarto] == 1][tipoDeCuarto].sum()
     cantDeCuartos[letra] = resultado
 
@@ -1006,7 +506,6 @@ for letra in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', '
     if tipoDeCuarto not in hotelsdfTesteo.columns:
         continue
     hotelsdfTesteo[tipoDeCuarto]
-    #print("SSUS")
     resultado = hotelsdfTesteo[hotelsdfTesteo[tipoDeCuarto] == 1][tipoDeCuarto].sum()
     cantDeCuartos[letra] = resultado
 
@@ -1040,38 +539,38 @@ print('Sobran en arbol:', added)
 
 ## Entrenamiento del modelo
 
+Se genera un dataset con los datos necesarios para predecir la cancelacion y creamos un dataset conteniendo el target, para luego, generar conjuntos de test y train
+
 ```python
-#Creamos un dataset con los features que vamos a usar para tratar de predecir el target
 hotelsdfArbol_x=hotelsdfArbol.drop(['is_canceled'], axis='columns', inplace=False)
 
-#Creo un dataset con la variable target
+
 hotelsdfArbol_y = hotelsdfArbol['is_canceled'].copy()
 
-#Genero los conjuntos de train y de test
 x_train, x_test, y_train, y_test = train_test_split(hotelsdfArbol_x,
                                                     hotelsdfArbol_y, 
                                                     test_size=0.2,  #proporcion 80/20
-                                                    random_state=9) #usamos la semilla 9 porque somos el grupo 9
+                                                    random_state=9) #Semilla 9, como el Equipo !!
 ```
 
-Ahora ya tenemos generados nuestros conjuntos de train y test; y tenemos nuesto dataframe con los datos numericos vamos a generar nuestro modelo
+Ahora ya tenemos generados nuestros conjuntos de train y test; y tenemos nuestro dataframe con los datos numericos, vamos a generar nuestro modelo
+
+Iniciamos con una profundidad maxima arbitraria, en este caso 20 y creamos un arbol utilizando el criterio **Gini** 
+
+Dicho modelo sera uno generado directamente tomando en cuenta todos los valores y sin generar ningun tipo de poda, para observar como se comporta un modelo sin tratar
 
 ```python
-#Vamos a iniciar con una profundidad maxima considerable para tener un arbol de dimesiones considerables
 PROFUNDIDAD_MAX = 20
 
-#Creamos un clasificador con hiperparámetros 
-tree_model = tree.DecisionTreeClassifier(criterion="gini", #Gini es el criterio por defecto
+tree_model = tree.DecisionTreeClassifier(criterion="gini",
                                          max_depth = PROFUNDIDAD_MAX) 
-
-#Entrenamos el modelo con el conjunto de entrenamiento
 model = tree_model.fit(X = x_train, y = y_train)
 ```
 
+Una vez entrenado el modelo realizamos una predicción con el mismo
+
 ```python
-#Realizamos una predicción sobre el set de test
 y_pred = model.predict(x_test)
-#Valores Predichos
 y_pred
 ```
 
@@ -1086,17 +585,21 @@ Estas columns representan 20% de nuestro dataframe que fue dedicado al testeo de
 Vamos a graficar la matriz de confusion para visualizar los resultados de nuesto modelo:
 
 ```python
-#Creo la matriz de confusión
 tabla=confusion_matrix(y_test, y_pred)
-
-#Grafico la matriz de confusión
 sns.heatmap(tabla,cmap='GnBu',annot=True,fmt='g')
 plt.xlabel('Predicted')
 plt.ylabel('True')
 ```
 
+Presentamos las reglas conseguidas en árbol no optizado:
+
+```python
+reglas = export_text(tree_model, feature_names=list(hotelsdfArbol_x.columns.tolist()))
+print(reglas)
+```
+
 A continuacion vamos a graficar el arbol resultante: \
-(Advertencia: Suele tardar unos minutos en terminar de renderizar la imagen)
+(**Advertencia**: Suele tardar unos minutos en terminar de renderizar la imagen)
 
 ```python
 plt.figure(figsize=(100,100))
@@ -1111,8 +614,7 @@ plt.show(tree_plot_completo)
 
 Con la imagen se ve que el arbol resultante tiene unas dimensiones exageradas, vemos ademas que tiene una profundidad de 20 como especificamos
 
-
-Vemos que, sin ningun tipo de optimizacion y con un arbol de profundidad 20 y sin ningun tipo de poda obtenemos, en nuestro dataset de testeo:
+Vemos que en un árbol sin optimizar de profundidad 20 y sin configurar una mejora en los hiperparametros obtenemos las siguientes metricas:
 
 ```python
 accuracy=accuracy_score(y_test,y_pred)
@@ -1126,20 +628,188 @@ print("Precision: "+str(precision))
 print("f1 score: "+str(f1))
 ```
 
-## Ahora vamos a compararlo con el dataset de testeo de verdad
-
 ```python
 #Realizamos una predicción sobre el set de test
 y_pred = model.predict(hotelsdfTesteo)
 #Valores Predichos
 y_pred
 ```
+Con este modelo, obtuvimos el siguiente resultado:
+
+![PrimeraEntrega](informe/images/primeraPrediccion.jpg)
+
+
+# Busqueda de hiperparametros, poda y validación cruzada
+
+## Randomized Search Cross Validation
+
+Mediante la tecnica de ramdomized search cross validations hacemos una busqueda de los mejores hiperparametros
+
+Tomamos 15 combinaciones posibles entre los parametros existentes y buscamos la combinación que mejor optimiza la metrica F1. La decisión de mejorar la metrica F1 viene de equilibrar tanto presion y recall debido a que la naturaleza del problema no requiere la mejora de alguna en particular, lo que significa que clasifica correctamente la mayoria de los casos positivos y encuentra la maxima cantidad de ellos
+
+Nos basamos en los siguientes parametros:
 
 ```python
-df_submission = pd.DataFrame({'id': hotelsdfTesteoOriginal['id'], 'is_canceled': y_pred})
-df_submission.head()
+
+combinaciones=15
+limite_hojas_nodos = list(range(2, 50))
+valor_poda = 0.0001 #0.0007
+profundidad = list(range(0,40))
+folds=10
+
+
+params_grid = {'criterion':['gini','entropy'],
+               'min_samples_leaf':limite_hojas_nodos,
+               'min_samples_split': limite_hojas_nodos, 
+               'ccp_alpha':np.linspace(0,valor_poda,combinaciones),
+               'max_depth':profundidad}
+
+kfoldcv = StratifiedKFold(n_splits=folds)
+
+base_tree = DecisionTreeClassifier() 
+
+scorer_fn = make_scorer(sk.metrics.f1_score)
+
+randomcv = RandomizedSearchCV(estimator=base_tree,
+                              param_distributions = params_grid,
+                              scoring=scorer_fn,
+                              cv=kfoldcv,
+                              n_iter=combinaciones) 
+
+randomcv.fit(x_train,y_train)
+```
+
+Mostramos los mejores hiperparametros devueltos por el arbol y el valor del f1_score
+
+```python
+print("Mostramos los mejores resultados: ")
+print(randomcv.best_params_)
+print()
+print("Mostramos el mejor resultado obtenido de busqueda aleatoria: ")
+print("f1_score = ",randomcv.best_score_)
+```
+
+Algunos valores obtenidos del algoritmo
+
+```python
+randomcv.cv_results_['mean_test_score']
+```
+
+## Predicción y Evaluación del Modelo con mejores hiperparámetros
+
+Generamos el árbol con los hiperparametros que optimizan su eficiencia y a su vez presentamos el conjunto de valores con su peso relativo a la toma de la decisión 
+
+```python
+arbol_mejores_parametros=DecisionTreeClassifier().set_params(**randomcv.best_params_)
+arbol_mejores_parametros.fit(x_train,y_train)
+```
+
+*Conjunto de reglas:*
+
+```python
+features_considerados = hotelsdfArbol_x.columns.to_list()
+best_tree = randomcv.best_estimator_
+feat_imps = best_tree.feature_importances_
+
+for feat_imp,feat in sorted(zip(feat_imps,features_considerados)):
+  if feat_imp>0:
+    print('{}: {}'.format(feat,feat_imp))
+```
+
+Es importante destacar tres de las variables seleccionadas en la primera parte de nuestro analisis (Checkpoint 1):  lead_time, average_daily_rate y previous_cancelations_nums estan enmarcadas dentro de las diez caracteristicas que aportan màs información en la construcción del árbol
+
+*Mostramos las reglas internas del árbol:*
+
+```python
+reglas = export_text(arbol_mejores_parametros, feature_names=list(features_considerados))
+print(reglas)
+```
+
+Se puede observar una considerable simplificacion en la ramificacion de las reglas de este árbol comparado contra el primer árbol generado en el análisis 
+
+
+### Grafica representativa del árbol optimizado
+
+Mostramos los primeros cinco niveles del árbol optimazado y observamos una diferencia con el primer árbol generado en el analisis:
+
+```python
+dot_data = StringIO()
+export_graphviz(arbol_mejores_parametros, out_file=dot_data,  
+                 filled=True, rounded=True,
+                 special_characters=True,
+                 feature_names=features_considerados,
+                 class_names=['no cancelo','cancelo'],
+                 max_depth=5)
+
+graph = pydotplus.graph_from_dot_data(dot_data.getvalue())  
+Image(graph.create_png())
+```
+
+Considerando lo antes mencionado podemos apreciar que:
+1. El primer nodo particiona segun el tipo de deposito: sin rembolso, donde, la gente tiende a mantener la reserva y con rembolso donde se tiende a cancelar
+2. El segundo nivel árbol toma en consideración el lead time y el numero de cambios en la reserva. Con un lead time menor a 11.5 tiene una menor cantidad de reservas canceladas, mientras, en el otro nodo clasifica cancelado si el numero de cambios en la reserva es menor que cero
+3. En un tercer nivel observamos que las variables que más aportan informacion son: previous cancelation number, market segment type online TA, customer type trasient party y arrival month day 13
+
+### Prediccion con split de train
+
+Hacemos una primera evaluación del árbol haciendo uso de los datos de prueba y medimos su desempeño
+
+```python
+y_pred= arbol_mejores_parametros.predict(x_test)
+print('F1-Score: {}'.format(f1_score(y_test, y_pred, average='binary')))
+cm = confusion_matrix(y_test,y_pred)
+sns.heatmap(cm, cmap='Blues',annot=True,fmt='g')
+plt.xlabel('Predecidos')
+plt.ylabel('Verdaderos')
+plt.title("Desempeño del modelo con datos de prueba")
+
+```
+
+*Un vistazo al primer conjunto de prediccione:*
+
+```python
+arbol_mejores_parametros.predict_proba(x_test)
+```
+
+## Entrenamiento Cross Validation
+
+Procedemos a realizar entrenamiento del árbol mediante el metodo de la validación cruzada en 10 folds considerando que fue como se entreno previamente al árbol mas optimo. Esto buscando siempre mantener la metrica F1 en su valor más alto, como también comprobar que el árbol mantiene un desempeño esperado y detectar posibles casos de *Overfitting o Underfitting*
+
+```python
+kfoldcv =StratifiedKFold(n_splits=folds) 
+scorer_fn = make_scorer(sk.metrics.f1_score)
+
+resultados = cross_validate(arbol_mejores_parametros,x_train, y_train, cv=kfoldcv,scoring=scorer_fn,return_estimator=True)
+
+metricsCV = resultados['test_score']
+
+arbol_mejor_performance = resultados['estimator'][np.where(metricsCV==max(metricsCV))[0][0]]
+
 ```
 
 ```python
-df_submission.to_csv('submissions/arbol_decisiones_ineficiente.csv', index=False)
+metric_labelsCV = ['F1 Score']*len(metricsCV) 
+sns.set_context('talk')
+sns.set_style("darkgrid")
+plt.figure(figsize=(8,8))
+sns.boxplot(metricsCV)
+plt.title("Modelo entrenado con 10 folds")
 ```
+
+```python
+y_pred= arbol_mejor_performance.predict(x_test)
+print(classification_report(y_test,y_pred))
+print('F1-Score: {}'.format(f1_score(y_test, y_pred, average='binary'))) 
+cm = confusion_matrix(y_test,y_pred)
+sns.heatmap(cm, cmap='Blues',annot=True,fmt='g')
+plt.xlabel('Predicted')
+plt.ylabel('True')
+```
+
+---
+
+# Conclusión
+
+1. Al comparar los dos modelos construidos, se observó una mejora considerable en el segundo modelo en factores como la performance y las métricas en comparación con el primero. Esto sugiere que se pudo optimizar significativamente el modelo mediante la incorporación de tecnicas como: ramdomized cross search
+2. Las métricas del árbol se mejoraron mediante la optimización del F1 score, el cual fue seleccionado debido a la naturaleza del problema en el que no había un motivo particular para seleccionar una métrica específica (como recall o precision).
+3. A pesar de la poda y la reducción de la libertad del árbol para extenderse, se logró una mejora significativa en su métrica F1. Esto demuestra que la poda y la limitación de la extensión del árbol no necesariamente afectan negativamente su rendimiento, sino que pueden mejorar la capacidad de generalización del modelo.
