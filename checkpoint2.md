@@ -561,24 +561,31 @@ Iniciamos con una profundidad maxima arbitraria, en este caso 20 y creamos un ar
 Dicho modelo sera uno generado directamente tomando en cuenta todos los valores y sin generar ningun tipo de poda, para observar como se comporta un modelo sin tratar
 
 ```python
-#TODO: DESCOMENTAR
-#PROFUNDIDAD_MAX = 20
+'''
 
-#tree_model = tree.DecisionTreeClassifier(criterion="gini",
-#                                         max_depth = PROFUNDIDAD_MAX) 
-#model = tree_model.fit(X = x_train, y = y_train)
+PROFUNDIDAD_MAX = 20
+
+tree_model = tree.DecisionTreeClassifier(criterion="gini",
+                                         max_depth = PROFUNDIDAD_MAX) 
+model = tree_model.fit(X = x_train, y = y_train)
+'''
 ```
+
 
 Una vez entrenado el modelo realizamos una predicción con el mismo
 
 ```python
+'''
 y_pred = model.predict(x_test)
 y_pred
+'''
 ```
 
 ```python
+'''
 ds_resultados=pd.DataFrame(zip(y_test,y_pred),columns=['test','pred'])
 ds_resultados
+'''
 ```
 
 Estas columns representan 20% de nuestro dataframe que fue dedicado al testeo del modelo
@@ -587,17 +594,21 @@ Estas columns representan 20% de nuestro dataframe que fue dedicado al testeo de
 Vamos a graficar la matriz de confusion para visualizar los resultados de nuesto modelo:
 
 ```python
+'''
 tabla=confusion_matrix(y_test, y_pred)
 sns.heatmap(tabla,cmap='GnBu',annot=True,fmt='g')
 plt.xlabel('Predicted')
 plt.ylabel('True')
+'''
 ```
 
 Presentamos las reglas conseguidas en árbol no optizado:
 
 ```python
+'''
 reglas = export_text(tree_model, feature_names=list(hotelsdfArbol_x.columns.tolist()))
 print(reglas)
+'''
 ```
 
 A continuacion vamos a graficar el arbol resultante: \
@@ -615,8 +626,11 @@ tree_plot_completo=tree.plot_tree(model,
 plt.show(tree_plot_completo)
 '''
 
+```
 ```python
+'''
 dump(model, 'modelos/arbolIneficiente.joblib') 
+'''
 ```
 
 Con la imagen se ve que el arbol resultante tiene unas dimensiones exageradas, vemos ademas que tiene una profundidad de 20 como especificamos
@@ -624,6 +638,7 @@ Con la imagen se ve que el arbol resultante tiene unas dimensiones exageradas, v
 Vemos que en un árbol sin optimizar de profundidad 20 y sin configurar una mejora en los hiperparametros obtenemos las siguientes metricas:
 
 ```python
+'''
 accuracy=accuracy_score(y_test,y_pred)
 recall=recall_score(y_test,y_pred)
 f1=f1_score(y_test,y_pred,)
@@ -633,13 +648,16 @@ print("Accuracy: "+str(accuracy))
 print("Recall: "+str(recall))
 print("Precision: "+str(precision))
 print("f1 score: "+str(f1))
+'''
 ```
 
 ```python
+'''
 #Realizamos una predicción sobre el set de test
 y_pred = model.predict(hotelsdfTesteo)
 #Valores Predichos
 y_pred
+'''
 ```
 Con este modelo, obtuvimos el siguiente resultado:
 
@@ -849,6 +867,12 @@ Tu codigo aqui
 '''
 ```
 
+```python
+'''
+dump(model, 'modelos/arbolHojas.joblib') 
+'''
+```
+
 ## Poda modificada
 
 ```python
@@ -857,11 +881,23 @@ Tu codigo aqui
 '''
 ```
 
+```python
+'''
+dump(model, 'modelos/arbolPoda.joblib') 
+'''
+```
+
 ## Profundidad modificada
 
 ```python
 '''
 Tu codigo aqui
+'''
+```
+
+```python
+'''
+dump(model, 'modelos/arbolProfundidad.joblib') 
 '''
 ```
 
