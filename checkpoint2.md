@@ -602,6 +602,7 @@ A continuacion vamos a graficar el arbol resultante: \
 (**Advertencia**: Suele tardar unos minutos en terminar de renderizar la imagen)
 
 ```python
+'''
 plt.figure(figsize=(100,100))
 
 tree_plot_completo=tree.plot_tree(model,
@@ -610,6 +611,7 @@ tree_plot_completo=tree.plot_tree(model,
                                  rounded=True,
                                  class_names=['Not Canceled','Is canceled']) #model.classes_
 plt.show(tree_plot_completo)
+'''
 ```
 
 Con la imagen se ve que el arbol resultante tiene unas dimensiones exageradas, vemos ademas que tiene una profundidad de 20 como especificamos
@@ -650,7 +652,7 @@ Tomamos 15 combinaciones posibles entre los parametros existentes y buscamos la 
 Nos basamos en los siguientes parametros:
 
 ```python
-
+'''
 combinaciones=15
 limite_hojas_nodos = list(range(2, 50))
 valor_poda = 0.0001 #0.0007
@@ -677,22 +679,27 @@ randomcv = RandomizedSearchCV(estimator=base_tree,
                               n_iter=combinaciones) 
 
 randomcv.fit(x_train,y_train)
+'''
 ```
 
 Mostramos los mejores hiperparametros devueltos por el arbol y el valor del f1_score
 
 ```python
+'''
 print("Mostramos los mejores resultados: ")
 print(randomcv.best_params_)
 print()
 print("Mostramos el mejor resultado obtenido de busqueda aleatoria: ")
 print("f1_score = ",randomcv.best_score_)
+'''
 ```
 
 Algunos valores obtenidos del algoritmo
 
 ```python
+'''
 randomcv.cv_results_['mean_test_score']
+'''
 ```
 
 ## Predicción y Evaluación del Modelo con mejores hiperparámetros
@@ -700,13 +707,16 @@ randomcv.cv_results_['mean_test_score']
 Generamos el árbol con los hiperparametros que optimizan su eficiencia y a su vez presentamos el conjunto de valores con su peso relativo a la toma de la decisión 
 
 ```python
+'''
 arbol_mejores_parametros=DecisionTreeClassifier().set_params(**randomcv.best_params_)
 arbol_mejores_parametros.fit(x_train,y_train)
+'''
 ```
 
 *Conjunto de reglas:*
 
 ```python
+'''
 features_considerados = hotelsdfArbol_x.columns.to_list()
 best_tree = randomcv.best_estimator_
 feat_imps = best_tree.feature_importances_
@@ -714,6 +724,7 @@ feat_imps = best_tree.feature_importances_
 for feat_imp,feat in sorted(zip(feat_imps,features_considerados)):
   if feat_imp>0:
     print('{}: {}'.format(feat,feat_imp))
+'''
 ```
 
 Es importante destacar tres de las variables seleccionadas en la primera parte de nuestro analisis (Checkpoint 1):  lead_time, average_daily_rate y previous_cancelations_nums estan enmarcadas dentro de las diez caracteristicas que aportan màs información en la construcción del árbol
@@ -721,8 +732,10 @@ Es importante destacar tres de las variables seleccionadas en la primera parte d
 *Mostramos las reglas internas del árbol:*
 
 ```python
+'''
 reglas = export_text(arbol_mejores_parametros, feature_names=list(features_considerados))
 print(reglas)
+'''
 ```
 
 Se puede observar una considerable simplificacion en la ramificacion de las reglas de este árbol comparado contra el primer árbol generado en el análisis 
@@ -733,6 +746,7 @@ Se puede observar una considerable simplificacion en la ramificacion de las regl
 Mostramos los primeros cinco niveles del árbol optimazado y observamos una diferencia con el primer árbol generado en el analisis:
 
 ```python
+'''
 dot_data = StringIO()
 export_graphviz(arbol_mejores_parametros, out_file=dot_data,  
                  filled=True, rounded=True,
@@ -743,6 +757,7 @@ export_graphviz(arbol_mejores_parametros, out_file=dot_data,
 
 graph = pydotplus.graph_from_dot_data(dot_data.getvalue())  
 Image(graph.create_png())
+'''
 ```
 
 Considerando lo antes mencionado podemos apreciar que:
@@ -755,6 +770,7 @@ Considerando lo antes mencionado podemos apreciar que:
 Hacemos una primera evaluación del árbol haciendo uso de los datos de prueba y medimos su desempeño
 
 ```python
+'''
 y_pred= arbol_mejores_parametros.predict(x_test)
 print('F1-Score: {}'.format(f1_score(y_test, y_pred, average='binary')))
 cm = confusion_matrix(y_test,y_pred)
@@ -762,13 +778,15 @@ sns.heatmap(cm, cmap='Blues',annot=True,fmt='g')
 plt.xlabel('Predecidos')
 plt.ylabel('Verdaderos')
 plt.title("Desempeño del modelo con datos de prueba")
-
+'''
 ```
 
 *Un vistazo al primer conjunto de prediccione:*
 
 ```python
+'''
 arbol_mejores_parametros.predict_proba(x_test)
+'''
 ```
 
 ## Entrenamiento Cross Validation
@@ -776,6 +794,7 @@ arbol_mejores_parametros.predict_proba(x_test)
 Procedemos a realizar entrenamiento del árbol mediante el metodo de la validación cruzada en 10 folds considerando que fue como se entreno previamente al árbol mas optimo. Esto buscando siempre mantener la metrica F1 en su valor más alto, como también comprobar que el árbol mantiene un desempeño esperado y detectar posibles casos de *Overfitting o Underfitting*
 
 ```python
+'''
 kfoldcv =StratifiedKFold(n_splits=folds) 
 scorer_fn = make_scorer(sk.metrics.f1_score)
 
@@ -784,19 +803,22 @@ resultados = cross_validate(arbol_mejores_parametros,x_train, y_train, cv=kfoldc
 metricsCV = resultados['test_score']
 
 arbol_mejor_performance = resultados['estimator'][np.where(metricsCV==max(metricsCV))[0][0]]
-
+'''
 ```
 
 ```python
+'''
 metric_labelsCV = ['F1 Score']*len(metricsCV) 
 sns.set_context('talk')
 sns.set_style("darkgrid")
 plt.figure(figsize=(8,8))
 sns.boxplot(metricsCV)
 plt.title("Modelo entrenado con 10 folds")
+'''
 ```
 
 ```python
+'''
 y_pred= arbol_mejor_performance.predict(x_test)
 print(classification_report(y_test,y_pred))
 print('F1-Score: {}'.format(f1_score(y_test, y_pred, average='binary'))) 
@@ -804,6 +826,38 @@ cm = confusion_matrix(y_test,y_pred)
 sns.heatmap(cm, cmap='Blues',annot=True,fmt='g')
 plt.xlabel('Predicted')
 plt.ylabel('True')
+'''
+```
+
+# Busqueda de hiperparametros
+Con modificaciones de valores para mejorar resultados
+limite_hojas_nodos = list(range(2, 50))
+valor_poda = 0.0001 #0.0007
+profundidad = list(range(0,40))
+
+
+## Limite de hojas modificado
+
+```python
+'''
+Tu codigo aqui
+'''
+```
+
+## Poda modificada
+
+```python
+'''
+Tu codigo aqui
+'''
+```
+
+## Profundidad modificada
+
+```python
+'''
+Tu codigo aqui
+'''
 ```
 
 ---
