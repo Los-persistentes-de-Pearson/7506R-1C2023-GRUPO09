@@ -856,8 +856,6 @@ hotelsdfTesteo[ hotelsdfTesteo['continente'] =="ATA"]
 Hay un registro correspondiente a "Antartida". como no podemos dropearlo, le ponemos de continente "north america".\
 Le asignamos el valor de America del norte debido a que estados unidos es el pais con mas bases en la antartica
 
-**TO DO -> Revisar**
-
 ```python
 hotelsdfTesteo.loc[hotelsdfTesteo['continente'] == "ATA", 'continente'] = "North America"
 ```
@@ -1037,7 +1035,7 @@ print('Sobran en arbol:', added)
 
 ## Entrenamiento del modelo
 
-Se genera un data set con los datos necesarios para predecir la cancelacion y creamos un dataset conteniendo el target, para luego, generar conjuntos de test y train
+Se genera un dataset con los datos necesarios para predecir la cancelacion y creamos un dataset conteniendo el target, para luego, generar conjuntos de test y train
 
 ```python
 hotelsdfArbol_x=hotelsdfArbol.drop(['is_canceled'], axis='columns', inplace=False)
@@ -1051,20 +1049,17 @@ x_train, x_test, y_train, y_test = train_test_split(hotelsdfArbol_x,
                                                     random_state=9) #Semilla 9, como el Equipo !!
 ```
 
-Ahora ya tenemos generados nuestros conjuntos de train y test; y tenemos nuesto dataframe con los datos numericos vamos a generar nuestro modelo
+Ahora ya tenemos generados nuestros conjuntos de train y test; y tenemos nuestro dataframe con los datos numericos, vamos a generar nuestro modelo
 
-
-Iniciamos con una profundidad maxima de 20 y creamos un arbol utilizando el criterio **Gini** 
-
+Iniciamos con una profundidad maxima arbitraria, en este caso 20 y creamos un arbol utilizando el criterio **Gini** 
 
 Dicho modelo sera uno generado directamente tomando en cuenta todos los valores y sin generar ningun tipo de poda, para observar como se comporta un modelo sin tratar
 
 ```python
 PROFUNDIDAD_MAX = 20
 
-tree_model = tree.DecisionTreeClassifier(criterion="gini", #Gini es el criterio por defecto
+tree_model = tree.DecisionTreeClassifier(criterion="gini",
                                          max_depth = PROFUNDIDAD_MAX) 
-
 model = tree_model.fit(X = x_train, y = y_train)
 ```
 
@@ -1072,8 +1067,6 @@ Una vez entrenado el modelo realizamos una predicción con el mismo
 
 ```python
 y_pred = model.predict(x_test)
-
-#Valores Predichos
 y_pred
 ```
 
@@ -1089,10 +1082,16 @@ Vamos a graficar la matriz de confusion para visualizar los resultados de nuesto
 
 ```python
 tabla=confusion_matrix(y_test, y_pred)
-
 sns.heatmap(tabla,cmap='GnBu',annot=True,fmt='g')
 plt.xlabel('Predicted')
 plt.ylabel('True')
+```
+
+Presentamos las reglas conseguidas en árbol no optizado:
+
+```python
+reglas = export_text(tree_model, feature_names=list(hotelsdfArbol_x.columns.tolist()))
+print(reglas)
 ```
 
 A continuacion vamos a graficar el arbol resultante: \
@@ -1111,8 +1110,7 @@ plt.show(tree_plot_completo)
 
 Con la imagen se ve que el arbol resultante tiene unas dimensiones exageradas, vemos ademas que tiene una profundidad de 20 como especificamos
 
-
-Vemos que, sin ningun tipo de optimizacion y con un arbol de profundidad 20 y sin ningun tipo de poda obtenemos, en nuestro dataset de testeo:
+Vemos que en un árbol sin optimizar de profundidad 20 y sin configurar una mejora en los hiperparametros obtenemos las siguientes metricas:
 
 ```python
 accuracy=accuracy_score(y_test,y_pred)
@@ -1132,30 +1130,21 @@ y_pred = model.predict(hotelsdfTesteo)
 #Valores Predichos
 y_pred
 ```
-
-```python
-df_submission = pd.DataFrame({'id': hotelsdfTesteoOriginal['id'], 'is_canceled': y_pred})
-df_submission.head()
-```
-
-```python
-df_submission.to_csv('submissions/arbol_decisiones_ineficiente.csv', index=False)
-```
+# TODO
 
 Con este modelo, obtuvimos el siguiente resultado:
 
-
 ![PrimeraEntrega](informe/images/primeraPrediccion.jpg)
 
-# Mejoras en Performance, Cross Validation y poda
+# Busqueda de hiperparametros, poda y validación cruzada
 
-## Randomized Serach Cross Validation
+## Randomized Search Cross Validation
 
-Buscamos los mejores atributos que generen una optimizacion en la predicción de nuestro árbol
+Mediante la tecnica de ramdomized search cross validations hacemos una busqueda de los mejores hiperparametros
 
+Tomamos 15 combinaciones posibles entre los parametros existentes y buscamos la combinación que mejor optimiza la metrica F1. La decisión de mejorar la metrica F1 viene de equilibrar tanto presion y recall debido a que la naturaleza del problema no requiere la mejora de alguna en particular, lo que significa que clasifica correctamente la mayoria de los casos positivos y encuentra la maxima cantidad de ellos
 
-Tomamos unas 15 combinaciones posibles entre los parametros existentes y buscamos la mejor entre todas ellas. Para el cross validation hacemos una partición de 10 folds considerando el gran tamaño del dataset
-
+Nos basamos en los siguientes parametros:
 
 ```python
 
@@ -1171,7 +1160,6 @@ params_grid = {'criterion':['gini','entropy'],
                'min_samples_split': limite_hojas_nodos, 
                'ccp_alpha':np.linspace(0,valor_poda,combinaciones),
                'max_depth':profundidad}
-
 
 kfoldcv = StratifiedKFold(n_splits=folds)
 
@@ -1204,7 +1192,16 @@ Algunos valores obtenidos del algoritmo
 randomcv.cv_results_['mean_test_score']
 ```
 
-Mostramos todos los atributos considerados en la construcción y optimización del árbol, como también, vemos la información que aportan en el analísis 
+## Predicción y Evaluación del Modelo con mejores hiperparámetros
+
+Generamos el árbol con los hiperparametros que optimizan su eficiencia y a su vez presentamos el conjunto de valores con su peso relativo a la toma de la decisión 
+
+```python
+arbol_mejores_parametros=DecisionTreeClassifier().set_params(**randomcv.best_params_)
+arbol_mejores_parametros.fit(x_train,y_train)
+```
+
+*Conjunto de reglas:*
 
 ```python
 features_considerados = hotelsdfArbol_x.columns.to_list()
@@ -1216,23 +1213,21 @@ for feat_imp,feat in sorted(zip(feat_imps,features_considerados)):
     print('{}: {}'.format(feat,feat_imp))
 ```
 
-## Predicción y Evaluación del Modelo con mejores hiperparámetros
+Es importante destacar tres de las variables seleccionadas en la primera parte de nuestro analisis (Checkpoint 1):  lead_time, average_daily_rate y previous_cancelations_nums estan enmarcadas dentro de las diez caracteristicas que aportan màs información en la construcción del árbol
 
-
-Creo el árbol con los mejores hiperparámetros
+*Mostramos las reglas internas del árbol:*
 
 ```python
-arbol_mejores_parametros=DecisionTreeClassifier().set_params(**randomcv.best_params_)
-
-arbol_mejores_parametros.fit(x_train,y_train)
-
 reglas = export_text(arbol_mejores_parametros, feature_names=list(features_considerados))
 print(reglas)
 ```
 
-### Grafica representativa del árbol optimizado
-###TODO SI se desea hacer funcar la libreria
+Se puede observar una considerable simplificacion en la ramificacion de las reglas de este árbol comparado contra el primer árbol generado en el análisis 
 
+
+### Grafica representativa del árbol optimizado
+
+Mostramos los primeros cinco niveles del árbol optimazado y observamos una diferencia con el primer árbol generado en el analisis:
 
 ```python
 dot_data = StringIO()
@@ -1247,22 +1242,27 @@ graph = pydotplus.graph_from_dot_data(dot_data.getvalue())
 Image(graph.create_png())
 ```
 
+Considerando lo antes mencionado podemos apreciar que:
+1. El primer nodo particiona segun el tipo de deposito: sin rembolso, donde, la gente tiende a mantener la reserva y con rembolso donde se tiende a cancelar
+2. El segundo nivel árbol toma en consideración el lead time y el numero de cambios en la reserva. Con un lead time menor a 11.5 tiene una menor cantidad de reservas canceladas, mientras, en el otro nodo clasifica cancelado si el numero de cambios en la reserva es menor que cero
+3. En un tercer nivel observamos que las variables que más aportan informacion son: previous cancelation number, market segment type online TA, customer type trasient party y arrival month day 13
+
 ### Prediccion con split de train
 
-
-Evalúo el Arbol con los mejores hiperparámetros y hacemos predicciones sobre el dataset de evaluacion
+Hacemos una primera evaluación del árbol haciendo uso de los datos de prueba y medimos su desempeño
 
 ```python
 y_pred= arbol_mejores_parametros.predict(x_test)
-print('F1-Score: {}'.format(f1_score(y_test, y_pred, average='binary'))) #binary considera la clase positiva por defecto 1
+print('F1-Score: {}'.format(f1_score(y_test, y_pred, average='binary')))
 cm = confusion_matrix(y_test,y_pred)
 sns.heatmap(cm, cmap='Blues',annot=True,fmt='g')
 plt.xlabel('Predecidos')
 plt.ylabel('Verdaderos')
+plt.title("Desempeño del modelo con datos de prueba")
 
 ```
 
-Muestro array de predcciones
+*Un vistazo al primer conjunto de prediccione:*
 
 ```python
 arbol_mejores_parametros.predict_proba(x_test)
@@ -1270,7 +1270,7 @@ arbol_mejores_parametros.predict_proba(x_test)
 
 ## Entrenamiento Cross Validation
 
-Procedemos a realizar entrenamiento del árbol mediante el metodo de la validación cruzada en 10 folds considerando que fue como se entreno previamente el árbol mas optimo. Esto buscando siempre mantener la metrica F1 en su valor más alto
+Procedemos a realizar entrenamiento del árbol mediante el metodo de la validación cruzada en 10 folds considerando que fue como se entreno previamente al árbol mas optimo. Esto buscando siempre mantener la metrica F1 en su valor más alto, como también comprobar que el árbol mantiene un desempeño esperado y detectar posibles casos de *Overfitting o Underfitting*
 
 ```python
 kfoldcv =StratifiedKFold(n_splits=folds) 
@@ -1294,11 +1294,6 @@ sns.boxplot(metricsCV)
 plt.title("Modelo entrenado con 15 folds")
 ```
 
-### Reglas del arbol ##To do Por ver
-
-### Grafico del arbol ##To do Por ver
-
-## Predicción y Evaluación del Modelo
 
 ```python
 y_pred= arbol_mejor_performance.predict(x_test)
