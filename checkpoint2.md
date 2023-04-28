@@ -640,9 +640,14 @@ y_pred = model.predict(hotelsdfTesteo)
 y_pred
 ```
 ```python
-#dump(model, 'modelos/arbolIneficiente.joblib')
+#dump(model, 'modelos1/arbolIneficiente.joblib')
 #Cargamos el modelo de una de nuestras corrida. Este modelo no deberia variar mucho entre corrida y corrida
-model = load()
+model = load('modelos/arbolIneficiente.joblib')
+```
+
+```python
+ds_resultados=pd.DataFrame(zip(y_test,y_pred),columns=['test','pred'])
+ds_resultados
 ```
 
 Con este modelo, obtuvimos el siguiente resultado:
