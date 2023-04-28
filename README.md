@@ -1,5 +1,4 @@
 # 7506R-1C2023-GRUPO09
-
 ## Informe
 
 Informe:
