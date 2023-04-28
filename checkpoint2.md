@@ -646,8 +646,12 @@ model = load('modelos/arbolIneficiente.joblib')
 ```
 
 ```python
-ds_resultados=pd.DataFrame(zip(y_test,y_pred),columns=['test','pred'])
-ds_resultados
+df_submission = pd.DataFrame({'id': hotelsdfTesteoOriginal['id'], 'is_canceled': y_pred})
+df_submission.head()
+```
+
+```python
+df_submission.to_csv('submissions/arbol_decisiones_ineficiente.csv', index=False)
 ```
 
 Con este modelo, obtuvimos el siguiente resultado:
