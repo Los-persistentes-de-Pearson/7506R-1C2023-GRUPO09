@@ -605,7 +605,6 @@ A continuacion vamos a graficar el arbol resultante: \
 (**Advertencia**: Suele tardar unos minutos en terminar de renderizar la imagen)
 
 ```python
-'''
 plt.figure(figsize=(100,100))
 
 tree_plot_completo=tree.plot_tree(model,
@@ -614,8 +613,6 @@ tree_plot_completo=tree.plot_tree(model,
                                  rounded=True,
                                  class_names=['Not Canceled','Is canceled']) #model.classes_
 plt.show(tree_plot_completo)
-'''
-
 ```
 Con la imagen se ve que el arbol resultante tiene unas dimensiones exageradas, vemos ademas que tiene una profundidad de 20 como especificamos
 
@@ -718,6 +715,13 @@ randomcv.cv_results_['mean_test_score']
 
 Generamos el árbol con los hiperparametros que optimizan su eficiencia y a su vez presentamos el conjunto de valores con su peso relativo a la toma de la decisión 
 
+
+Cargamos el mejor arbol que encontramos (explicado en la seccion de validacion cruzada)
+
+```python
+arbol_mejores_parametros = load('modelos/arbolEficiente.joblib')
+```
+
 ```python
 arbol_mejores_parametros=DecisionTreeClassifier().set_params(**randomcv.best_params_)
 arbol_mejores_parametros.fit(x_train,y_train)
@@ -735,7 +739,7 @@ for feat_imp,feat in sorted(zip(feat_imps,features_considerados)):
     print('{}: {}'.format(feat,feat_imp))
 ```
 
-Es importante destacar tres de las variables seleccionadas en la primera parte de nuestro analisis (Checkpoint 1):  lead_time, average_daily_rate y previous_cancelations_nums estan enmarcadas dentro de las diez caracteristicas que aportan màs información en la construcción del árbol
+Es importante destacar que tres de las variables seleccionadas en la primera parte de nuestro analisis (Checkpoint 1):  lead_time, average_daily_rate y previous_cancelations_nums estan enmarcadas dentro de las diez caracteristicas que aportan màs información en la construcción del árbol
 
 *Mostramos las reglas internas del árbol:*
 
@@ -766,8 +770,9 @@ Image(graph.create_png())
 
 Considerando lo antes mencionado podemos apreciar que:
 1. El primer nodo particiona segun el tipo de deposito: sin rembolso, donde, la gente tiende a mantener la reserva y con rembolso donde se tiende a cancelar
-2. El segundo nivel árbol toma en consideración el lead time y el numero de cambios en la reserva. Con un lead time menor a 11.5 tiene una menor cantidad de reservas canceladas, mientras, en el otro nodo clasifica cancelado si el numero de cambios en la reserva es menor que cero
-3. En un tercer nivel observamos que las variables que más aportan informacion son: previous cancelation number, market segment type online TA, customer type trasient party y arrival month day 13
+2. El segundo nivel árbol toma en consideración la cantidad de espacios de estacionamiento requerido y si el tipo de cliente es Transient Party. La primera variable es discreta; la segunda variable es binaria (o vale 1 o vale 0). Esta ultima fue generada en el proceso de one hot encoding
+3. En un tercer nivel observamos que las variables que más informacion aportan son: previous cancelation number y hotel name
+
 
 ### Prediccion con split de train
 
@@ -829,20 +834,27 @@ Es por esto que lo guardamos para que pueda ser cargado para uso posterior
 ```python
 #dump(arbol_mejores_parametros, 'modelos/arbolEficiente.joblib')
 #Cargamos el modelo de una de nuestras corrida. Este modelo no deberia variar mucho entre corrida y corrida
-arbol_mejores_parametros = load('modelos/arbolEficiente.joblib')
 ```
 
 ```python
 #Realizamos una predicción sobre el set de test
-y_pred = model.predict(hotelsdfTesteo)
+y_pred = arbol_mejores_parametros.predict(hotelsdfTesteo)
 #Valores Predichos
 y_pred
 ```
 
----
+```python
+df_submission = pd.DataFrame({'id': hotelsdfTesteoOriginal['id'], 'is_canceled': y_pred})
+df_submission.head()
+```
+
+```python
+df_submission.to_csv('submissions/arbol_decisiones_eficiente.csv', index=False)
+```
 
 # Conclusión
 
 1. Al comparar los dos modelos construidos, se observó una mejora considerable en el segundo modelo en factores como la performance y las métricas en comparación con el primero. Esto sugiere que se pudo optimizar significativamente el modelo mediante la incorporación de tecnicas como: ramdomized cross search
 2. Las métricas del árbol se mejoraron mediante la optimización del F1 score, el cual fue seleccionado debido a la naturaleza del problema en el que no había un motivo particular para seleccionar una métrica específica (como recall o precision).
 3. A pesar de la poda y la reducción de la libertad del árbol para extenderse, se logró una mejora significativa en su métrica F1. Esto demuestra que la poda y la limitación de la extensión del árbol no necesariamente afectan negativamente su rendimiento, sino que pueden mejorar la capacidad de generalización del modelo.
+4. Se realizaron repetidas pruebas sobre el modelo buscando mejorar el f1 score, de todos estos intentos se alamaceno el que mejor balanceaba eficiencia con f1 score.  
