@@ -634,17 +634,17 @@ print("f1 score: "+str(f1))
 ```
 
 ```python
-#Realizamos una predicción sobre el set de test
-y_pred = model.predict(hotelsdfTesteo)
-#Valores Predichos
-y_pred
-```
-```python
 #dump(model, 'modelos1/arbolIneficiente.joblib')
 #Cargamos el modelo de una de nuestras corrida. Este modelo no deberia variar mucho entre corrida y corrida
 model = load('modelos/arbolIneficiente.joblib')
 ```
 
+```python
+#Realizamos una predicción sobre el set de test
+y_pred = model.predict(hotelsdfTesteo)
+#Valores Predichos
+y_pred
+```
 ```python
 df_submission = pd.DataFrame({'id': hotelsdfTesteoOriginal['id'], 'is_canceled': y_pred})
 df_submission.head()
@@ -721,7 +721,6 @@ Generamos el árbol con los hiperparametros que optimizan su eficiencia y a su v
 ```python
 arbol_mejores_parametros=DecisionTreeClassifier().set_params(**randomcv.best_params_)
 arbol_mejores_parametros.fit(x_train,y_train)
-
 ```
 
 *Conjunto de reglas:*
@@ -822,6 +821,14 @@ cm = confusion_matrix(y_test,y_pred)
 sns.heatmap(cm, cmap='Blues',annot=True,fmt='g')
 plt.xlabel('Predicted')
 plt.ylabel('True')
+```
+
+Se determina que de la anterior busqueda de hiperparametros mediante la validacion cruzada, el ultimo arbol obtenido es el arbol mas eficiente del trabajo.\
+
+```python
+dump(arbol_mejores_parametros, 'modelos/arbolEficiente.joblib')
+#Cargamos el modelo de una de nuestras corrida. Este modelo no deberia variar mucho entre corrida y corrida
+#arbol_mejores_parametros = load('modelos/arbolEficiente.joblib')
 ```
 
 ---
