@@ -823,12 +823,20 @@ plt.xlabel('Predicted')
 plt.ylabel('True')
 ```
 
-Se determina que de la anterior busqueda de hiperparametros mediante la validacion cruzada, el ultimo arbol obtenido es el arbol mas eficiente del trabajo.\
+Se determina que de la anterior busqueda de hiperparametros mediante la validacion cruzada, el ultimo arbol obtenido es el arbol mas eficiente entrenado hasta el momento.\
+Es por esto que lo guardamos para que pueda ser cargado para uso posterior
 
 ```python
-dump(arbol_mejores_parametros, 'modelos/arbolEficiente.joblib')
+#dump(arbol_mejores_parametros, 'modelos/arbolEficiente.joblib')
 #Cargamos el modelo de una de nuestras corrida. Este modelo no deberia variar mucho entre corrida y corrida
-#arbol_mejores_parametros = load('modelos/arbolEficiente.joblib')
+arbol_mejores_parametros = load('modelos/arbolEficiente.joblib')
+```
+
+```python
+#Realizamos una predicción sobre el set de test
+y_pred = model.predict(hotelsdfTesteo)
+#Valores Predichos
+y_pred
 ```
 
 ---
