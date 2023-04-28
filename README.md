@@ -9,4 +9,5 @@
 
 ## Repo del equipo #9
 
-![Karl Pearson](informe/images/Karl_Pearson.jpg)
+[Informe checkpoint 2](7506_TP1_GRUPO09_CHP2_REPORTE.pdf)
+[Karl Pearson](informe/images/Karl_Pearson.jpg)
