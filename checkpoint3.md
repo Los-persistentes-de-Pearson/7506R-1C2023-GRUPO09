@@ -551,3 +551,35 @@ df_submission.to_csv('knn_base.csv', index=False)
 dump(knn_base, 'knn_base.joblib')
 ```
 
+# SVM 
+
+
+
+
+
+
+# Random Forest 
+
+
+
+
+
+# XGBoost 
+
+
+
+
+# Modelo Voting
+
+
+
+
+
+# Modelo Stacking 
+
+
+
+
+
+
+# Conclusiones 
