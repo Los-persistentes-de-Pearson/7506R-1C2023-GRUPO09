@@ -572,7 +572,112 @@ df_submission.to_csv('knn_base.csv', index=False)
 dump(knn_base, 'knn_base.joblib')
 ```
 
+## Busqueda de hiperparametros
 
+### Modificar los k vecinos
+
+Realizamos una busqueda de cuales son los valores de k para los cuales el modelo tiene un mejor desempeño 
+
+```python
+metricas = []
+
+cant_vecinos = range(1, 30) 
+
+for n in cant_vecinos:
+    knn = KNeighborsClassifier(n_neighbors = n)
+    knn.fit(x_train, y_train)
+    y_pred = knn.predict(x_test)
+    metricas.append( (n, (y_test == y_pred).sum())) 
+```
+
+De la prueba anterior observamos el comportamiento que tiene 
+
+```python
+plt.figure(figsize = (8,6))
+
+df_metrics = pd.DataFrame(metricas, columns=['cant_vecinos', 'correctos'])
+
+ax = df_metrics.plot( x='cant_vecinos', 
+                      y='correctos',
+                      title='Aciertos vs Cantidad de Vecinos'
+                    )
+
+ax.set_ylabel("Cantidad de aciertos")
+ax.set_xlabel("Cantidad de Vecinos")
+plt.show()
+```
+
+Por otro lado observamos el comportamiento de la presicion 
+
+```python 
+from sklearn.model_selection import cross_val_score
+knn_metricas = []
+
+for n in cant_vecinos:
+  knn = KNeighborsClassifier(n_neighbors = n)
+  scores=cross_val_score(knn,x_train,y_train,cv=10,scoring='accuracy')
+  knn_metricas.append(scores.mean())
+```
+
+
+```python
+plt.plot(cant_vecinos, knn_metricas)
+plt.xlabel('Cantidad de Vecinos')
+plt.ylabel('Cross Validation Accuracy')
+plt.title('Accuracy vs Cantidad de Vecinos')
+plt.show()
+```
+
+### Random search cross validation
+
+```python 
+#Grilla de Parámetros
+params_grid={ 'n_neighbors':range(1,15), 
+              'weights':['distance','uniform'],
+              'algorithm':['ball_tree', 'kd_tree'],
+              'metric':['euclidean','manhattan']
+             }
+
+
+knn_optimizado = KNeighborsClassifier()
+combinaciones = 10
+k_folds = 10
+metrica_fn = make_scorer(sk.metrics.f1_score)
+
+#Random Search con 10 Folds y 10 iteraciones
+parametros = RandomizedSearchCV(
+            estimator=knn_optimizado, 
+            param_distributions = params_grid, 
+            cv=k_folds, 
+            scoring=metrica_fn, 
+            n_iter=combinaciones, 
+            random_state=9)
+    
+parametros.fit(x_train, y_train)
+parametros.cv_results_['mean_test_score']
+```
+
+```python 
+print(parametros)
+print(parametros.best_params_)
+print(parametros.best_score_)
+```
+
+```python
+
+knn_optimizado = KNeighborsClassifier(**parametros.best_params_)
+knn_optimizado.fit(x_train, y_train)
+```
+
+```python
+dump(knn_optimizado, 'knn_optimizado.joblib')
+```
+
+```python
+y_pred = knn_optimizado.predict(hotelsdf_pruebas)
+df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': y_pred})
+df_submission.to_csv('knn_optimizado.csv', index=False)
+```
 
 # SVM 
 
