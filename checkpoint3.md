@@ -520,9 +520,11 @@ x_train, x_test, y_train, y_test = train_test_split(hotelsdf_modelo_x,
 
 Entrenamos un primer modelo de KNN usando los datos previamente tratados
 
-## KNN sin busqueda de hiperparametros
+## KNN base
 
-En primera instancia entrenamos un modelo sin optimizar hiperparametros 
+En primera instancia entrenamos un modelo sin optimizar hiperparametros, de manera que, se obtiene una medida de la predicción base que tiene el modelo.
+
+Creamos el modelo y lo entrenamos:
 
 ```python
 from sklearn.neighbors import KNeighborsClassifier
@@ -534,14 +536,33 @@ knn_base.fit(x_train, y_train)
 y_pred = knn_base.predict(x_test)
 ```
 
+Observamos el comportamiento del modelo base
+
 ```python
 print('correctas: ', np.sum(y_test == y_pred))
 print('total: ', len(y_test))
 ```
 
+Realizamos unas primeras medidas de como se desempeña dicho modelo mediante una matriz de confusion
+
 ```python
 accuracy_score(y_test,y_pred)
 ```
+
+Observamos mediante la matriz de confusion el comportamiento del modelo base con los datos de prueba 
+
+```python
+print(classification_report(y_test,y_pred))
+
+confusion_base_knn = confusion_matrix(y_test,y_pred)
+sns.heatmap(confusion_base_knn, cmap='Blues',annot=True,fmt='g')
+plt.xlabel('Predicted')
+plt.ylabel('True')
+```
+
+Basado en el grafico, es posible observar que el modelo base ha obtenido un desempeño moderado en los datos de prueba a pesar de no haber recibido ningun tipo de optimización 
+
+Generamos la primera predicción para kaggle y almacenamos el modelo
 
 ```python
 y_pred = knn_base.predict(hotelsdf_pruebas)
@@ -550,6 +571,8 @@ df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled
 df_submission.to_csv('knn_base.csv', index=False)
 dump(knn_base, 'knn_base.joblib')
 ```
+
+
 
 # SVM 
 
