@@ -558,6 +558,189 @@ dump(knn_base, 'knn_base.joblib')
 
 
 
+### Librerias y Funciones
+
+```python
+import pandas as pd
+import sklearn as sk
+import seaborn as sns
+import matplotlib.pyplot as plt
+import numpy as np
+
+from sklearn.datasets import load_iris
+from sklearn import preprocessing
+from sklearn.model_selection import train_test_split, RandomizedSearchCV, GridSearchCV
+from sklearn.svm import SVC
+from sklearn.datasets import make_classification
+from sklearn.metrics import confusion_matrix, classification_report
+```
+
+```python
+def metricas(y_pred,y_test):
+
+  print(classification_report(y_test,y_pred))
+  
+  cm = confusion_matrix(y_test,y_pred)
+  sns.heatmap(cm, cmap='Blues',annot=True,fmt='g')
+  plt.xlabel('Predicted')
+  plt.ylabel('True')
+```
+
+```python
+# #Construyo un modelo SVM  
+# svm = SVC()
+
+# #Lo entreno con los datos sin escalar
+# svm.fit(x_train, y_train)
+
+# #Hago la prediccion y calculo las métricas
+# y_pred=svm.predict(x_test)
+# metricas(y_pred,y_test)
+```
+
+```python
+#svm.get_params
+```
+
+### Modifico Kernels para ver cual se adapta mejor
+
+
+### Lineal
+
+```python
+#Creo un clasificador con kernel lineal y lo entreno sobre los datos escalados min-max
+# clf = SVC(kernel='linear', C=5)
+# clf.fit(x_train, y_train)
+
+# #Hago la predicción y calculo las métricas
+# y_pred_lin=clf.predict(x_test)
+# metricas(y_pred_lin,y_test)
+```
+
+```python
+#resultados = cross_validate(arbol_mejores_parametros,x_train, y_train, cv=kfoldcv,scoring=scorer_fn,return_estimator=True)
+
+```
+
+### Polinomico
+
+```python
+#Creo un clasificador con kernel polinomico y lo entreno sobre los datos escalados min-max
+# clf = SVC(kernel='poly')
+# clf.fit(x_train, y_train)
+
+# #Hago la predicción y calculo las métricas
+# y_pred_pol=clf.predict(x_test)
+# metricas(y_pred_pol,y_test)
+
+```
+
+#### intento mejorar hiperparametros (da error)
+
+```python
+# #vario hiperparaemtros en kernel polinomico
+# clf = SVC(cache_size=900, max_iter=100)
+# #SVC(kernel='poly', C=5, degree=10, gamma=10, coef0=10)
+# #clf.fit(x_train, y_train)
+
+# # parametros = [ {'C': [0,75, 9, 1, 10, 100], 
+# #                 'gamma': [0.001, 0.0001], 
+# #                 'kernel': ['poly']},
+# #  ]
+
+
+# combinaciones=5
+
+# scorer_fn = make_scorer(sk.metrics.f1_score)
+
+# parametros = {
+#                 'kernel': ['poly'],
+#                 'degree': [6 ,7, 8, 9] ,
+#                 'gamma': ['scale', 'auto'],
+#                 #'coef0': [10],
+#                 'C': [1, 5, 8],
+# }
+
+# #svmReg = svm.SVR(cache_size=900, max_iter=1000) # El cache es para agilizar el procesado
+# # Ademas se limita a 1000 max iter dado que de otra forma el procesamiento tarda demasiado.
+
+
+# gridcv_svm = RandomizedSearchCV(estimator=clf,
+#                               #param_grid= parametros,
+#                               param_distributions = parametros
+#                               #scoring=scorer_fn,
+#                               #cv=kfoldcv,
+#                               #n_iter=combinaciones
+#                               ) 
+
+# #lo entreno sobre los datos
+# gridcv_svm.fit(x_train, y_train)
+
+# #Hago la predicción y calculo las métricas
+# gridcv_svm.predict(x_test)
+# metricas(gridcv_svm,y_test)
+```
+
+### Kernel radial
+
+```python
+#Creo un clasificador con kernel radial y lo entreno sobre los datos escalados min-max
+#clf = SVC(kernel='rbf', C=5, gamma=10)
+clf = SVC(kernel='rbf')
+clf.fit(x_train, y_train)
+
+#Hago la predicción y calculo las métricas
+y_pred_rad=clf.predict(x_test)
+metricas(y_pred_rad,y_test)
+```
+
+```python
+from sklearn.utils.fixes import loguniform
+
+parametros = {'C': [9, 1, 10, 100],
+ 'gamma': [0, 10, 100],
+ 'kernel': ['rbf'],
+ 'class_weight':['balanced', None]}
+
+#vario hiperparaemtros en kernel polinomico
+clf = SVC(cache_size=900, max_iter=100)
+#SVC(kernel='poly', C=5, degree=10, gamma=10, coef0=10)
+#clf.fit(x_train, y_train)
+combinaciones=10
+
+scorer_fn = make_scorer(sk.metrics.f1_score)
+
+#svmReg = svm.SVR(cache_size=900, max_iter=1000) # El cache es para agilizar el procesado
+# Ademas se limita a 1000 max iter dado que de otra forma el procesamiento tarda demasiado.
+
+
+gridcv_svm = GridSearchCV(estimator=clf,
+                              param_grid= parametros,
+                              #param_distributions = parametros,
+                              scoring=scorer_fn,
+                              #cv=kfoldcv,
+                              #n_iter=combinaciones
+                              ) 
+
+#lo entreno sobre los datos
+gridcv_svm.fit(x_train, y_train)
+
+print("Mostramos los mejores resultados: ")
+print(gridcv_svm.best_params_)
+print()
+print("Mostramos el mejor resultado obtenido de busqueda aleatoria: ")
+print("",gridcv_svm.best_score_)
+
+```
+
+```python
+y_pred_rad=gridcv_svm.predict(x_test)
+metricas(y_pred_rad,y_test)
+```
+
+El f1 score da muy mal. da altisimo el accuracy pero muy bajo el
+
+
 # Random Forest 
 
 
