@@ -587,19 +587,16 @@ def metricas(y_pred,y_test):
 ```
 
 ```python
-# #Construyo un modelo SVM  
-# svm = SVC()
+#Construyo un modelo SVM  
+#por default kernel rgb radial
+svm = SVC()
 
-# #Lo entreno con los datos sin escalar
-# svm.fit(x_train, y_train)
+#Lo entreno con los datos
+svm.fit(x_train, y_train)
 
-# #Hago la prediccion y calculo las métricas
-# y_pred=svm.predict(x_test)
-# metricas(y_pred,y_test)
-```
-
-```python
-#svm.get_params
+#Hago la prediccion y calculo las métricas
+y_pred=svm.predict(x_test)
+metricas(y_pred,y_test)
 ```
 
 ### Modifico Kernels para ver cual se adapta mejor
@@ -609,18 +606,68 @@ def metricas(y_pred,y_test):
 
 ```python
 #Creo un clasificador con kernel lineal y lo entreno sobre los datos escalados min-max
-# clf = SVC(kernel='linear', C=5)
-# clf.fit(x_train, y_train)
+clf = SVC(kernel='linear', C=7)
+clf.fit(x_train, y_train)
 
-# #Hago la predicción y calculo las métricas
-# y_pred_lin=clf.predict(x_test)
-# metricas(y_pred_lin,y_test)
+#Hago la predicción y calculo las métricas
+y_pred_lin=clf.predict(x_test)
+metricas(y_pred_lin,y_test)
 ```
+
+### vario valor de C en kernel lineal para encontrar el mejor
+
+
+NO SE PUIEDE HACERE CON RANDOMIZE SEARCH. SI O SI A MANO
 
 ```python
-#resultados = cross_validate(arbol_mejores_parametros,x_train, y_train, cv=kfoldcv,scoring=scorer_fn,return_estimator=True)
+# #vario hiperparaemtros en kernel lineal
+# clf = SVC(kernel='linear', cache_size=900, max_iter=100)
+# #SVC(kernel='poly', C=5, degree=10, gamma=10, coef0=10)
+# #clf.fit(x_train, y_train)
+
+# #parametros = [ {'C': [3, 5, 9, 10, 100] }]
+# parametros = [ {'C': [5] }]
+
+# combinaciones=5
+
+# scorer_fn = make_scorer(sk.metrics.f1_score)
+
+
+# gridcv_svm = RandomizedSearchCV(estimator=clf,
+#                               #param_grid= parametros,
+#                               param_distributions = parametros,
+#                               ) 
+# #lo entreno sobre los datos
+# gridcv_svm.fit(x_train, y_train)
+
+# #Hago la predicción y calculo las métricas
+# gridcv_svm.predict(x_test)
+# metricas(gridcv_svm,y_test)
+```
+
+Hago un entrenamiento con cross validation para ver que el modelo sea generalizable
+
+```python
+
+#kfoldcv = StratifiedKFold(n_splits=folds)
+#scorer_fn = make_scorer(sk.metrics.f1_score)
+#resultados = cross_validate(clf,x_train, y_train, cv=kfoldcv,scoring=scorer_fn,return_estimator=True)
 
 ```
+
+Exporto el csv para submission
+
+```python
+# df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': y_pred})
+# df_submission.to_csv('submissions/arbol_decisiones_ineficiente.csv', index=False)
+
+```
+
+#### Polinomico y radial
+
+
+El codigo a continuacion para ambos kernels se encuentra comentado debido al gran tiempo que demora entrenar SVM's con tantos datos (no sabemos cuanto exactamente ua que nunca pudimos terminar de correrlo). Esto se debe a que en estos casos el algoritmos crea una matriz de NXN demandando mucha RAM y CPU. Con lo visto en clase, las pruebas hechas durante la realizacion del tp (ver a continuacion), lo googleado y lo Chatgetepeado se concluye que al trabjar con una cantidad tan grande de datos de testeo lo mejor es utilzar un Kernel lineal(ver seccion anterior)
+
 
 ### Polinomico
 
@@ -686,18 +733,20 @@ def metricas(y_pred,y_test):
 ```python
 #Creo un clasificador con kernel radial y lo entreno sobre los datos escalados min-max
 #clf = SVC(kernel='rbf', C=5, gamma=10)
-clf = SVC(kernel='rbf')
-clf.fit(x_train, y_train)
+# clf = SVC(kernel='rbf')
+# clf.fit(x_train, y_train)
 
-#Hago la predicción y calculo las métricas
-y_pred_rad=clf.predict(x_test)
-metricas(y_pred_rad,y_test)
+# #Hago la predicción y calculo las métricas
+# y_pred_rad=clf.predict(x_test)
+# metricas(y_pred_rad,y_test)
 ```
+
+Intentamos mejorar los parametros del SVM con kernel raidal haciendo una busquedo con GridSearch.
 
 ```python
 from sklearn.utils.fixes import loguniform
 
-parametros = {'C': [9, 1, 10, 100],
+parametros = {'C': [1, 9, 10, 100],
  'gamma': [0, 10, 100],
  'kernel': ['rbf'],
  'class_weight':['balanced', None]}
@@ -729,8 +778,18 @@ print("Mostramos los mejores resultados: ")
 print(gridcv_svm.best_params_)
 print()
 print("Mostramos el mejor resultado obtenido de busqueda aleatoria: ")
-print("",gridcv_svm.best_score_)
+print("f1_score: ",gridcv_svm.best_score_)
 
+```
+
+obtenemos el SVM con ""mejores"" parametros y realizamos la prediccion. Se comenta el codigo debido a que toma mucho tiempo entrtenarlo
+
+```python
+# mejor_svm = SVC().set_params(**gridcv_svm.best_params_)
+# mejor_svm.fit(x_train, y_train)
+
+# y_pred_rad_mejorado=mejor_svm.predict(x_test)
+# metricas(y_pred_rad_mejorado,y_test)
 ```
 
 ```python
