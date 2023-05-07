@@ -518,6 +518,38 @@ x_train, x_test, y_train, y_test = train_test_split(hotelsdf_modelo_x,
 
 # KNN
 
+Entrenamos un primer modelo de KNN usando los datos previamente tratados
+
+## KNN sin busqueda de hiperparametros
+
+En primera instancia entrenamos un modelo sin optimizar hiperparametros 
+
+```python
+from sklearn.neighbors import KNeighborsClassifier
+
+knn_base = KNeighborsClassifier()
+knn_base.get_params()
+
+knn_base.fit(x_train, y_train)
+y_pred = knn_base.predict(x_test)
+```
+
+```python
+print('correctas: ', np.sum(y_test == y_pred))
+print('total: ', len(y_test))
+```
+
+```python
+accuracy_score(y_test,y_pred)
+```
+
+```python
+y_pred = knn_base.predict(hotelsdf_pruebas)
+y_pred
+df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': y_pred})
+df_submission.to_csv('knn_base.csv', index=False)
+dump(knn_base, 'knn_base.joblib')
+```
 
 # SVM 
 
