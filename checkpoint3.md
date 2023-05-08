@@ -16,7 +16,6 @@ from IPython.display import Image
 from matplotlib import pyplot as plt
 from dict_paises import COUNTRY_ALPHA3_TO_COUNTRY_ALPHA2, COUNTRY_ALPHA2_TO_CONTINENT
 from joblib import dump, load
-from os.path import exists
 
 from sklearn.model_selection import StratifiedKFold, KFold,RandomizedSearchCV, train_test_split, cross_validate
 from sklearn.tree import DecisionTreeClassifier, export_graphviz, export_text
@@ -601,8 +600,6 @@ y_pred = model.predict(x_test)
 y_pred
 ```
 
-La matriz de confusion es la siguiente:
-
 ```python
 #Creamos la matriz de confusión
 tabla=confusion_matrix(y_test, y_pred)
@@ -612,9 +609,6 @@ sns.heatmap(tabla,cmap='GnBu',annot=True,fmt='g')
 plt.xlabel('Predicted')
 plt.ylabel('True')
 ```
-
-Vemos que obtuvimos una alta cantidad de falsos positivos
-
 
 Sin ningun tipo de optimizacion obtuvimos los siguientes scores 
 
@@ -641,27 +635,28 @@ for i in range(10):
 
 Ahora vamos a buscar mejorar esos resultados; optimizando los hiperparametros usando validacion cruzada
 
-```python
-if exists('modelos/randomForestCV.joblib') == False:
-    rf_cv = RandomForestClassifier(oob_score=False, random_state=9, n_jobs=JOBS)
-    #rf_cv = RandomForestClassifier(max_features='sqrt', oob_score=True, random_state=1, n_jobs=-1)
-    param_grid = { "criterion" : ["gini", "entropy"], 
-                   "min_samples_leaf" : [1, 5, 10, 15, 20],
-                   "min_samples_split" : [2, 8, 16, 32, 64],
-                   "n_estimators": [10, 20, 30, 40, 50, 60, 70] }   
 
-    #Probamos entrenando sólo con 1 métrica
-    gs = GridSearchCV(estimator=rf_cv, param_grid=param_grid, scoring="f1", cv=5, n_jobs=JOBS)
-    gs_fit = gs.fit(X = x_train, y = y_train)
-    dump(gs_fit, 'modelos/randomForestCV.joblib')
-```
+Busquemos hiperparametros con GridSearch CV
 
 ```python
-gs_fit = load('modelos/randomForestCV.joblib')
+rf_cv = RandomForestClassifier(oob_score=False, random_state=9, n_jobs=JOBS)
+#rf_cv = RandomForestClassifier(max_features='sqrt', oob_score=True, random_state=1, n_jobs=-1)
+param_grid = { "criterion" : ["gini", "entropy"], 
+               "min_samples_leaf" : [1, 5, 10], 
+               "min_samples_split" : [2, 8, 16], 
+               "n_estimators": [10,20] }
+
+#Probamos entrenando sólo con 1 métrica
+gs = GridSearchCV(estimator=rf_cv, param_grid=param_grid, scoring="f1", cv=5, n_jobs=JOBS)
+gs_fit = gs.fit(X = x_train, y = y_train)
 ```
 
 ```python
 gs_fit.best_params_
+```
+
+```python
+print("accuracy en entrenamiento con cv: "+str(gs_fit.best_score_))
 ```
 
 ```python
@@ -670,10 +665,7 @@ rf_cv_best=gs_fit.best_estimator_
 
 #Predicción
 y_pred_rf_cv_best = rf_cv_best.predict(x_test)
-y_pred_rf_cv_best
 ```
-
-Con esta validacion, obtenemos la siguiente matriz de confusion
 
 ```python
 #Creo matriz de confusión
@@ -688,27 +680,15 @@ plt.ylabel('True')
 print(classification_report(y_test,y_pred_rf_cv_best))
 ```
 
-A priori, se ven menos falsos positivos
-
 ```python
 #Evaluo la performance en el conjunto de evaluación
-accuracyCV=accuracy_score(y_test,y_pred_rf_cv_best)
-recallCV=recall_score(y_test,y_pred_rf_cv_best)
-f1CV=f1_score(y_test,y_pred_rf_cv_best)
+accuracy=accuracy_score(y_test,y_pred_rf_cv_best)
+recall=recall_score(y_test,y_pred_rf_cv_best)
+f1=f1_score(y_test,y_pred_rf_cv_best)
 
 print("Accuracy: "+str(accuracy))
 print("Recall: "+str(recall))
 print("f1 score: "+str(f1))
-```
-
-Con este nuevo modelo, obtuvimos las siguientes mejoras:
-
-```python
-recall
-```
-
-```python
-input()
 ```
 
 Decidimos solo medir la metrica f1-score
