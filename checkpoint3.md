@@ -21,7 +21,9 @@ from sklearn.model_selection import StratifiedKFold, KFold,RandomizedSearchCV, t
 from sklearn.tree import DecisionTreeClassifier, export_graphviz, export_text
 from sklearn.metrics import confusion_matrix, classification_report , f1_score, make_scorer, precision_score, recall_score, accuracy_score,f1_score
 from sklearn.preprocessing import MinMaxScaler
-from sklearn import tree 
+from sklearn import tree
+from sklearn.ensemble import RandomForestClassifier
+
 
 #Si estamos  en colab tenemos que instalar la libreria "dtreeviz" aparte. 
 if IN_COLAB == True:
@@ -507,7 +509,6 @@ Se genera un dataset con los datos necesarios para predecir la cancelacion y cre
 ```python
 hotelsdf_modelo_x=hotelsdf_modelo.drop(['is_canceled'], axis='columns', inplace=False)
 
-
 hotelsdf_modelo_y = hotelsdf_modelo['is_canceled'].copy()
 
 x_train, x_test, y_train, y_test = train_test_split(hotelsdf_modelo_x,
@@ -525,30 +526,30 @@ Entrenamos un primer modelo de KNN usando los datos previamente tratados
 En primera instancia entrenamos un modelo sin optimizar hiperparametros 
 
 ```python
-from sklearn.neighbors import KNeighborsClassifier
+#from sklearn.neighbors import KNeighborsClassifier
 
-knn_base = KNeighborsClassifier()
-knn_base.get_params()
+#knn_base = KNeighborsClassifier()
+#knn_base.get_params()
 
-knn_base.fit(x_train, y_train)
-y_pred = knn_base.predict(x_test)
+#knn_base.fit(x_train, y_train)
+#y_pred = knn_base.predict(x_test)
 ```
 
 ```python
-print('correctas: ', np.sum(y_test == y_pred))
-print('total: ', len(y_test))
+#print('correctas: ', np.sum(y_test == y_pred))
+#print('total: ', len(y_test))
 ```
 
 ```python
-accuracy_score(y_test,y_pred)
+#accuracy_score(y_test,y_pred)
 ```
 
 ```python
-y_pred = knn_base.predict(hotelsdf_pruebas)
-y_pred
-df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': y_pred})
-df_submission.to_csv('knn_base.csv', index=False)
-dump(knn_base, 'knn_base.joblib')
+#y_pred = knn_base.predict(hotelsdf_pruebas)
+#y_pred
+#df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': y_pred})
+#df_submission.to_csv('knn_base.csv', index=False)
+#dump(knn_base, 'knn_base.joblib')
 ```
 
 # SVM 
@@ -563,6 +564,85 @@ dump(knn_base, 'knn_base.joblib')
 
 
 
+```python
+rfc_default = RandomForestClassifier()
+rfc_default.get_params()
+```
+
+```python
+#Creamos un clasificador con hiperparámetros arbitrarios
+rfc = RandomForestClassifier(max_features='auto', 
+                             oob_score=True, 
+                             random_state=2, 
+                             n_jobs=-1,
+                             criterion="entropy", 
+                             min_samples_leaf=5,
+                             min_samples_split=5,
+                             n_estimators=50 )
+#Entrenamos el modelo
+model = rfc.fit(X = x_train, y = y_train)
+```
+
+```python
+#Realizamos una predicción sobre el set de test
+y_pred = model.predict(x_test)
+#Valores Predichos
+y_pred
+```
+
+```python
+y_test.values
+```
+
+```python
+ds_resultados=pd.DataFrame(zip(y_test,y_pred),columns=['test','pred'])
+ds_resultados.head()
+```
+
+```python
+#Creo la matriz de confusión
+tabla=confusion_matrix(y_test, y_pred)
+
+#Grafico la matriz de confusión
+sns.heatmap(tabla,cmap='GnBu',annot=True,fmt='g')
+plt.xlabel('Predicted')
+plt.ylabel('True')
+```
+
+```python
+#Calculo las métricas en el conjunto de evaluación
+accuracy=accuracy_score(y_test,y_pred)
+recall=recall_score(y_test,y_pred)
+f1=f1_score(y_test,y_pred)
+
+print("Accuracy: "+str(accuracy))
+print("Recall: "+str(recall))
+print("f1 score: "+str(f1))
+```
+
+```python
+plt.figure(figsize=(100,100))
+
+tree_plot_completo=tree.plot_tree(model.estimators_[48],
+                                 feature_names=hotelsdf_modelo_x.columns.to_list(),
+                                 filled=True,
+                                 rounded=True,
+                                 class_names=['Not Survived','Survived']) #model.classes_
+plt.show(tree_plot_completo)
+```
+
+```python
+plt.figure(figsize=(12,12))
+
+tree_plot=tree.plot_tree(model.estimators_[48],
+                         max_depth=2,
+                         feature_names=hotelsdf_modelo_x.columns.to_list(),
+                         filled=True,
+                         rounded=True,
+                         class_names=True)
+
+plt.show(tree_plot)
+```
 
 # XGBoost 
 
