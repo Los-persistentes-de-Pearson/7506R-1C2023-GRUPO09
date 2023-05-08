@@ -23,6 +23,7 @@ from sklearn.metrics import confusion_matrix, classification_report , f1_score, 
 from sklearn.preprocessing import MinMaxScaler
 from sklearn import tree
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import GridSearchCV
 
 
 #Si estamos  en colab tenemos que instalar la libreria "dtreeviz" aparte. 
@@ -561,9 +562,6 @@ En primera instancia entrenamos un modelo sin optimizar hiperparametros
 
 # Random Forest 
 
-
-
-
 ```python
 rfc_default = RandomForestClassifier()
 rfc_default.get_params()
@@ -642,6 +640,24 @@ tree_plot=tree.plot_tree(model.estimators_[48],
                          class_names=True)
 
 plt.show(tree_plot)
+```
+
+## Cross validation
+
+
+Busquemos hiperparametros con GridSearch CV
+
+```python
+rf_cv = RandomForestClassifier(oob_score=True, random_state=1, n_jobs=-1)
+#rf_cv = RandomForestClassifier(max_features='sqrt', oob_score=True, random_state=1, n_jobs=-1)
+param_grid = { "criterion" : ["gini", "entropy"], 
+               "min_samples_leaf" : [1, 5, 10], 
+               "min_samples_split" : [2, 4, 10, 12, 16], 
+               "n_estimators": [10,20, 50] }
+
+#Probamos entrenando sólo con 1 métrica
+gs = GridSearchCV(estimator=rf_cv, param_grid=param_grid, scoring="accuracy", cv=5, n_jobs=-1)
+gs_fit = gs.fit(X = x_train, y = y_train)
 ```
 
 # XGBoost 
