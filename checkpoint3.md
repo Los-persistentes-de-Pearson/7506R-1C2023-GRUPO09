@@ -646,12 +646,12 @@ if exists('modelos/randomForestCV.joblib') == False:
     rf_cv = RandomForestClassifier(oob_score=False, random_state=9, n_jobs=JOBS)
     #rf_cv = RandomForestClassifier(max_features='sqrt', oob_score=True, random_state=1, n_jobs=-1)
     param_grid = { "criterion" : ["gini", "entropy"], 
-                   "min_samples_leaf" : [1, 5, 10, 15, 20],
-                   "min_samples_split" : [2, 8, 16, 32, 64],
-                   "n_estimators": [10, 20, 30, 40, 50, 60, 70] }   
+                   "min_samples_leaf" : [1, 5, 10, 15, 20], #Vamos a hacer muchas combinaciones ya que solo vamos
+                   "min_samples_split" : [2, 8, 16, 32, 64],#a correr este modelo 1 sola vez; ya que lo vamos a 
+                   "n_estimators": [10, 20, 30, 40, 50, 60, 70] } #guardar   
 
     #Probamos entrenando sólo con 1 métrica
-    gs = GridSearchCV(estimator=rf_cv, param_grid=param_grid, scoring="f1", cv=5, n_jobs=JOBS)
+    gs = GridSearchCV(estimator=rf_cv, param_grid=param_grid, scoring="f1", cv=5, n_jobs=JOBS) #Optimizamos f1_score
     gs_fit = gs.fit(X = x_train, y = y_train)
     dump(gs_fit, 'modelos/randomForestCV.joblib')
 ```
@@ -696,16 +696,22 @@ accuracyCV=accuracy_score(y_test,y_pred_rf_cv_best)
 recallCV=recall_score(y_test,y_pred_rf_cv_best)
 f1CV=f1_score(y_test,y_pred_rf_cv_best)
 
-print("Accuracy: "+str(accuracy))
-print("Recall: "+str(recall))
-print("f1 score: "+str(f1))
+print("Accuracy: "+str(accuracyCV))
+print("Recall: "+str(recallCV))
+print("f1 score: "+str(f1CV))
 ```
 
 Con este nuevo modelo, obtuvimos las siguientes mejoras:
 
 ```python
-recall
+print(str("Accuracy = ") + str(accuracyCV - accuracy)[3:4] + "%")
+print(str("Recall = ") + str(recallCV - recall)[3:4] + "%")
+print(str("f1 score = ") + str(f1CV - f1)[3:4] + "%")
 ```
+
+<!-- #raw -->
+Vemos que optimizando por el f1 score, obtuvimos una mejora del 3% en ese vamos; pero una mejora del 5% en recall
+<!-- #endraw -->
 
 ```python
 input()
