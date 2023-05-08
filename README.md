@@ -6,3 +6,4 @@ Informe:
 
 
 ![Karl Pearson](informe/images/Karl_Pearson.jpg) 
+
