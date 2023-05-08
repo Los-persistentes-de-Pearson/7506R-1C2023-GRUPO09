@@ -29,12 +29,14 @@ from sklearn.model_selection import GridSearchCV
 #Si estamos  en colab tenemos que instalar la libreria "dtreeviz" aparte. 
 if IN_COLAB == True:
     !pip install 'dtreeviz'
-import dtreeviz.trees as dtreeviz
+import dtreeviz as dtreeviz
 
 #Para eliminar los warnings
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 warnings.simplefilter(action='ignore', category=UserWarning)
+
+JOBS=-2
 ```
 
 ## Cargamos el dataframe de testeo
@@ -562,23 +564,33 @@ En primera instancia entrenamos un modelo sin optimizar hiperparametros
 
 # Random Forest 
 
-```python
-rfc_default = RandomForestClassifier()
-rfc_default.get_params()
-```
+
+Para empezar con el random forest, vamos a crear un modelo con valores totalmente aleatorios.
+Usando https://www.random.org/, con valor maximo 50 y valor minimo 1, obtuvimos:
+- 33
+- 15
+- 40
+- 36
+
+(Criterion fue dejado como entropy)
 
 ```python
 #Creamos un clasificador con hiperparámetros arbitrarios
 rfc = RandomForestClassifier(max_features='auto', 
-                             oob_score=True, 
-                             random_state=2, 
-                             n_jobs=-1,
+                             n_jobs=JOBS,
                              criterion="entropy", 
-                             min_samples_leaf=5,
-                             min_samples_split=5,
-                             n_estimators=50 )
+                             random_state=33, 
+                             min_samples_leaf=15,
+                             min_samples_split=40,
+                             n_estimators=36 )
 #Entrenamos el modelo
 model = rfc.fit(X = x_train, y = y_train)
+```
+
+```python
+#Nos guardamos este modelo para poder cargarlo en todas las corridas posteriores
+#dump(model, 'modelos/randomForest.joblib')
+model = load('modelos/randomForest.joblib')
 ```
 
 ```python
@@ -589,16 +601,7 @@ y_pred
 ```
 
 ```python
-y_test.values
-```
-
-```python
-ds_resultados=pd.DataFrame(zip(y_test,y_pred),columns=['test','pred'])
-ds_resultados.head()
-```
-
-```python
-#Creo la matriz de confusión
+#Creamos la matriz de confusión
 tabla=confusion_matrix(y_test, y_pred)
 
 #Grafico la matriz de confusión
@@ -607,8 +610,9 @@ plt.xlabel('Predicted')
 plt.ylabel('True')
 ```
 
+Sin ningun tipo de optimizacion obtuvimos los siguientes scores 
+
 ```python
-#Calculo las métricas en el conjunto de evaluación
 accuracy=accuracy_score(y_test,y_pred)
 recall=recall_score(y_test,y_pred)
 f1=f1_score(y_test,y_pred)
@@ -618,46 +622,147 @@ print("Recall: "+str(recall))
 print("f1 score: "+str(f1))
 ```
 
-```python
-plt.figure(figsize=(100,100))
-
-tree_plot_completo=tree.plot_tree(model.estimators_[48],
-                                 feature_names=hotelsdf_modelo_x.columns.to_list(),
-                                 filled=True,
-                                 rounded=True,
-                                 class_names=['Not Survived','Survived']) #model.classes_
-plt.show(tree_plot_completo)
-```
+Ademas, segun este modelo; las 10 columnas mas relevantes son:
 
 ```python
-plt.figure(figsize=(12,12))
-
-tree_plot=tree.plot_tree(model.estimators_[48],
-                         max_depth=2,
-                         feature_names=hotelsdf_modelo_x.columns.to_list(),
-                         filled=True,
-                         rounded=True,
-                         class_names=True)
-
-plt.show(tree_plot)
+p = sorted(list(zip(hotelsdf_modelo_x.columns.to_list(), model.feature_importances_)), key=lambda x: -x[1])
+for i in range(10):
+    print(p[i])
 ```
 
 ## Cross validation
 
 
+Ahora vamos a buscar mejorar esos resultados; optimizando los hiperparametros usando validacion cruzada
+
+
 Busquemos hiperparametros con GridSearch CV
 
 ```python
-rf_cv = RandomForestClassifier(oob_score=True, random_state=1, n_jobs=-1)
+rf_cv = RandomForestClassifier(oob_score=False, random_state=9, n_jobs=JOBS)
 #rf_cv = RandomForestClassifier(max_features='sqrt', oob_score=True, random_state=1, n_jobs=-1)
+param_grid = { "criterion" : ["gini", "entropy"], 
+               "min_samples_leaf" : [1, 5, 10], 
+               "min_samples_split" : [2, 8, 16], 
+               "n_estimators": [10,20] }
+
+#Probamos entrenando sólo con 1 métrica
+gs = GridSearchCV(estimator=rf_cv, param_grid=param_grid, scoring="f1", cv=5, n_jobs=JOBS)
+gs_fit = gs.fit(X = x_train, y = y_train)
+```
+
+```python
+gs_fit.best_params_
+```
+
+```python
+print("accuracy en entrenamiento con cv: "+str(gs_fit.best_score_))
+```
+
+```python
+#Obtenemos el mejor modelo
+rf_cv_best=gs_fit.best_estimator_
+
+#Predicción
+y_pred_rf_cv_best = rf_cv_best.predict(x_test)
+```
+
+```python
+#Creo matriz de confusión
+tabla=confusion_matrix(y_test,y_pred_rf_cv_best)
+
+#Grafico matriz de confusión
+sns.heatmap(tabla, cmap='Blues',annot=True,fmt='g')
+plt.xlabel('Predicted')
+plt.ylabel('True')
+
+#Reporte
+print(classification_report(y_test,y_pred_rf_cv_best))
+```
+
+```python
+#Evaluo la performance en el conjunto de evaluación
+accuracy=accuracy_score(y_test,y_pred_rf_cv_best)
+recall=recall_score(y_test,y_pred_rf_cv_best)
+f1=f1_score(y_test,y_pred_rf_cv_best)
+
+print("Accuracy: "+str(accuracy))
+print("Recall: "+str(recall))
+print("f1 score: "+str(f1))
+```
+
+Decidimos solo medir la metrica f1-score
+
+```python
+rf_cv = RandomForestClassifier(oob_score=False, random_state=1, n_jobs=JOBS)
+
 param_grid = { "criterion" : ["gini", "entropy"], 
                "min_samples_leaf" : [1, 5, 10], 
                "min_samples_split" : [2, 4, 10, 12, 16], 
                "n_estimators": [10,20, 50] }
 
-#Probamos entrenando sólo con 1 métrica
-gs = GridSearchCV(estimator=rf_cv, param_grid=param_grid, scoring="accuracy", cv=5, n_jobs=-1)
-gs_fit = gs.fit(X = x_train, y = y_train)
+#Probamos entrenando con varias métricas
+
+metricas=['accuracy','f1','roc_auc'] #'recall','precision'
+
+gs_multimetrica = GridSearchCV(estimator=rf_cv, 
+                               param_grid=param_grid, 
+                               scoring=metricas, 
+                               refit=False, 
+                               cv=5, 
+                               n_jobs=JOBS)
+#Entrenamiento
+gs_multimetrica_fit = gs_multimetrica.fit(X = x_train, y = y_train)
+```
+
+```python
+labels=[ key for key in gs_multimetrica_fit.cv_results_.keys() if("mean_test" in key)]
+
+for k in labels:
+    plt.plot(gs_multimetrica_fit.cv_results_[k],linestyle='--' , linewidth=0.8,marker='o',markersize=2)     
+    x_linea=np.argmax(gs_multimetrica_fit.cv_results_[k])
+    plt.axvline(x_linea,linestyle='--' ,linewidth=0.8,color='grey')
+        
+plt.xlabel("modelo", fontsize=10)
+plt.ylabel("métrica", fontsize=10)
+plt.legend(labels)
+plt.show()
+```
+
+```python
+params_elegidos=gs_multimetrica_fit.cv_results_['params'][np.argmax(gs_multimetrica_fit.cv_results_['mean_test_accuracy'])]
+params_elegidos
+```
+
+```python
+params_elegidos=gs_multimetrica_fit.cv_results_['params'][np.argmax(gs_multimetrica_fit.cv_results_['mean_test_accuracy'])]
+params_elegidos
+```
+
+```python
+#Creamos un clasificador RF
+rfc_multimetrica = RandomForestClassifier(criterion= params_elegidos['criterion'], 
+                                          min_samples_leaf= params_elegidos['min_samples_leaf'], 
+                                          min_samples_split= params_elegidos['min_samples_split'], 
+                                          n_estimators=params_elegidos['n_estimators'], 
+                                          oob_score=True, random_state=2, n_jobs=JOBS)
+#Entrenamos un modelo
+model_rfc_multimetrica = rfc_multimetrica.fit(X = x_train, y = y_train)
+
+#Hacemos una predicción
+y_pred_model_rfc_multimetrica = model_rfc_multimetrica.predict(x_test)
+```
+
+```python
+#Matriz de Confusión
+cm = confusion_matrix(y_test,y_pred_model_rfc_multimetrica)
+sns.heatmap(cm, cmap='Blues',annot=True,fmt='g')
+plt.xlabel('Predicted')
+plt.ylabel('True')
+
+#Reporte
+print(classification_report(y_test,y_pred_model_rfc_multimetrica))
+
 ```
 
 # XGBoost 
