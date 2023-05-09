@@ -798,6 +798,34 @@ model_rfc_multimetrica = rfc_multimetrica.fit(X = x_train, y = y_train)
 y_pred_model_rfc_multimetrica = model_rfc_multimetrica.predict(x_test)
 ```
 
+Vamos a visualizar uno de los estimadores de este random forest resultante:
+
+```python
+plt.figure(figsize=(12,12))
+
+tree_plot=tree.plot_tree(rfc_multimetrica.estimators_[56],
+                         max_depth=2,
+                         feature_names=hotelsdf_modelo_x.columns.to_list(),
+                         filled=True,
+                         rounded=True,
+                         class_names=True)
+
+plt.show(tree_plot)
+```
+
+Vision completa:
+
+```python
+plt.figure(figsize=(100,100))
+
+tree_plot_completo=tree.plot_tree(rfc_multimetrica.estimators_[56],
+                                 feature_names=hotelsdf_modelo_x.columns.to_list(),
+                                 filled=True,
+                                 rounded=True,)
+                                 #class_names=['Not Survived','Survived']) #model.classes_
+plt.show(tree_plot_completo)
+```
+
 Calculamos la matriz de confusion
 
 ```python
