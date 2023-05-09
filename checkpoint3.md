@@ -26,6 +26,15 @@ from sklearn import tree
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import GridSearchCV
 
+from sklearn.datasets import load_iris
+from sklearn import preprocessing
+from sklearn.model_selection import train_test_split, RandomizedSearchCV, GridSearchCV
+from sklearn.svm import SVC
+from sklearn import svm
+from sklearn.datasets import make_classification
+from sklearn.metrics import confusion_matrix, classification_report
+from sklearn.utils.fixes import loguniform
+
 
 #Si estamos  en colab tenemos que instalar la libreria "dtreeviz" aparte. 
 if IN_COLAB == True:
@@ -571,23 +580,6 @@ En primera instancia entrenamos un modelo sin optimizar hiperparametros
 ### Librerias y Funciones
 
 ```python
-import pandas as pd
-import sklearn as sk
-import seaborn as sns
-import matplotlib.pyplot as plt
-import numpy as np
-
-from sklearn.datasets import load_iris
-from sklearn import preprocessing
-from sklearn.model_selection import train_test_split, RandomizedSearchCV, GridSearchCV
-from sklearn.svm import SVC
-from sklearn import svm
-from sklearn.datasets import make_classification
-from sklearn.metrics import confusion_matrix, classification_report
-from sklearn.utils.fixes import loguniform
-```
-
-```python
 def metricas(y_pred,y_test):
 
   print(classification_report(y_test,y_pred))
@@ -602,26 +594,33 @@ Hacemos un GridSeacrh para ver cual es el mejor kernel a utilizar.
 OJO, TOMA 32 MIN aprox correrlo
 
 ```python
-parametros = { 'kernel': ["linear", "poly","rbf"]}
+if exists('modelos/gridcv_svm_tres.joblib') == False:
+    parametros = { 'kernel': ["linear", "poly","rbf"]}
 
 
-clf_tres = SVC()
+    clf_tres = SVC()
 
-scorer_fn = make_scorer(sk.metrics.f1_score)
+    scorer_fn = make_scorer(sk.metrics.f1_score)
 
-gridcv_svm_tres = GridSearchCV(estimator=clf_tres,
-                              param_grid= parametros,
-                              scoring=scorer_fn,
-                              ) 
+    gridcv_svm_tres = GridSearchCV(estimator=clf_tres,
+                                  param_grid= parametros,
+                                  scoring=scorer_fn,
+                                  n_jobs=JOBS #-1
+                                  ) 
 
-#lo entreno sobre los datos
-gridcv_svm_tres.fit(x_train, y_train)
+    #lo entreno sobre los datos
+    gridcv_svm_tres.fit(x_train, y_train)
 
-print("Mostramos los mejores resultados: ")
-print(gridcv_svm_tres.best_params_)
-print()
-print("Mostramos el mejor resultado obtenido de busqueda aleatoria: ")
-print("f1_score: ",gridcv_svm_tres.best_score_)
+    print("Mostramos los mejores resultados: ")
+    print(gridcv_svm_tres.best_params_)
+    print()
+    print("Mostramos el mejor resultado obtenido de busqueda aleatoria: ")
+    print("f1_score: ",gridcv_svm_tres.best_score_)
+    dump(gridcv_svm_tres, 'modelos/gridcv_svm_tres.joblib')
+```
+
+```python
+gridcv_svm_tres = load('modelos/gridcv_svm_tres.joblib')
 ```
 
 Obtenemos que el mejor Kernel es el linel con un f1_score de 0,75.
