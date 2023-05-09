@@ -740,9 +740,18 @@ Generamos un modelo XGBoost base, con los hiperparametros por defecto, de manera
 import xgboost as xgb
 
 xgb_base = xgb.XGBClassifier(random_state=9, n_estimators=100)
-
+xgb_base.fit(x_train, y_train)
 ```
 
+```python
+y_pred=xgb_base.predict(x_test)
+
+cm = confusion_matrix(y_test,y_pred)
+sns.heatmap(cm, cmap='Blues',annot=True,fmt='g')
+plt.xlabel('Predicted')
+plt.ylabel('True')
+
+```
 
 
 # Modelo Voting
