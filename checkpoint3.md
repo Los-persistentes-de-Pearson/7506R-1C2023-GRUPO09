@@ -754,6 +754,8 @@ if exists('modelos/randomForestCVMM.joblib') == False:
 gs_multimetrica_fit = load('modelos/randomForestCVMM.joblib')
 ```
 
+Vamos a graficar todos los resultados de las metricas que medimos
+
 ```python
 labels=[ key for key in gs_multimetrica_fit.cv_results_.keys() if("mean_test" in key)]
 
@@ -768,17 +770,21 @@ plt.legend(labels)
 plt.show()
 ```
 
-```python
-params_elegidos=gs_multimetrica_fit.cv_results_['params'][np.argmax(gs_multimetrica_fit.cv_results_['mean_test_accuracy'])]
-params_elegidos
-```
+Del grafico se observa que hay un modelo que parece optimizar todas las metricas. A ojo parece ser el ~180\
+Vamos a corroborarlo:
 
 ```python
-params_elegidos=gs_multimetrica_fit.cv_results_['params'][np.argmax(gs_multimetrica_fit.cv_results_['mean_test_accuracy'])]
-params_elegidos
+for metrica in metricas:
+    params_analizar=gs_multimetrica_fit.cv_results_['params'][np.argmax(gs_multimetrica_fit.cv_results_['mean_test_' + metrica])]
+    print(
+"Metrica " + metrica + ": " + str(params_analizar))
 ```
 
+Vemos que son todos muy similares pero con cierta variazon. Vamos a elegir a f1 score para tener cierto tipo de balance
+
 ```python
+params_analizar=gs_multimetrica_fit.cv_results_['params'][np.argmax(gs_multimetrica_fit.cv_results_['mean_test_f1'])]
+
 #Creamos un clasificador RF
 rfc_multimetrica = RandomForestClassifier(criterion= params_elegidos['criterion'], 
                                           min_samples_leaf= params_elegidos['min_samples_leaf'], 
@@ -788,7 +794,7 @@ rfc_multimetrica = RandomForestClassifier(criterion= params_elegidos['criterion'
 #Entrenamos un modelo
 model_rfc_multimetrica = rfc_multimetrica.fit(X = x_train, y = y_train)
 
-#Hacemos una predicción
+#Hacemos una predicción con el dataset de train
 y_pred_model_rfc_multimetrica = model_rfc_multimetrica.predict(x_test)
 ```
 
