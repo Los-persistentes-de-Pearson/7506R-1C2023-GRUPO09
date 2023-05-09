@@ -641,6 +641,25 @@ for i in range(10):
     print(p[i])
 ```
 
+Vamos a hacer un submission de nuestro random forest aleatorio:
+
+```python
+y_pred = model.predict(hotelsdf_pruebas)
+```
+
+```python
+df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': y_pred})
+df_submission.head()
+```
+
+```python
+df_submission.to_csv('submissions/random_forest_random.csv', index=False)
+```
+
+Este modelo tuvo el siguiente resultado en Kaggle
+![randoForestCVMM](informe/images/random_forest_random.png)
+
+
 ## Cross validation
 
 
@@ -719,6 +738,18 @@ Vemos que optimizando por el f1 score, obtuvimos una mejora del 2% nada mas; per
 
 Vamos a realizar una submission de este modelo
 
+```python
+y_pred_model_rfcv = rf_cv_best.predict(hotelsdf_pruebas)
+```
+
+```python
+df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': y_pred_model_rfcv})
+df_submission.head()
+```
+
+```python
+df_submission.to_csv('submissions/random_forestCV.csv', index=False)
+```
 
 Este modelo tuvo el siguiente resultado en Kaggle
 ![randoForestCVMM](informe/images/randomForestCV.png)
@@ -731,6 +762,9 @@ Ahora vamos a realizar un random forest pero tratando de optimizar distintas met
 Luego vamos a elegir la que optimice mejor todas las metricas
 
 ```python
+#Metricas que vamos a analizar:
+metricas=['accuracy','f1','roc_auc' ,'recall', 'precision'] 
+
 if exists('modelos/randomForestCVMM.joblib') == False:
     rf_cv = RandomForestClassifier(oob_score=False, random_state=1, n_jobs=JOBS)
 
@@ -739,11 +773,6 @@ if exists('modelos/randomForestCVMM.joblib') == False:
                     "min_samples_split" : [2, 8, 16, 32, 64],#a correr este modelo 1 sola vez; ya que lo vamos a 
                     "n_estimators": [10, 20, 30, 40, 50, 60, 70] } #guardar   
 
-
-
-    #Probamos entrenando con varias métricas
-
-    metricas=['accuracy','f1','roc_auc' ,'recall', 'precision'] #'recall','precision'
 
     gs_multimetrica = GridSearchCV(estimator=rf_cv, 
                                    param_grid=param_grid, 
@@ -790,7 +819,7 @@ for metrica in metricas:
 Vemos que son todos muy similares pero con cierta variazon. Vamos a elegir a f1 score para tener cierto tipo de balance
 
 ```python
-params_analizar=gs_multimetrica_fit.cv_results_['params'][np.argmax(gs_multimetrica_fit.cv_results_['mean_test_f1'])]
+params_elegidos=gs_multimetrica_fit.cv_results_['params'][np.argmax(gs_multimetrica_fit.cv_results_['mean_test_f1'])]
 
 #Creamos un clasificador RF
 rfc_multimetrica = RandomForestClassifier(criterion= params_elegidos['criterion'], 
@@ -823,14 +852,14 @@ plt.show(tree_plot)
 Vision completa:
 
 ```python
-plt.figure(figsize=(100,100))
+#plt.figure(figsize=(100,100))
 
-tree_plot_completo=tree.plot_tree(rfc_multimetrica.estimators_[56],
-                                 feature_names=hotelsdf_modelo_x.columns.to_list(),
-                                 filled=True,
-                                 rounded=True,)
-                                 #class_names=['Not Survived','Survived']) #model.classes_
-plt.show(tree_plot_completo)
+#tree_plot_completo=tree.plot_tree(rfc_multimetrica.estimators_[56],
+#                                 feature_names=hotelsdf_modelo_x.columns.to_list(),
+#                                 filled=True,
+#                                 rounded=True,)
+#                                 #class_names=['Not Survived','Survived']) #model.classes_
+#plt.show(tree_plot_completo)
 ```
 
 Calculamos la matriz de confusion
