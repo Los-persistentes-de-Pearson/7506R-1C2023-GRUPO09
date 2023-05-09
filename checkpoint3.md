@@ -631,7 +631,6 @@ plt.show()
 ### Random search cross validation
 
 ```python 
-#Grilla de Parámetros
 params_grid={ 'n_neighbors':range(1,15), 
               'weights':['distance','uniform'],
               'algorithm':['ball_tree', 'kd_tree'],
@@ -679,6 +678,45 @@ df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled
 df_submission.to_csv('knn_optimizado.csv', index=False)
 ```
 
+## Cross validation
+
+Verificamos la eficacia del modelo y sus hiperparametros mediante la validación cruzada
+
+```python
+
+kfoldcv =StratifiedKFold(n_splits=k_folds) 
+
+resultados = cross_validate(knn_optimizado,x_train, y_train, cv=kfoldcv,scoring=metrica_fn,return_estimator=True)
+
+metricsCV = resultados['test_score']
+
+knn_optimizado = resultados['estimator'][np.where(metricsCV==max(metricsCV))[0][0]]
+```
+
+Observamos la distribucion de la metrica f1 a lo largo de los entrenamientos
+
+```python
+metric_labelsCV = ['F1 Score']*len(metricsCV) 
+sns.set_context('talk')
+sns.set_style("darkgrid")
+plt.figure(figsize=(8,8))
+sns.boxplot(metricsCV)
+plt.title("Modelo entrenado con 10 folds")
+```
+
+Mostramos la matriz de confusión del modelo y observamos su desempeño global
+
+```python
+y_pred= knn_optimizado.predict(x_test)
+print(classification_report(y_test,y_pred))
+print('F1-Score: {}'.format(f1_score(y_test, y_pred, average='binary'))) 
+cm = confusion_matrix(y_test,y_pred)
+sns.heatmap(cm, cmap='Blues',annot=True,fmt='g')
+plt.xlabel('predecido')
+plt.ylabel('verdadero')
+```
+
+
 # SVM 
 
 
@@ -694,6 +732,16 @@ df_submission.to_csv('knn_optimizado.csv', index=False)
 
 # XGBoost 
 
+## Modelo base
+
+Generamos un modelo XGBoost base, con los hiperparametros por defecto, de manera que se pueda realizar una comparacion posterior a entrenar un modelo con sus hiperparametros optimmizados
+
+```python
+import xgboost as xgb
+
+xgb_base = xgb.XGBClassifier(random_state=9, n_estimators=100)
+
+```
 
 
 
