@@ -833,6 +833,27 @@ print(str("Recall = ") + str(recallCVMM - recallCV)[3:4] + "%")
 print(str("f1 score = ") + str(f1CVMM - f1CV)[3:4] + "%")
 ```
 
+Realizamos la prediccion sobre el dataset de testeo
+
+```python
+y_pred_model_rfc_multimetrica = model_rfc_multimetrica.predict(hotelsdf_pruebas)
+```
+
+```python
+df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': y_pred_model_rfc_multimetrica})
+df_submission.head()
+```
+
+```python
+df_submission.to_csv('submissions/random_forestCVMM.csv', index=False)
+```
+
+Este modelo tuvo el siguiente resultado en Kaggle
+
+
+![randoForestCVMM](informe/images/randomForestCVMM.png)
+
+
 # XGBoost 
 
 
