@@ -717,6 +717,13 @@ print(str("f1 score = ") + str(f1CV - f1)[3:4] + "%")
 Vemos que optimizando por el f1 score, obtuvimos una mejora del 2% nada mas; pero una mejora del 4% en recall
 
 
+Vamos a realizar una submission de este modelo
+
+
+Este modelo tuvo el siguiente resultado en Kaggle
+![randoForestCVMM](informe/images/randomForestCV.png)
+
+
 ## Cross validation multiples metricas
 
 
@@ -877,9 +884,10 @@ df_submission.to_csv('submissions/random_forestCVMM.csv', index=False)
 ```
 
 Este modelo tuvo el siguiente resultado en Kaggle
-
-
 ![randoForestCVMM](informe/images/randomForestCVMM.png)
+
+
+Vemos que a pesar de todas nuestras mejoras, solo obtuvimos una mejora del 0.2%
 
 
 # XGBoost 
