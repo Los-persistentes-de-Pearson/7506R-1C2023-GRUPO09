@@ -798,6 +798,8 @@ model_rfc_multimetrica = rfc_multimetrica.fit(X = x_train, y = y_train)
 y_pred_model_rfc_multimetrica = model_rfc_multimetrica.predict(x_test)
 ```
 
+Calculamos la matriz de confusion
+
 ```python
 #Matriz de Confusión
 cm = confusion_matrix(y_test,y_pred_model_rfc_multimetrica)
@@ -808,6 +810,27 @@ plt.ylabel('True')
 #Reporte
 print(classification_report(y_test,y_pred_model_rfc_multimetrica))
 
+```
+
+A pesar de todas nuestra busqueda, no se observan cambios significativos
+
+```python
+#Evaluo la performance en el conjunto de evaluación
+accuracyCVMM=accuracy_score(y_test,y_pred_model_rfc_multimetrica)
+recallCVMM=recall_score(y_test,y_pred_model_rfc_multimetrica)
+f1CVMM=f1_score(y_test,y_pred_model_rfc_multimetrica)
+
+print("Accuracy: "+str(accuracyCVMM))
+print("Recall: "+str(recallCVMM))
+print("f1 score: "+str(f1CVMM))
+```
+
+Sorprendentemente, no tuvimos mejoras significativas comparado con el modelo que no consideraba todas las metricas
+
+```python
+print(str("Accuracy = ") + str(accuracyCVMM - accuracyCV)[3:4] + "%")
+print(str("Recall = ") + str(recallCVMM - recallCV)[3:4] + "%")
+print(str("f1 score = ") + str(f1CVMM - f1CV)[3:4] + "%")
 ```
 
 # XGBoost 
