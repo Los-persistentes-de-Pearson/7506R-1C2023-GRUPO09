@@ -724,25 +724,34 @@ Ahora vamos a realizar un random forest pero tratando de optimizar distintas met
 Luego vamos a elegir la que optimice mejor todas las metricas
 
 ```python
-rf_cv = RandomForestClassifier(oob_score=False, random_state=1, n_jobs=JOBS)
+if exists('modelos/randomForestCVMM.joblib') == False:
+    rf_cv = RandomForestClassifier(oob_score=False, random_state=1, n_jobs=JOBS)
 
-param_grid = { "criterion" : ["gini", "entropy"], 
-               "min_samples_leaf" : [1, 5, 10], 
-               "min_samples_split" : [2, 4, 10, 12, 16], 
-               "n_estimators": [10,20, 50] }
+    param_grid = { "criterion" : ["gini", "entropy"], 
+                    "min_samples_leaf" : [1, 5, 10, 15, 20], #Vamos a hacer muchas combinaciones ya que solo vamos
+                    "min_samples_split" : [2, 8, 16, 32, 64],#a correr este modelo 1 sola vez; ya que lo vamos a 
+                    "n_estimators": [10, 20, 30, 40, 50, 60, 70] } #guardar   
 
-#Probamos entrenando con varias métricas
 
-metricas=['accuracy','f1','roc_auc' ,'recall', 'precision'] #'recall','precision'
 
-gs_multimetrica = GridSearchCV(estimator=rf_cv, 
-                               param_grid=param_grid, 
-                               scoring=metricas, 
-                               refit=False, 
-                               cv=5, 
-                               n_jobs=JOBS)
-#Entrenamiento
-gs_multimetrica_fit = gs_multimetrica.fit(X = x_train, y = y_train)
+    #Probamos entrenando con varias métricas
+
+    metricas=['accuracy','f1','roc_auc' ,'recall', 'precision'] #'recall','precision'
+
+    gs_multimetrica = GridSearchCV(estimator=rf_cv, 
+                                   param_grid=param_grid, 
+                                   scoring=metricas, 
+                                   refit=False, 
+                                   cv=5, 
+                                   n_jobs=JOBS)
+    #Entrenamiento
+    gs_multimetrica_fit = gs_multimetrica.fit(X = x_train, y = y_train)
+    dump(gs_multimetrica_fit, 'modelos/randomForestCVMM.joblib')
+
+```
+
+```python
+gs_multimetrica_fit = load('modelos/randomForestCVMM.joblib')
 ```
 
 ```python
