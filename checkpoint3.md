@@ -37,7 +37,12 @@ import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 warnings.simplefilter(action='ignore', category=UserWarning)
 
+```
+
+```python
+# Constantes
 JOBS=-2
+SEED=9
 ```
 
 ## Cargamos el dataframe de testeo
@@ -518,7 +523,7 @@ hotelsdf_modelo_y = hotelsdf_modelo['is_canceled'].copy()
 x_train, x_test, y_train, y_test = train_test_split(hotelsdf_modelo_x,
                                                     hotelsdf_modelo_y, 
                                                     test_size=0.3,  #proporcion 70/30
-                                                    random_state=9) #Semilla 9, como el Equipo !!
+                                                    random_state=SEED) #Semilla 9, como el Equipo !!
 ```
 
 # KNN
@@ -580,7 +585,7 @@ Usando https://www.random.org/, con valor maximo 50 y valor minimo 1, obtuvimos:
 rfc = RandomForestClassifier(max_features='auto', 
                              n_jobs=JOBS,
                              criterion="entropy", 
-                             random_state=33, 
+                             random_state=SEED, 
                              min_samples_leaf=15,
                              min_samples_split=40,
                              n_estimators=36 )
@@ -709,15 +714,14 @@ print(str("Recall = ") + str(recallCV - recall)[3:4] + "%")
 print(str("f1 score = ") + str(f1CV - f1)[3:4] + "%")
 ```
 
-<!-- #raw -->
-Vemos que optimizando por el f1 score, obtuvimos una mejora del 3% en ese vamos; pero una mejora del 5% en recall
-<!-- #endraw -->
+Vemos que optimizando por el f1 score, obtuvimos una mejora del 2% nada mas; pero una mejora del 4% en recall
 
-```python
-input()
-```
 
-Decidimos solo medir la metrica f1-score
+## Cross validation multiples metricas
+
+
+Ahora vamos a realizar un random forest pero tratando de optimizar distintas metricas a la vez. \
+Luego vamos a elegir la que optimice mejor todas las metricas
 
 ```python
 rf_cv = RandomForestClassifier(oob_score=False, random_state=1, n_jobs=JOBS)
@@ -729,7 +733,7 @@ param_grid = { "criterion" : ["gini", "entropy"],
 
 #Probamos entrenando con varias métricas
 
-metricas=['accuracy','f1','roc_auc'] #'recall','precision'
+metricas=['accuracy','f1','roc_auc' ,'recall', 'precision'] #'recall','precision'
 
 gs_multimetrica = GridSearchCV(estimator=rf_cv, 
                                param_grid=param_grid, 
