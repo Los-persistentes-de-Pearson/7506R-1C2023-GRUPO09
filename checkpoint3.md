@@ -1570,14 +1570,11 @@ Realizamos la validación cruzada del modelo para verificar que no caiga en over
 ```python
 if not exist('modelos/xgb_optimizado.joblib'):
     kfoldcv =StratifiedKFold(n_splits=k_folds) 
-
     resultados = cross_validate(xgb_optimizado,x_train, y_train, cv=kfoldcv,scoring=metrica_fn,return_estimator=True)
-
     metricsCV = resultados['test_score']
-
     xgb_optimizado = resultados['estimator'][np.where(metricsCV==max(metricsCV))[0][0]]
-
     dump(xgb_optimizado, 'xgb_optimizado.joblib')
+    
 else:
     xgb_optimizado = load('modelos/xgb_optimizado.joblib')
 ```
