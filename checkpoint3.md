@@ -743,16 +743,113 @@ xgb_base = xgb.XGBClassifier(random_state=9, n_estimators=100)
 xgb_base.fit(x_train, y_train)
 ```
 
+Vemos el comportamiento del modelo base y mostramos las metricas obtenidas en el procesp
+
 ```python
 y_pred=xgb_base.predict(x_test)
 
+print(classification_report(y_test,y_pred))
+print('F1-Score: {}'.format(f1_score(y_test, y_pred, average='binary'))) 
 cm = confusion_matrix(y_test,y_pred)
 sns.heatmap(cm, cmap='Blues',annot=True,fmt='g')
-plt.xlabel('Predicted')
-plt.ylabel('True')
-
+plt.xlabel('Predecido')
+plt.ylabel('Verdadero')
 ```
 
+Realizamos una prediccion en kaggle y almacenamos el modelo generado en una primera instancia 
+
+```python
+y_pred = xgb_base.predict(hotelsdf_pruebas)
+y_pred
+df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': y_pred})
+df_submission.to_csv('xgb_base.csv', index=False)
+dump(xgb_base, 'xgb_base.joblib')
+```
+
+## Busqueda de hiperparametros
+
+Realizamos una busqueda para encontrar los mejores hiperparametros del XGBoost y a su vez optimizar el modelo
+
+```python 
+estimadores = [90, 100]
+profundidad_max = [7, 8, 9, 10]
+subsample = [0.5, 0.7, 0.8, 0.9]
+
+params = {
+    #'learning_rate': [0.035, 0.034],
+    'max_depth': profundidad_max,
+    'n_estimators': estimadores,
+    #'subsample': [0.5, 0.7, 0.8, 0.9],
+    #'colsample_bytree': [0.5, 0.7, 0.8, 0.9]
+}
+
+
+xgb_entrenamiento = xgb.XGBClassifier()
+combinaciones = 10
+k_folds = 10
+metrica_fn = make_scorer(sk.metrics.f1_score)
+
+#Random Search con 10 Folds y 10 iteraciones
+parametros = RandomizedSearchCV(
+            estimator=xgb_entrenamiento, 
+            param_distributions = params, 
+            cv=k_folds, 
+            scoring=metrica_fn, 
+            n_iter=combinaciones, 
+            random_state=9)
+    
+parametros.fit(x_train, y_train)
+parametros.cv_results_['mean_test_score']
+```
+
+```python
+print("Mostramos los mejores resultados: ")
+print(parametros.best_params_)
+print()
+print("Mostramos el mejor resultado obtenido de busqueda aleatoria: ")
+print("f1_score = ",parametros.best_score_)
+```
+
+```python
+xgb_optimizado = xgb.XGBClassifier(**parametros.best_params_)
+```
+
+```python
+kfoldcv =StratifiedKFold(n_splits=k_folds) 
+
+resultados = cross_validate(xgb_optimizado,x_train, y_train, cv=kfoldcv,scoring=metrica_fn,return_estimator=True)
+
+metricsCV = resultados['test_score']
+
+xgb_optimizado = resultados['estimator'][np.where(metricsCV==max(metricsCV))[0][0]]
+```
+
+```python
+metric_labelsCV = ['F1 Score']*len(metricsCV) 
+sns.set_context('talk')
+sns.set_style("darkgrid")
+plt.figure()
+sns.boxplot(metricsCV)
+plt.title("Modelo entrenado con 10 folds")
+```
+
+```python
+y_pred= xgb_optimizado.predict(x_test)
+print(classification_report(y_test,y_pred))
+print('F1-Score: {}'.format(f1_score(y_test, y_pred, average='binary'))) 
+cm = confusion_matrix(y_test,y_pred)
+sns.heatmap(cm, cmap='Blues',annot=True,fmt='g')
+plt.xlabel('predecido')
+plt.ylabel('verdadero')
+```
+
+```python
+y_pred = xgb_optimizado.predict(hotelsdf_pruebas)
+y_pred
+df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': y_pred})
+df_submission.to_csv('xgb_optimizado.csv', index=False)
+dump(xgb_optimizado, 'xgb_optimizado.joblib')
+```
 
 # Modelo Voting
 
