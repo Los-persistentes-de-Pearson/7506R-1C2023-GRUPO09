@@ -36,6 +36,7 @@ from sklearn.metrics import confusion_matrix, classification_report
 from sklearn.utils.fixes import loguniform
 from sklearn.neighbors import KNeighborsClassifier
 
+import xgboost as xgb
 
 #Si estamos  en colab tenemos que instalar la libreria "dtreeviz" aparte. 
 if IN_COLAB == True:
@@ -1471,10 +1472,13 @@ Vemos que a pesar de todas nuestras mejoras, solo obtuvimos una mejora del 0.2%
 Generamos un modelo XGBoost base, con los hiperparametros por defecto, de manera que se pueda realizar una comparacion posterior a entrenar un modelo con sus hiperparametros optimmizados
 
 ```python
-import xgboost as xgb
 
-xgb_base = xgb.XGBClassifier(random_state=9, n_estimators=100)
-xgb_base.fit(x_train, y_train)
+if not exist('modelos/xgb_base.joblib'):
+    xgb_base = xgb.XGBClassifier(random_state=9, n_estimators=100) 
+    xgb_base.fit(x_train, y_train)
+    dump(xgb_base, 'xgb_base.joblib')
+else:
+    xgb_base = load('modelos/xgb_base.joblib')
 ```
 
 Vemos el comportamiento del modelo base y mostramos las metricas obtenidas en el procesp
@@ -1490,51 +1494,58 @@ plt.xlabel('Predecido')
 plt.ylabel('Verdadero')
 ```
 
-Realizamos una prediccion en kaggle y almacenamos el modelo generado en una primera instancia 
+Realizamos una prediccion para kaggle y almacenamos el modelo generado en una primera instancia 
 
 ```python
 y_pred = xgb_base.predict(hotelsdf_pruebas)
 y_pred
 df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': y_pred})
-df_submission.to_csv('xgb_base.csv', index=False)
-dump(xgb_base, 'xgb_base.joblib')
+
+if not exist('submissions/xgb_base.csv'):
+    df_submission.to_csv('xgb_base.csv', index=False)
 ```
+
+Destacamos que este modelo sin recibir ninguna optimización tiene la presición mas alta de todos los modelos entrenados
 
 ## Busqueda de hiperparametros
 
-Realizamos una busqueda para encontrar los mejores hiperparametros del XGBoost y a su vez optimizar el modelo
+Realizamos una busqueda para encontrar los mejores hiperparametros del XGBoost y a su vez optimizar el modelo *Puede tomar tiempo, alrededor de 50 min*
 
 ```python
-estimadores = [90, 100]
-profundidad_max = [7, 8, 9, 10]
-subsample = [0.5, 0.7, 0.8, 0.9]
+if not exist('modelos/RCV_xgb.joblib'):
 
-params = {
-    #'learning_rate': [0.035, 0.034],
-    'max_depth': profundidad_max,
-    'n_estimators': estimadores,
-    #'subsample': [0.5, 0.7, 0.8, 0.9],
-    #'colsample_bytree': [0.5, 0.7, 0.8, 0.9]
-}
+    estimadores = [90, 100, 110, 150]
+    profundidad_max = [7, 8, 9, 10, 15]
+    learning_rate = [0.01, 0.05, 0.1, 0.2]
+
+    params = {
+        'max_depth': profundidad_max,
+        'n_estimators': estimadores,
+        'learning_rate': learning_rate,
+            }
 
 
-xgb_entrenamiento = xgb.XGBClassifier()
-combinaciones = 10
-k_folds = 10
-metrica_fn = make_scorer(sk.metrics.f1_score)
+    xgb_entrenamiento = xgb.XGBClassifier()
+    combinaciones = 10
+    k_folds = 10
+    metrica_fn = make_scorer(sk.metrics.f1_score)
 
-#Random Search con 10 Folds y 10 iteraciones
-parametros = RandomizedSearchCV(
-            estimator=xgb_entrenamiento, 
-            param_distributions = params, 
-            cv=k_folds, 
-            scoring=metrica_fn, 
-            n_iter=combinaciones, 
-            random_state=9)
-    
-parametros.fit(x_train, y_train)
-parametros.cv_results_['mean_test_score']
+    parametros = RandomizedSearchCV(
+                estimator=xgb_entrenamiento, 
+                param_distributions = params, 
+                cv=k_folds, 
+                scoring=metrica_fn, 
+                n_iter=combinaciones, 
+                random_state=9)
+
+    parametros.fit(x_train, y_train)
+    parametros.cv_results_['mean_test_score']
+
+else:
+    parametros = load('modelos/RCV_xgb.joblib')
 ```
+
+Mostramos las metricas y los mejores hiperparametros conseguidos en el analisis 
 
 ```python
 print("Mostramos los mejores resultados: ")
@@ -1544,19 +1555,34 @@ print("Mostramos el mejor resultado obtenido de busqueda aleatoria: ")
 print("f1_score = ",parametros.best_score_)
 ```
 
-```python
-xgb_optimizado = xgb.XGBClassifier(**parametros.best_params_)
-```
+Entrenamos el modelo con sus hiperparametros
 
 ```python
-kfoldcv =StratifiedKFold(n_splits=k_folds) 
-
-resultados = cross_validate(xgb_optimizado,x_train, y_train, cv=kfoldcv,scoring=metrica_fn,return_estimator=True)
-
-metricsCV = resultados['test_score']
-
-xgb_optimizado = resultados['estimator'][np.where(metricsCV==max(metricsCV))[0][0]]
+if not exist('modelos/xgb_optimizado.joblib'):
+    xgb_optimizado = xgb.XGBClassifier(**parametros.best_params_)
+    xgb_optimizado.fit(x_train, y_train)
+else:
+    xgb_optimizado = load('modelos/xgb_optimizado.joblib')
 ```
+
+Realizamos la validación cruzada del modelo para verificar que no caiga en overfitting o underfitting 
+
+```python
+if not exist('modelos/xgb_optimizado.joblib'):
+    kfoldcv =StratifiedKFold(n_splits=k_folds) 
+
+    resultados = cross_validate(xgb_optimizado,x_train, y_train, cv=kfoldcv,scoring=metrica_fn,return_estimator=True)
+
+    metricsCV = resultados['test_score']
+
+    xgb_optimizado = resultados['estimator'][np.where(metricsCV==max(metricsCV))[0][0]]
+
+    dump(xgb_optimizado, 'xgb_optimizado.joblib')
+else:
+    xgb_optimizado = load('modelos/xgb_optimizado.joblib')
+```
+
+Observamos el comportamiento del modelo a lo largo de la validacón cruzada 
 
 ```python
 metric_labelsCV = ['F1 Score']*len(metricsCV) 
@@ -1566,6 +1592,8 @@ plt.figure()
 sns.boxplot(metricsCV)
 plt.title("Modelo entrenado con 10 folds")
 ```
+
+Observamos la matriz de confusión del modelo y concluimos que es el modelo con el mejor F1 score que se ha podido entrenar en el analisis sobre las reservas
 
 ```python
 y_pred= xgb_optimizado.predict(x_test)
@@ -1577,13 +1605,17 @@ plt.xlabel('predecido')
 plt.ylabel('verdadero')
 ```
 
+Realizamos la predicción de kaggle 
+
 ```python
 y_pred = xgb_optimizado.predict(hotelsdf_pruebas)
 y_pred
-df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': y_pred})
-df_submission.to_csv('xgb_optimizado.csv', index=False)
-dump(xgb_optimizado, 'xgb_optimizado.joblib')
+if not exist('submissions/xgb_optimizado.joblib'):
+    df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': y_pred})
+    df_submission.to_csv('xgb_optimizado.csv', index=False)
 ```
+
+El ensamble XGBoost representa el modelo más preciso de todos los modelos entrenados hasta esta sección del analisis
 
 # Modelo Voting
 
