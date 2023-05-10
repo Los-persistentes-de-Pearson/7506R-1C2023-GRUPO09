@@ -1624,3 +1624,12 @@ El ensamble XGBoost representa el modelo más preciso de todos los modelos entre
 
 
 # Conclusiones 
+
+
+1. KNN: 
+2. SVM:
+3. Random Forest:
+4. XGBoost:
+5. Voting:
+6. Stacking:
+7. General
