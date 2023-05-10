@@ -539,9 +539,11 @@ x_train, x_test, y_train, y_test = train_test_split(hotelsdf_modelo_x,
 
 Entrenamos un primer modelo de KNN usando los datos previamente tratados
 
-## KNN sin busqueda de hiperparametros
+## KNN base
 
-En primera instancia entrenamos un modelo sin optimizar hiperparametros 
+En primera instancia entrenamos un modelo sin optimizar hiperparametros, de manera que, se obtiene una medida de la predicción base que tiene el modelo.
+
+Creamos el modelo y lo entrenamos:
 
 ```python
 #from sklearn.neighbors import KNeighborsClassifier
@@ -553,14 +555,33 @@ En primera instancia entrenamos un modelo sin optimizar hiperparametros
 #y_pred = knn_base.predict(x_test)
 ```
 
+Observamos el comportamiento del modelo base
+
 ```python
 #print('correctas: ', np.sum(y_test == y_pred))
 #print('total: ', len(y_test))
 ```
 
+Realizamos unas primeras medidas de como se desempeña dicho modelo mediante una matriz de confusion
+
 ```python
 #accuracy_score(y_test,y_pred)
 ```
+
+Observamos mediante la matriz de confusion el comportamiento del modelo base con los datos de prueba 
+
+```python
+print(classification_report(y_test,y_pred))
+
+confusion_base_knn = confusion_matrix(y_test,y_pred)
+sns.heatmap(confusion_base_knn, cmap='Blues',annot=True,fmt='g')
+plt.xlabel('Predicted')
+plt.ylabel('True')
+```
+
+Basado en el grafico, es posible observar que el modelo base ha obtenido un desempeño moderado en los datos de prueba a pesar de no haber recibido ningun tipo de optimización 
+
+Generamos la primera predicción para kaggle y almacenamos el modelo
 
 ```python
 #y_pred = knn_base.predict(hotelsdf_pruebas)
@@ -569,6 +590,151 @@ En primera instancia entrenamos un modelo sin optimizar hiperparametros
 #df_submission.to_csv('knn_base.csv', index=False)
 #dump(knn_base, 'knn_base.joblib')
 ```
+
+## Busqueda de hiperparametros
+
+### Modificar los k vecinos
+
+Realizamos una busqueda de cuales son los valores de k para los cuales el modelo tiene un mejor desempeño 
+
+```python
+metricas = []
+
+cant_vecinos = range(1, 30) 
+
+for n in cant_vecinos:
+    knn = KNeighborsClassifier(n_neighbors = n)
+    knn.fit(x_train, y_train)
+    y_pred = knn.predict(x_test)
+    metricas.append( (n, (y_test == y_pred).sum())) 
+```
+
+De la prueba anterior observamos el comportamiento que tiene 
+
+```python
+plt.figure(figsize = (8,6))
+
+df_metrics = pd.DataFrame(metricas, columns=['cant_vecinos', 'correctos'])
+
+ax = df_metrics.plot( x='cant_vecinos', 
+                      y='correctos',
+                      title='Aciertos vs Cantidad de Vecinos'
+                    )
+
+ax.set_ylabel("Cantidad de aciertos")
+ax.set_xlabel("Cantidad de Vecinos")
+plt.show()
+```
+
+Por otro lado observamos el comportamiento de la presicion 
+
+```python 
+from sklearn.model_selection import cross_val_score
+knn_metricas = []
+
+for n in cant_vecinos:
+  knn = KNeighborsClassifier(n_neighbors = n)
+  scores=cross_val_score(knn,x_train,y_train,cv=10,scoring='accuracy')
+  knn_metricas.append(scores.mean())
+```
+
+
+```python
+plt.plot(cant_vecinos, knn_metricas)
+plt.xlabel('Cantidad de Vecinos')
+plt.ylabel('Cross Validation Accuracy')
+plt.title('Accuracy vs Cantidad de Vecinos')
+plt.show()
+```
+
+### Random search cross validation
+
+```python 
+params_grid={ 'n_neighbors':range(1,15), 
+              'weights':['distance','uniform'],
+              'algorithm':['ball_tree', 'kd_tree'],
+              'metric':['euclidean','manhattan']
+             }
+
+
+knn_optimizado = KNeighborsClassifier()
+combinaciones = 10
+k_folds = 10
+metrica_fn = make_scorer(sk.metrics.f1_score)
+
+#Random Search con 10 Folds y 10 iteraciones
+parametros = RandomizedSearchCV(
+            estimator=knn_optimizado, 
+            param_distributions = params_grid, 
+            cv=k_folds, 
+            scoring=metrica_fn, 
+            n_iter=combinaciones, 
+            random_state=9)
+    
+parametros.fit(x_train, y_train)
+parametros.cv_results_['mean_test_score']
+```
+
+```python 
+print(parametros)
+print(parametros.best_params_)
+print(parametros.best_score_)
+```
+
+```python
+
+knn_optimizado = KNeighborsClassifier(**parametros.best_params_)
+knn_optimizado.fit(x_train, y_train)
+```
+
+```python
+dump(knn_optimizado, 'knn_optimizado.joblib')
+```
+
+```python
+y_pred = knn_optimizado.predict(hotelsdf_pruebas)
+df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': y_pred})
+df_submission.to_csv('knn_optimizado.csv', index=False)
+```
+
+## Cross validation
+
+Verificamos la eficacia del modelo y sus hiperparametros mediante la validación cruzada
+
+```python
+
+kfoldcv =StratifiedKFold(n_splits=k_folds) 
+
+resultados = cross_validate(knn_optimizado,x_train, y_train, cv=kfoldcv,scoring=metrica_fn,return_estimator=True)
+
+metricsCV = resultados['test_score']
+
+knn_optimizado = resultados['estimator'][np.where(metricsCV==max(metricsCV))[0][0]]
+```
+
+Observamos la distribucion de la metrica f1 a lo largo de los entrenamientos
+
+```python
+metric_labelsCV = ['F1 Score']*len(metricsCV) 
+sns.set_context('talk')
+sns.set_style("darkgrid")
+plt.figure(figsize=(8,8))
+sns.boxplot(metricsCV)
+plt.title("Modelo entrenado con 10 folds")
+```
+
+Mostramos la matriz de confusión del modelo y observamos su desempeño global
+
+```python
+y_pred= knn_optimizado.predict(x_test)
+print(classification_report(y_test,y_pred))
+print('F1-Score: {}'.format(f1_score(y_test, y_pred, average='binary'))) 
+cm = confusion_matrix(y_test,y_pred)
+sns.heatmap(cm, cmap='Blues',annot=True,fmt='g')
+plt.xlabel('predecido')
+plt.ylabel('verdadero')
+```
+
 
 # SVM 
 
@@ -1281,8 +1447,124 @@ Vemos que a pesar de todas nuestras mejoras, solo obtuvimos una mejora del 0.2%
 
 # XGBoost 
 
+## Modelo base
+
+Generamos un modelo XGBoost base, con los hiperparametros por defecto, de manera que se pueda realizar una comparacion posterior a entrenar un modelo con sus hiperparametros optimmizados
+
+```python
+import xgboost as xgb
+
+xgb_base = xgb.XGBClassifier(random_state=9, n_estimators=100)
+xgb_base.fit(x_train, y_train)
+```
+
+Vemos el comportamiento del modelo base y mostramos las metricas obtenidas en el procesp
+
+```python
+y_pred=xgb_base.predict(x_test)
+
+print(classification_report(y_test,y_pred))
+print('F1-Score: {}'.format(f1_score(y_test, y_pred, average='binary'))) 
+cm = confusion_matrix(y_test,y_pred)
+sns.heatmap(cm, cmap='Blues',annot=True,fmt='g')
+plt.xlabel('Predecido')
+plt.ylabel('Verdadero')
+```
+
+Realizamos una prediccion en kaggle y almacenamos el modelo generado en una primera instancia 
+
+```python
+y_pred = xgb_base.predict(hotelsdf_pruebas)
+y_pred
+df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': y_pred})
+df_submission.to_csv('xgb_base.csv', index=False)
+dump(xgb_base, 'xgb_base.joblib')
+```
+
+## Busqueda de hiperparametros
+
+Realizamos una busqueda para encontrar los mejores hiperparametros del XGBoost y a su vez optimizar el modelo
+
+```python 
+estimadores = [90, 100]
+profundidad_max = [7, 8, 9, 10]
+subsample = [0.5, 0.7, 0.8, 0.9]
+
+params = {
+    #'learning_rate': [0.035, 0.034],
+    'max_depth': profundidad_max,
+    'n_estimators': estimadores,
+    #'subsample': [0.5, 0.7, 0.8, 0.9],
+    #'colsample_bytree': [0.5, 0.7, 0.8, 0.9]
+}
 
 
+xgb_entrenamiento = xgb.XGBClassifier()
+combinaciones = 10
+k_folds = 10
+metrica_fn = make_scorer(sk.metrics.f1_score)
+
+#Random Search con 10 Folds y 10 iteraciones
+parametros = RandomizedSearchCV(
+            estimator=xgb_entrenamiento, 
+            param_distributions = params, 
+            cv=k_folds, 
+            scoring=metrica_fn, 
+            n_iter=combinaciones, 
+            random_state=9)
+    
+parametros.fit(x_train, y_train)
+parametros.cv_results_['mean_test_score']
+```
+
+```python
+print("Mostramos los mejores resultados: ")
+print(parametros.best_params_)
+print()
+print("Mostramos el mejor resultado obtenido de busqueda aleatoria: ")
+print("f1_score = ",parametros.best_score_)
+```
+
+```python
+xgb_optimizado = xgb.XGBClassifier(**parametros.best_params_)
+```
+
+```python
+kfoldcv =StratifiedKFold(n_splits=k_folds) 
+
+resultados = cross_validate(xgb_optimizado,x_train, y_train, cv=kfoldcv,scoring=metrica_fn,return_estimator=True)
+
+metricsCV = resultados['test_score']
+
+xgb_optimizado = resultados['estimator'][np.where(metricsCV==max(metricsCV))[0][0]]
+```
+
+```python
+metric_labelsCV = ['F1 Score']*len(metricsCV) 
+sns.set_context('talk')
+sns.set_style("darkgrid")
+plt.figure()
+sns.boxplot(metricsCV)
+plt.title("Modelo entrenado con 10 folds")
+```
+
+```python
+y_pred= xgb_optimizado.predict(x_test)
+print(classification_report(y_test,y_pred))
+print('F1-Score: {}'.format(f1_score(y_test, y_pred, average='binary'))) 
+cm = confusion_matrix(y_test,y_pred)
+sns.heatmap(cm, cmap='Blues',annot=True,fmt='g')
+plt.xlabel('predecido')
+plt.ylabel('verdadero')
+```
+
+```python
+y_pred = xgb_optimizado.predict(hotelsdf_pruebas)
+y_pred
+df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': y_pred})
+df_submission.to_csv('xgb_optimizado.csv', index=False)
+dump(xgb_optimizado, 'xgb_optimizado.joblib')
+```
 
 # Modelo Voting
 
