@@ -28,14 +28,13 @@ from sklearn.model_selection import GridSearchCV
 
 from sklearn.datasets import load_iris
 from sklearn import preprocessing
-from sklearn.model_selection import train_test_split, RandomizedSearchCV, GridSearchCV
+from sklearn.model_selection import train_test_split, RandomizedSearchCV, GridSearchCV, cross_val_score
 from sklearn.svm import SVC
 from sklearn import svm
 from sklearn.datasets import make_classification
 from sklearn.metrics import confusion_matrix, classification_report
 from sklearn.utils.fixes import loguniform
 from sklearn.neighbors import KNeighborsClassifier
-
 
 
 #Si estamos  en colab tenemos que instalar la libreria "dtreeviz" aparte. 
@@ -551,15 +550,10 @@ Creamos el modelo y lo entrenamos:
 if not exists('modelos/knn_base.joblib'):
     knn_base = KNeighborsClassifier()
     knn_base.get_params()
-
     knn_base.fit(x_train, y_train)
     dump(knn_base, 'modelos/knn_base.joblib')
-
-
-```
-
-```python
-knn_base = load('modelos/knn_base.joblib')
+else:
+    knn_base = load('modelos/knn_base.joblib')
 ```
 
 ```python
@@ -573,32 +567,28 @@ print('correctas: ', np.sum(y_test == y_pred))
 print('total: ', len(y_test))
 ```
 
-Realizamos unas primeras medidas de como se desempeña dicho modelo mediante una matriz de confusion
-
-```python
-accuracy_score(y_test,y_pred)
-```
-
 Observamos mediante la matriz de confusion el comportamiento del modelo base con los datos de prueba 
 
 ```python
 print(classification_report(y_test,y_pred))
 
-confusion_base_knn = confusion_matrix(y_test,y_pred)
-sns.heatmap(confusion_base_knn, cmap='Blues',annot=True,fmt='g')
-plt.xlabel('Predicted')
-plt.ylabel('True')
+confusion_knn_base = confusion_matrix(y_test,y_pred)
+sns.heatmap(confusion_knn_base, cmap='Blues',annot=True,fmt='g')
+plt.xlabel('Predicho')
+plt.ylabel('Verdadero')
 ```
 
 Basado en el grafico, es posible observar que el modelo base ha obtenido un desempeño moderado en los datos de prueba a pesar de no haber recibido ningun tipo de optimización 
 
-Generamos la primera predicción para kaggle y almacenamos el modelo
+Generamos una prediccón para kaggle con el modelo base
 
 ```python
 y_pred = knn_base.predict(hotelsdf_pruebas)
 y_pred
 df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': y_pred})
-df_submission.to_csv('submissions/knn_base.csv', index=False)
+
+if not exist('submissions/knn_base.csv'):
+    df_submission.to_csv('submissions/knn_base.csv', index=False)
 ```
 
 ## Busqueda de hiperparametros
@@ -608,26 +598,23 @@ df_submission.to_csv('submissions/knn_base.csv', index=False)
 Realizamos una busqueda de cuales son los valores de k para los cuales el modelo tiene un mejor desempeño 
 
 ```python
-    metricas = []
-    cant_vecinos = range(1, 30) 
+metricas = []
+cant_vecinos = range(1, 30) 
 
 if not exists('modelos/metricas.joblib'):
-
     for n in cant_vecinos:
         knn = KNeighborsClassifier(n_neighbors = n, n_jobs=JOBS)
         knn.fit(x_train, y_train)
         y_pred = knn.predict(x_test)
         metricas.append( (n, (y_test == y_pred).sum())) 
-```
-
-```python
-metricas = load('modelos/metricas.joblib')
+else:
+    metricas = load('modelos/metricas.joblib')
 ```
 
 De la prueba anterior observamos el comportamiento que tiene 
 
 ```python
-plt.figure(figsize = (8,6))
+plt.figure(figsize = (6,5))
 
 df_metrics = pd.DataFrame(metricas, columns=['cant_vecinos', 'correctos'])
 
@@ -644,7 +631,6 @@ plt.show()
 Por otro lado observamos el comportamiento de la presicion 
 
 ```python
-from sklearn.model_selection import cross_val_score
 knn_metricas = []
 
 if not exists('modelos/knn_metricas.joblib'):
@@ -652,11 +638,9 @@ if not exists('modelos/knn_metricas.joblib'):
       knn = KNeighborsClassifier(n_neighbors = n)
       scores=cross_val_score(knn,x_train,y_train,cv=10,scoring='accuracy')
       knn_metricas.append(scores.mean())
-
-```
-
-```python
-dump(knn_metricas, 'modelos/knn_metricas.joblib')
+    dump(knn_metricas, 'modelos/knn_metricas.joblib')
+else:
+    knn_metricas = load('modelos/knn_metricas.joblib')
 ```
 
 ```python
@@ -667,10 +651,13 @@ plt.title('Accuracy vs Cantidad de Vecinos')
 plt.show()
 ```
 
+Podemos concluir de las graficas anteriores que el modelo tiende a empeorar a medida que aumentan la cantidad de vecinos, de todos modos la variación de la presión es considerablemente pequeña. Por lo tanto consideraremos el mismo rango de valores a la hora de realizar el cross validation search
+
 ### Random search cross validation
 
-```python
+Buscamos la mejor combinación de hiperparametros con la intención de mejorar las metricas del modelo y a su vez mejorar la performance del mismo
 
+```python
 if not exist('modelos/RCV_knn.joblib'):
 
     params_grid={ 'n_neighbors':range(1,15), 
@@ -685,7 +672,6 @@ if not exist('modelos/RCV_knn.joblib'):
     k_folds = 10
     metrica_fn = make_scorer(sk.metrics.f1_score)
 
-    #Random Search con 10 Folds y 10 iteraciones
     parametros = RandomizedSearchCV(
                 estimator=knn_optimizado, 
                 param_distributions = params_grid, 
@@ -698,8 +684,11 @@ if not exist('modelos/RCV_knn.joblib'):
     parametros.cv_results_['mean_test_score']
 
     dump(parametros, 'modelos/RCV_knn.joblib')
-
+else:
+    parametros = load('modelos/RCV_knn.joblib')
 ```
+
+Observamos el comportamiento de los mejores hiperparamtros encontrados 
 
 ```python
 print(parametros)
@@ -707,19 +696,14 @@ print(parametros.best_params_)
 print(parametros.best_score_)
 ```
 
+Creamos y entrenamos el modelo con los mejores imperparametros 
+
 ```python
 if not exist('modelos/knn_optimizado.joblib'):
     knn_optimizado = KNeighborsClassifier(**parametros.best_params_)
     knn_optimizado.fit(x_train, y_train)
-    dump(knn_optimizado, 'modelos/knn_optimizado.joblib')
-```
-
-```python
-y_pred = knn_optimizado.predict(hotelsdf_pruebas)
-df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': y_pred})
-
-if not exist('submissions/knn_optimizado.csv'):
-    df_submission.to_csv('submissions/knn_optimizado.csv', index=False)
+else:
+    knn_optimizado = load('modelos/knn_optimizado.joblib')
 ```
 
 ## Cross validation
@@ -727,11 +711,13 @@ if not exist('submissions/knn_optimizado.csv'):
 Verificamos la eficacia del modelo y sus hiperparametros mediante la validación cruzada
 
 ```python
+if not exist('modelos/knn_optimizado.joblib'):
 
-kfoldcv =StratifiedKFold(n_splits=k_folds) 
-resultados = cross_validate(knn_optimizado,x_train, y_train, cv=kfoldcv,scoring=metrica_fn,return_estimator=True)
-metricas_knn = resultados['test_score']
-knn_optimizado = resultados['estimator'][np.where(metricas_knn==max(metricas_knn))[0][0]]
+    kfoldcv =StratifiedKFold(n_splits=k_folds) 
+    resultados = cross_validate(knn_optimizado,x_train, y_train, cv=kfoldcv,scoring=metrica_fn,return_estimator=True)
+    metricas_knn = resultados['test_score']
+    knn_optimizado = resultados['estimator'][np.where(metricas_knn==max(metricas_knn))[0][0]]
+    dump(knn_optimizado, 'modelos/knn_optimizado.joblib')
 
 ```
 
@@ -758,6 +744,17 @@ plt.xlabel('predecido')
 plt.ylabel('verdadero')
 ```
 
+Una vez entrenado y guardado el modelo generamos una predicción para kaggle.
+
+```python
+y_pred = knn_optimizado.predict(hotelsdf_pruebas)
+df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': y_pred})
+
+if not exist('submissions/knn_optimizado.csv'):
+    df_submission.to_csv('submissions/knn_optimizado.csv', index=False)
+```
+
+Si comparamos el desempeño del modelo tanto en ejecución del analisis como en las predicciones de kaggle podemos observar que el modelo optimizado presenta una mejoria de al menos 0.05 puntos a comparación del modelo base. Por otro lado, el modelo knn no presenta una mejora global al analisis hecho con un árbol de decisión
 
 # SVM 
 
