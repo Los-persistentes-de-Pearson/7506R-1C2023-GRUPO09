@@ -16,22 +16,42 @@ from IPython.display import Image
 from matplotlib import pyplot as plt
 from dict_paises import COUNTRY_ALPHA3_TO_COUNTRY_ALPHA2, COUNTRY_ALPHA2_TO_CONTINENT
 from joblib import dump, load
+from os.path import exists
 
 from sklearn.model_selection import StratifiedKFold, KFold,RandomizedSearchCV, train_test_split, cross_validate
 from sklearn.tree import DecisionTreeClassifier, export_graphviz, export_text
 from sklearn.metrics import confusion_matrix, classification_report , f1_score, make_scorer, precision_score, recall_score, accuracy_score,f1_score
 from sklearn.preprocessing import MinMaxScaler
-from sklearn import tree 
+from sklearn import tree
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import GridSearchCV
+
+from sklearn.datasets import load_iris
+from sklearn import preprocessing
+from sklearn.model_selection import train_test_split, RandomizedSearchCV, GridSearchCV
+from sklearn.svm import SVC
+from sklearn import svm
+from sklearn.datasets import make_classification
+from sklearn.metrics import confusion_matrix, classification_report
+from sklearn.utils.fixes import loguniform
+
 
 #Si estamos  en colab tenemos que instalar la libreria "dtreeviz" aparte. 
 if IN_COLAB == True:
     !pip install 'dtreeviz'
-import dtreeviz.trees as dtreeviz
+import dtreeviz as dtreeviz
 
 #Para eliminar los warnings
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 warnings.simplefilter(action='ignore', category=UserWarning)
+
+```
+
+```python
+# Constantes
+JOBS=-2
+SEED=9
 ```
 
 ## Cargamos el dataframe de testeo
@@ -507,49 +527,214 @@ Se genera un dataset con los datos necesarios para predecir la cancelacion y cre
 ```python
 hotelsdf_modelo_x=hotelsdf_modelo.drop(['is_canceled'], axis='columns', inplace=False)
 
-
 hotelsdf_modelo_y = hotelsdf_modelo['is_canceled'].copy()
 
 x_train, x_test, y_train, y_test = train_test_split(hotelsdf_modelo_x,
                                                     hotelsdf_modelo_y, 
                                                     test_size=0.3,  #proporcion 70/30
-                                                    random_state=9) #Semilla 9, como el Equipo !!
+                                                    random_state=SEED) #Semilla 9, como el Equipo !!
 ```
 
 # KNN
 
 Entrenamos un primer modelo de KNN usando los datos previamente tratados
 
-## KNN sin busqueda de hiperparametros
+## KNN base
 
-En primera instancia entrenamos un modelo sin optimizar hiperparametros 
+En primera instancia entrenamos un modelo sin optimizar hiperparametros, de manera que, se obtiene una medida de la predicción base que tiene el modelo.
+
+Creamos el modelo y lo entrenamos:
 
 ```python
-from sklearn.neighbors import KNeighborsClassifier
+#from sklearn.neighbors import KNeighborsClassifier
 
-knn_base = KNeighborsClassifier()
-knn_base.get_params()
+#knn_base = KNeighborsClassifier()
+#knn_base.get_params()
 
-knn_base.fit(x_train, y_train)
-y_pred = knn_base.predict(x_test)
+#knn_base.fit(x_train, y_train)
+#y_pred = knn_base.predict(x_test)
+```
+
+Observamos el comportamiento del modelo base
+
+```python
+#print('correctas: ', np.sum(y_test == y_pred))
+#print('total: ', len(y_test))
+```
+
+Realizamos unas primeras medidas de como se desempeña dicho modelo mediante una matriz de confusion
+
+```python
+#accuracy_score(y_test,y_pred)
+```
+
+Observamos mediante la matriz de confusion el comportamiento del modelo base con los datos de prueba 
+
+```python
+print(classification_report(y_test,y_pred))
+
+confusion_base_knn = confusion_matrix(y_test,y_pred)
+sns.heatmap(confusion_base_knn, cmap='Blues',annot=True,fmt='g')
+plt.xlabel('Predicted')
+plt.ylabel('True')
+```
+
+Basado en el grafico, es posible observar que el modelo base ha obtenido un desempeño moderado en los datos de prueba a pesar de no haber recibido ningun tipo de optimización 
+
+Generamos la primera predicción para kaggle y almacenamos el modelo
+
+```python
+#y_pred = knn_base.predict(hotelsdf_pruebas)
+#y_pred
+#df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': y_pred})
+#df_submission.to_csv('knn_base.csv', index=False)
+#dump(knn_base, 'knn_base.joblib')
+```
+
+## Busqueda de hiperparametros
+
+### Modificar los k vecinos
+
+Realizamos una busqueda de cuales son los valores de k para los cuales el modelo tiene un mejor desempeño 
+
+```python
+metricas = []
+
+cant_vecinos = range(1, 30) 
+
+for n in cant_vecinos:
+    knn = KNeighborsClassifier(n_neighbors = n)
+    knn.fit(x_train, y_train)
+    y_pred = knn.predict(x_test)
+    metricas.append( (n, (y_test == y_pred).sum())) 
+```
+
+De la prueba anterior observamos el comportamiento que tiene 
+
+```python
+plt.figure(figsize = (8,6))
+
+df_metrics = pd.DataFrame(metricas, columns=['cant_vecinos', 'correctos'])
+
+ax = df_metrics.plot( x='cant_vecinos', 
+                      y='correctos',
+                      title='Aciertos vs Cantidad de Vecinos'
+                    )
+
+ax.set_ylabel("Cantidad de aciertos")
+ax.set_xlabel("Cantidad de Vecinos")
+plt.show()
+```
+
+Por otro lado observamos el comportamiento de la presicion 
+
+```python 
+from sklearn.model_selection import cross_val_score
+knn_metricas = []
+
+for n in cant_vecinos:
+  knn = KNeighborsClassifier(n_neighbors = n)
+  scores=cross_val_score(knn,x_train,y_train,cv=10,scoring='accuracy')
+  knn_metricas.append(scores.mean())
+```
+
+
+```python
+plt.plot(cant_vecinos, knn_metricas)
+plt.xlabel('Cantidad de Vecinos')
+plt.ylabel('Cross Validation Accuracy')
+plt.title('Accuracy vs Cantidad de Vecinos')
+plt.show()
+```
+
+### Random search cross validation
+
+```python 
+params_grid={ 'n_neighbors':range(1,15), 
+              'weights':['distance','uniform'],
+              'algorithm':['ball_tree', 'kd_tree'],
+              'metric':['euclidean','manhattan']
+             }
+
+
+knn_optimizado = KNeighborsClassifier()
+combinaciones = 10
+k_folds = 10
+metrica_fn = make_scorer(sk.metrics.f1_score)
+
+#Random Search con 10 Folds y 10 iteraciones
+parametros = RandomizedSearchCV(
+            estimator=knn_optimizado, 
+            param_distributions = params_grid, 
+            cv=k_folds, 
+            scoring=metrica_fn, 
+            n_iter=combinaciones, 
+            random_state=9)
+    
+parametros.fit(x_train, y_train)
+parametros.cv_results_['mean_test_score']
+```
+
+```python 
+print(parametros)
+print(parametros.best_params_)
+print(parametros.best_score_)
 ```
 
 ```python
-print('correctas: ', np.sum(y_test == y_pred))
-print('total: ', len(y_test))
+
+knn_optimizado = KNeighborsClassifier(**parametros.best_params_)
+knn_optimizado.fit(x_train, y_train)
 ```
 
 ```python
-accuracy_score(y_test,y_pred)
+dump(knn_optimizado, 'knn_optimizado.joblib')
 ```
 
 ```python
-y_pred = knn_base.predict(hotelsdf_pruebas)
-y_pred
+y_pred = knn_optimizado.predict(hotelsdf_pruebas)
 df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': y_pred})
-df_submission.to_csv('knn_base.csv', index=False)
-dump(knn_base, 'knn_base.joblib')
+df_submission.to_csv('knn_optimizado.csv', index=False)
 ```
+
+## Cross validation
+
+Verificamos la eficacia del modelo y sus hiperparametros mediante la validación cruzada
+
+```python
+
+kfoldcv =StratifiedKFold(n_splits=k_folds) 
+
+resultados = cross_validate(knn_optimizado,x_train, y_train, cv=kfoldcv,scoring=metrica_fn,return_estimator=True)
+
+metricsCV = resultados['test_score']
+
+knn_optimizado = resultados['estimator'][np.where(metricsCV==max(metricsCV))[0][0]]
+```
+
+Observamos la distribucion de la metrica f1 a lo largo de los entrenamientos
+
+```python
+metric_labelsCV = ['F1 Score']*len(metricsCV) 
+sns.set_context('talk')
+sns.set_style("darkgrid")
+plt.figure(figsize=(8,8))
+sns.boxplot(metricsCV)
+plt.title("Modelo entrenado con 10 folds")
+```
+
+Mostramos la matriz de confusión del modelo y observamos su desempeño global
+
+```python
+y_pred= knn_optimizado.predict(x_test)
+print(classification_report(y_test,y_pred))
+print('F1-Score: {}'.format(f1_score(y_test, y_pred, average='binary'))) 
+cm = confusion_matrix(y_test,y_pred)
+sns.heatmap(cm, cmap='Blues',annot=True,fmt='g')
+plt.xlabel('predecido')
+plt.ylabel('verdadero')
+```
+
 
 # SVM 
 
@@ -558,16 +743,828 @@ dump(knn_base, 'knn_base.joblib')
 
 
 
+### Librerias y Funciones
+
+```python
+def metricas(y_pred,y_test):
+
+  print(classification_report(y_test,y_pred))
+  
+  cm = confusion_matrix(y_test,y_pred)
+  sns.heatmap(cm, cmap='Blues',annot=True,fmt='g')
+  plt.xlabel('Predicted')
+  plt.ylabel('True')
+```
+
+Hacemos un GridSeacrh para ver cual es el mejor kernel a utilizar.
+OJO, TOMA 32 MIN aprox correrlo
+
+```python
+if exists('modelos/gridcv_svm_tres.joblib') == False:
+    parametros = { 'kernel': ["linear", "poly","rbf"]}
+
+
+    clf_tres = SVC()
+
+    scorer_fn = make_scorer(sk.metrics.f1_score)
+
+    gridcv_svm_tres = GridSearchCV(estimator=clf_tres,
+                                  param_grid= parametros,
+                                  scoring=scorer_fn,
+                                  n_jobs=JOBS #-1
+                                  ) 
+
+    #lo entreno sobre los datos
+    gridcv_svm_tres.fit(x_train, y_train)
+
+    print("Mostramos los mejores resultados: ")
+    print(gridcv_svm_tres.best_params_)
+    print()
+    print("Mostramos el mejor resultado obtenido de busqueda aleatoria: ")
+    print("f1_score: ",gridcv_svm_tres.best_score_)
+    dump(gridcv_svm_tres, 'modelos/gridcv_svm_tres.joblib')
+```
+
+```python
+gridcv_svm_tres = load('modelos/gridcv_svm_tres.joblib')
+```
+
+Obtenemos que el mejor Kernel es el linel con un f1_score de 0,75.
+
+
+A continuacion, probamos de igualmente los 3 Kernels para ver si podemos obtener alguna optimizacion.
+
+
+### Modifico Kernels para ver cual se adapta mejor
+
+
+### Lineal 
+
+```python
+#Creo un clasificador con kernel lineal y lo entreno
+clf_lineal = SVC(kernel='linear', C=5)
+clf_lineal.fit(x_train, y_train)
+
+#Hago la predicción y calculo las métricas
+y_pred_lin=clf_lineal.predict(x_test)
+metricas(y_pred_lin,y_test)
+```
+
+Con el kernel lineal, obtebemos un f1_score relativamente bueno (casi igual al obtenido con el GridSearch antes) aunq no mejor que el obtenido con el decission tree en la entrega anterior.Intentamos cambiar su parametro C para ver si conseguimos alguna leve mejora (no lo elevamos demasiado porque ya sabemos que overfittea). Este priceso fue hecho a "fuerza bruta" ya que no encontramos la manera de correr un Random/Grid search para variar solo el parametro C. Se probo con valores de C = [1, 5, 7, 10, 15, 100] y con todos se obtuvo un f1_score muy similar. Optamos por el valor de 5 ya que lo esperado es que un valor de C mas bajo nos entregue un modelo mas generalizable.
+
+
+Hago un entrenamiento con cross validation para ver que el modelo sea generalizable\
+
+**ATENCION: 8 MIN con core i5 + 16Gb RAM**
+
+```python
+folds=5
+
+kfoldcv = StratifiedKFold(n_splits=folds)
+scorer_fn = make_scorer(sk.metrics.f1_score)
+resultados = cross_validate(clf_lineal,x_train, y_train, cv=kfoldcv,scoring=scorer_fn,return_estimator=True)
+
+```
+
+```python
+metricsCV=resultados['test_score']
+svm_lineal_mejor_performance=resultados['estimator'][np.where(metricsCV==max(metricsCV))[0][0]]
+
+metricsCV
+```
+
+```python
+metric_labelsCV = ['F1 Score']*len(metricsCV) 
+sns.set_context('talk')
+sns.set_style("darkgrid")
+plt.figure(figsize=(8,8))
+sns.boxplot(metricsCV)
+plt.title("Modelo entrenado con 5 folds")
+```
+
+Se puede ver que no hay mucha variacion en los valores obtenidos por lo cual podemos concluir que es un modelo bueno para generalizar. A continuacion los resultados de probar con el dataset de testeo.
+
+```python
+y_pred= svm_lineal_mejor_performance.predict(x_test)
+print(classification_report(y_test,y_pred))
+print('F1-Score: {}'.format(f1_score(y_test, y_pred, average='binary'))) 
+cm = confusion_matrix(y_test,y_pred)
+sns.heatmap(cm, cmap='Blues',annot=True,fmt='g')
+plt.xlabel('Predicted')
+plt.ylabel('True')
+```
+
+```python
+# dump(svm_lineal_mejor_performance, 'modelos/svm_lineal_mejor_performance.joblib')
+```
+
+A continuacion deberiamos exportar el csv para submission a Kaggle. Puesto que no representaninguna mejora del score obtenido anteriormente no lo hacemos. Lo esperado es que, segun lo estudiado en clase, recien al hacer los ensambles con varios estimadores mediocres -muy buena palabra- (un KNN, un SVM y un RF) obtendremos una mejora en el f1_score.
+
+```python
+df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': y_pred})
+df_submission.to_csv('submissions/svm_lineal_mejor_performance.csv', index=False)
+
+```
+
+### Polinomico y Radial
+
+
+El codigo a continuacion para ambos kernels se encuentra comentado en muchas partes debido al gran tiempo que demora entrenar SVM's con tantos datos (no sabemos cuanto exactamente cuanto ya que nunca pudimos terminar de correrlo). Esto se debe a que al utilizar Kernels Radial y Polinomico los algoritmos crean matrices de NXN demandando mucha RAM y CPU. Dejamos los snippets de codigo como prueba de ello.
+
+
+### Polinomico
+Creamos un SVM con Kernel polynomico con parametros por default (sin parametros)
+
+```python
+#Creo un clasificador con kernel polinomico y lo entreno sobre los datos escalados min-max
+clf_poly = SVC(kernel='poly')
+clf_poly.fit(x_train, y_train)
+
+#Hago la predicción y calculo las métricas
+y_pred_pol=clf_poly.predict(x_test)
+metricas(y_pred_pol,y_test)
+
+```
+
+Con el kernel polinomico sin parametros obtenemos un f1_score bastante malo (0,6). Intentamos optimizarlo a continuacion.
+
+
+#### Intento mejorar hiperparametros (da error)
+A continuacion se deja el codigo que se intento utlizar para optimizar los hiperparametros con RandomizedSearchCV del SVM con Kernel polinomico. No se pudo obtener un resultado en tiempo razonable
+
+```python
+#vario hiperparaemtros en kernel polinomico
+clf_poly = SVC(kernel='poly')
+
+parametros = [ {'C': [0,75, 9, 1, 10, 100], 
+                'gamma': [10, 0.001, 0.0001], 
+                'kernel': ['poly']},
+ ]
+
+
+combinaciones=1 #2,3 se puso 1 para ver si tardaba menos. :(
+
+scorer_fn = make_scorer(sk.metrics.f1_score)
+
+
+Randomcv_svm = RandomizedSearchCV(estimator=clf_poly,
+                              #param_grid= parametros,
+                              param_distributions = parametros,
+                              scoring=scorer_fn,
+                              #cv=kfoldcv,
+                              n_iter=combinaciones,
+                              ) 
+
+#lo entreno sobre los datos
+Randomcv_svm.fit(x_train, y_train)
+
+#Hago la predicción y calculo las métricas
+Randomcv_svm.predict(x_test)
+metricas(Randomcv_svm,y_test)
+```
+
+Intentamos optimizarlo a mano
+
+```python
+clf_poly = SVC(kernel='poly', C=5, degree=1, gamma=1, coef0=1)
+clf_poly.fit(x_train, y_train)
+
+#Hago la predicción y calculo las métricas
+y_pred_pol=clf_poly.predict(x_test)
+metricas(y_pred_pol,y_test)
+```
+
+Obtebemos que con valores de c=5, degree = 1, gamma =1 y coef01, el f1_score es de aproximadamente 0,75, parecido al lineal
+
+
+Hacemos cross validation para ver que el modelo sea generalizable
+
+
+#### ATENCION tarda 7M 45 seg
+
+```python
+folds=5
+
+kfoldcv = StratifiedKFold(n_splits=folds)
+scorer_fn = make_scorer(sk.metrics.f1_score)
+resultados = cross_validate(clf_poly,x_train, y_train, cv=kfoldcv,scoring=scorer_fn,return_estimator=True)
+
+metricsCV=resultados['test_score']
+svm_poly_mejor_performance=resultados['estimator'][np.where(metricsCV==max(metricsCV))[0][0]]
+
+metricsCV
+
+```
+
+```python
+metric_labelsCV = ['F1 Score']*len(metricsCV) 
+sns.set_context('talk')
+sns.set_style("darkgrid")
+plt.figure(figsize=(8,8))
+sns.boxplot(metricsCV)
+plt.title("Modelo entrenado con 5 folds")
+```
+
+```python
+y_pred= svm_poly_mejor_performance.predict(x_test)
+print(classification_report(y_test,y_pred))
+print('F1-Score: {}'.format(f1_score(y_test, y_pred, average='binary'))) 
+cm = confusion_matrix(y_test,y_pred)
+sns.heatmap(cm, cmap='Blues',annot=True,fmt='g')
+plt.xlabel('Predicted')
+plt.ylabel('True')
+```
+
+Exportamos el modelo con kernel polinomico sin optimizar, que es el q pudimos terminar de correr
+
+```python
+dump(y_pred_pol, 'modelos/svm_poly_mejor_performance.joblib')
+```
+
+Obtuvims resultados bastante buenos. Al igual que con el kernel lineal no exportamos el csv ya que la predccion no fue mejor que la que ya teniamos en Kaggle
+
+
+### Kernel radial
+
+```python
+#Creo un clasificador con kernel radial y lo entreno
+clf_radial = SVC(kernel='rbf')
+clf_radial.fit(x_train, y_train)
+
+#Hago la predicción y calculo las métricas
+y_pred_rad=clf_radial.predict(x_test)
+metricas(y_pred_rad,y_test)
+```
+
+Obtenemos resultados bastante malos de f1_score (0,6)
+
+
+#### Intentamos mejorar los parametros del SVM con kernel raidal haciendo una busquedo con GridSearch.
+
+```python
+#from sklearn.utils.fixes import loguniform
+
+parametros = {'C': [1, 9, 10, 100],
+ 'gamma': [0, 10, 100],
+ 'class_weight':['balanced', None]}
+
+#vario hiperparaemtros en kernel polinomico
+clf_rbf = SVC(kernel ="rbf", cache_size=900, max_iter=100)
+#SVC(kernel='poly', C=5, degree=10, gamma=10, coef0=10)
+#clf.fit(x_train, y_train)
+combinaciones=10
+
+scorer_fn = make_scorer(sk.metrics.f1_score)
+
+#svmReg = svm.SVR(cache_size=900, max_iter=1000) # El cache es para agilizar el procesado
+# Ademas se limita a 1000 max iter dado que de otra forma el procesamiento tarda demasiado.
+
+
+gridcv_svm = GridSearchCV(estimator=clf_rbf,
+                              param_grid= parametros,
+                              #param_distributions = parametros,
+                              scoring=scorer_fn,
+                              #cv=kfoldcv,
+                              #n_iter=combinaciones
+                              ) 
+
+#lo entreno sobre los datos
+gridcv_svm.fit(x_train, y_train)
+
+print("Mostramos los mejores resultados: ")
+print(gridcv_svm.best_params_)
+print()
+print("Mostramos el mejor resultado obtenido de busqueda aleatoria: ")
+print("f1_score: ",gridcv_svm.best_score_)
+
+```
+
+Se oibtuvieron resultados de f1_score apenas mejores q en el caso anterior (0.67). No representan una mejora respecto al SVM creado por default.
+
+
+A continuacion, creamos el SVM con ""mejores"" parametros y realizamos la prediccion. Se comenta el codigo debido a que TOMA MUCHO TIEMPO ENTRENARLO(No sabemos cuanto realmente)
+
+```python
+# mejor_svm_rbf = SVC().set_params(**gridcv_svm.best_params_)
+# mejor_svm_rbf.fit(x_train, y_train)
+
+# y_pred_rad_mejorado=mejor_svm_rbf.predict(x_test)
+# metricas(y_pred_rad_mejorado,y_test)
+```
+
+##### Hacemos Cross validation con svm radial encontrado con parametrops por default. NO pudimos terminar de correrlo debido a que toma mucho tiempo
+
+
+ATENCION no sabemos cuanto toma
+
+```python
+# folds=5
+
+# kfoldcv = StratifiedKFold(n_splits=folds)
+# scorer_fn = make_scorer(sk.metrics.f1_score)
+# resultados = cross_validate(clf_radial,x_train, y_train, cv=kfoldcv,scoring=scorer_fn,return_estimator=True)
+
+# metricsCV=resultados['test_score']
+
+# svm_poly_mejor_performance=resultados['estimator'][np.where(metricsCV==max(metricsCV))[0][0]]
+
+# metricsCV
+```
+
+```python
+# metric_labelsCV = ['F1 Score']*len(metricsCV) 
+# sns.set_context('talk')
+# sns.set_style("darkgrid")
+# plt.figure(figsize=(8,8))
+# sns.boxplot(metricsCV)
+# plt.title("Modelo entrenado con 5 folds")
+```
+
+Al no poder terminar de correr cross validation no podemos afirmar que el modelo con Kernel radial es generalizable, lo descartamos para su utilizacion en el ensmable.
+
+
+## Conclusion SVM
+Con lo visto en clase, las pruebas hechas durante la realizacion del tp, lo googleado, lo Chatgetepeado Y lo BARDeado (AI de google en prueba) se concluye que al trabjar con una cantidad tan grande de datos de testeo lo mejor es utilzar un Kernel lineal(ver seccion anterior). Este sera el utilizado para el ensable en su correspondiente seccion
+
+
+A continuacion repetimos la predccion para que quede mas a mano
+
+```python
+# y_pred_lin=clf_lineal.predict(x_test)
+# metricas(y_pred_lin,y_test)
+```
+
 # Random Forest 
 
 
+Para empezar con el random forest, vamos a crear un modelo con valores totalmente aleatorios.
+Usando https://www.random.org/, con valor maximo 50 y valor minimo 1, obtuvimos:
+- 33
+- 15
+- 40
+- 36
 
+(Criterion fue dejado como entropy)
+
+```python
+#Creamos un clasificador con hiperparámetros arbitrarios
+rfc = RandomForestClassifier(max_features='auto', 
+                             n_jobs=JOBS,
+                             criterion="entropy", 
+                             random_state=SEED, 
+                             min_samples_leaf=15,
+                             min_samples_split=40,
+                             n_estimators=36 )
+#Entrenamos el modelo
+model = rfc.fit(X = x_train, y = y_train)
+```
+
+```python
+#Nos guardamos este modelo para poder cargarlo en todas las corridas posteriores
+#dump(model, 'modelos/randomForest.joblib')
+model = load('modelos/randomForest.joblib')
+```
+
+```python
+#Realizamos una predicción sobre el set de test
+y_pred = model.predict(x_test)
+#Valores Predichos
+y_pred
+```
+
+La matriz de confusion es la siguiente:
+
+```python
+#Creamos la matriz de confusión
+tabla=confusion_matrix(y_test, y_pred)
+
+#Grafico la matriz de confusión
+sns.heatmap(tabla,cmap='GnBu',annot=True,fmt='g')
+plt.xlabel('Predicted')
+plt.ylabel('True')
+```
+
+Vemos que obtuvimos una alta cantidad de falsos positivos
+
+
+Sin ningun tipo de optimizacion obtuvimos los siguientes scores 
+
+```python
+accuracy=accuracy_score(y_test,y_pred)
+recall=recall_score(y_test,y_pred)
+f1=f1_score(y_test,y_pred)
+
+print("Accuracy: "+str(accuracy))
+print("Recall: "+str(recall))
+print("f1 score: "+str(f1))
+```
+
+Ademas, segun este modelo; las 10 columnas mas relevantes son:
+
+```python
+p = sorted(list(zip(hotelsdf_modelo_x.columns.to_list(), model.feature_importances_)), key=lambda x: -x[1])
+for i in range(10):
+    print(p[i])
+```
+
+Vamos a hacer un submission de nuestro random forest aleatorio:
+
+```python
+y_pred = model.predict(hotelsdf_pruebas)
+```
+
+```python
+df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': y_pred})
+df_submission.head()
+```
+
+```python
+df_submission.to_csv('submissions/random_forest_random.csv', index=False)
+```
+
+Este modelo tuvo el siguiente resultado en Kaggle
+![randoForestCVMM](informe/images/random_forest_random.png)
+
+
+## Cross validation
+
+
+Ahora vamos a buscar mejorar esos resultados; optimizando los hiperparametros usando validacion cruzada
+
+```python
+if exists('modelos/randomForestCV.joblib') == False:
+    rf_cv = RandomForestClassifier(oob_score=False, random_state=9, n_jobs=JOBS)
+    #rf_cv = RandomForestClassifier(max_features='sqrt', oob_score=True, random_state=1, n_jobs=-1)
+    param_grid = { "criterion" : ["gini", "entropy"], 
+                   "min_samples_leaf" : [1, 5, 10, 15, 20], #Vamos a hacer muchas combinaciones ya que solo vamos
+                   "min_samples_split" : [2, 8, 16, 32, 64],#a correr este modelo 1 sola vez; ya que lo vamos a 
+                   "n_estimators": [10, 20, 30, 40, 50, 60, 70] } #guardar   
+
+    #Probamos entrenando sólo con 1 métrica
+    gs = GridSearchCV(estimator=rf_cv, param_grid=param_grid, scoring="f1", cv=5, n_jobs=JOBS) #Optimizamos f1_score
+    gs_fit = gs.fit(X = x_train, y = y_train)
+    dump(gs_fit, 'modelos/randomForestCV.joblib')
+```
+
+```python
+gs_fit = load('modelos/randomForestCV.joblib')
+```
+
+```python
+gs_fit.best_params_
+```
+
+```python
+#Obtenemos el mejor modelo
+rf_cv_best=gs_fit.best_estimator_
+
+#Predicción
+y_pred_rf_cv_best = rf_cv_best.predict(x_test)
+y_pred_rf_cv_best
+```
+
+Con esta validacion, obtenemos la siguiente matriz de confusion
+
+```python
+#Creo matriz de confusión
+tabla=confusion_matrix(y_test,y_pred_rf_cv_best)
+
+#Grafico matriz de confusión
+sns.heatmap(tabla, cmap='Blues',annot=True,fmt='g')
+plt.xlabel('Predicted')
+plt.ylabel('True')
+
+#Reporte
+print(classification_report(y_test,y_pred_rf_cv_best))
+```
+
+A priori, se ven menos falsos positivos
+
+```python
+#Evaluo la performance en el conjunto de evaluación
+accuracyCV=accuracy_score(y_test,y_pred_rf_cv_best)
+recallCV=recall_score(y_test,y_pred_rf_cv_best)
+f1CV=f1_score(y_test,y_pred_rf_cv_best)
+
+print("Accuracy: "+str(accuracyCV))
+print("Recall: "+str(recallCV))
+print("f1 score: "+str(f1CV))
+```
+
+Con este nuevo modelo, obtuvimos las siguientes mejoras:
+
+```python
+print(str("Accuracy = ") + str(accuracyCV - accuracy)[3:4] + "%")
+print(str("Recall = ") + str(recallCV - recall)[3:4] + "%")
+print(str("f1 score = ") + str(f1CV - f1)[3:4] + "%")
+```
+
+Vemos que optimizando por el f1 score, obtuvimos una mejora del 2% nada mas; pero una mejora del 4% en recall
+
+
+Vamos a realizar una submission de este modelo
+
+```python
+y_pred_model_rfcv = rf_cv_best.predict(hotelsdf_pruebas)
+```
+
+```python
+df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': y_pred_model_rfcv})
+df_submission.head()
+```
+
+```python
+df_submission.to_csv('submissions/random_forestCV.csv', index=False)
+```
+
+Este modelo tuvo el siguiente resultado en Kaggle
+![randoForestCVMM](informe/images/randomForestCV.png)
+
+
+## Cross validation multiples metricas
+
+
+Ahora vamos a realizar un random forest pero tratando de optimizar distintas metricas a la vez. \
+Luego vamos a elegir la que optimice mejor todas las metricas
+
+```python
+#Metricas que vamos a analizar:
+metricas=['accuracy','f1','roc_auc' ,'recall', 'precision'] 
+
+if exists('modelos/randomForestCVMM.joblib') == False:
+    rf_cv = RandomForestClassifier(oob_score=False, random_state=1, n_jobs=JOBS)
+
+    param_grid = { "criterion" : ["gini", "entropy"], 
+                    "min_samples_leaf" : [1, 5, 10, 15, 20], #Vamos a hacer muchas combinaciones ya que solo vamos
+                    "min_samples_split" : [2, 8, 16, 32, 64],#a correr este modelo 1 sola vez; ya que lo vamos a 
+                    "n_estimators": [10, 20, 30, 40, 50, 60, 70] } #guardar   
+
+
+    gs_multimetrica = GridSearchCV(estimator=rf_cv, 
+                                   param_grid=param_grid, 
+                                   scoring=metricas, 
+                                   refit=False, 
+                                   cv=5, 
+                                   n_jobs=JOBS)
+    #Entrenamiento
+    gs_multimetrica_fit = gs_multimetrica.fit(X = x_train, y = y_train)
+    dump(gs_multimetrica_fit, 'modelos/randomForestCVMM.joblib')
+
+```
+
+```python
+gs_multimetrica_fit = load('modelos/randomForestCVMM.joblib')
+```
+
+Vamos a graficar todos los resultados de las metricas que medimos
+
+```python
+labels=[ key for key in gs_multimetrica_fit.cv_results_.keys() if("mean_test" in key)]
+
+for k in labels:
+    plt.plot(gs_multimetrica_fit.cv_results_[k],linestyle='--' , linewidth=0.8,marker='o',markersize=2)     
+    x_linea=np.argmax(gs_multimetrica_fit.cv_results_[k])
+    plt.axvline(x_linea,linestyle='--' ,linewidth=0.8,color='grey')
+        
+plt.xlabel("modelo", fontsize=10)
+plt.ylabel("métrica", fontsize=10)
+plt.legend(labels)
+plt.show()
+```
+
+Del grafico se observa que hay un modelo que parece optimizar todas las metricas. A ojo parece ser el ~180\
+Vamos a corroborarlo:
+
+```python
+for metrica in metricas:
+    params_analizar=gs_multimetrica_fit.cv_results_['params'][np.argmax(gs_multimetrica_fit.cv_results_['mean_test_' + metrica])]
+    print(
+"Metrica " + metrica + ": " + str(params_analizar))
+```
+
+Vemos que son todos muy similares pero con cierta variazon. Vamos a elegir a f1 score para tener cierto tipo de balance
+
+```python
+params_elegidos=gs_multimetrica_fit.cv_results_['params'][np.argmax(gs_multimetrica_fit.cv_results_['mean_test_f1'])]
+
+#Creamos un clasificador RF
+rfc_multimetrica = RandomForestClassifier(criterion= params_elegidos['criterion'], 
+                                          min_samples_leaf= params_elegidos['min_samples_leaf'], 
+                                          min_samples_split= params_elegidos['min_samples_split'], 
+                                          n_estimators=params_elegidos['n_estimators'], 
+                                          oob_score=True, random_state=2, n_jobs=JOBS)
+#Entrenamos un modelo
+model_rfc_multimetrica = rfc_multimetrica.fit(X = x_train, y = y_train)
+
+#Hacemos una predicción con el dataset de train
+y_pred_model_rfc_multimetrica = model_rfc_multimetrica.predict(x_test)
+```
+
+Vamos a visualizar uno de los estimadores de este random forest resultante:
+
+```python
+plt.figure(figsize=(12,12))
+
+tree_plot=tree.plot_tree(rfc_multimetrica.estimators_[56],
+                         max_depth=2,
+                         feature_names=hotelsdf_modelo_x.columns.to_list(),
+                         filled=True,
+                         rounded=True,
+                         class_names=True)
+
+plt.show(tree_plot)
+```
+
+Vision completa:
+
+```python
+#plt.figure(figsize=(100,100))
+
+#tree_plot_completo=tree.plot_tree(rfc_multimetrica.estimators_[56],
+#                                 feature_names=hotelsdf_modelo_x.columns.to_list(),
+#                                 filled=True,
+#                                 rounded=True,)
+#                                 #class_names=['Not Survived','Survived']) #model.classes_
+#plt.show(tree_plot_completo)
+```
+
+Calculamos la matriz de confusion
+
+```python
+#Matriz de Confusión
+cm = confusion_matrix(y_test,y_pred_model_rfc_multimetrica)
+sns.heatmap(cm, cmap='Blues',annot=True,fmt='g')
+plt.xlabel('Predicted')
+plt.ylabel('True')
+
+#Reporte
+print(classification_report(y_test,y_pred_model_rfc_multimetrica))
+
+```
+
+A pesar de todas nuestra busqueda, no se observan cambios significativos
+
+```python
+#Evaluo la performance en el conjunto de evaluación
+accuracyCVMM=accuracy_score(y_test,y_pred_model_rfc_multimetrica)
+recallCVMM=recall_score(y_test,y_pred_model_rfc_multimetrica)
+f1CVMM=f1_score(y_test,y_pred_model_rfc_multimetrica)
+
+print("Accuracy: "+str(accuracyCVMM))
+print("Recall: "+str(recallCVMM))
+print("f1 score: "+str(f1CVMM))
+```
+
+Sorprendentemente, no tuvimos mejoras significativas comparado con el modelo que no consideraba todas las metricas
+
+```python
+print(str("Accuracy = ") + str(accuracyCVMM - accuracyCV)[3:4] + "%")
+print(str("Recall = ") + str(recallCVMM - recallCV)[3:4] + "%")
+print(str("f1 score = ") + str(f1CVMM - f1CV)[3:4] + "%")
+```
+
+Realizamos la prediccion sobre el dataset de testeo
+
+```python
+y_pred_model_rfc_multimetrica = model_rfc_multimetrica.predict(hotelsdf_pruebas)
+```
+
+```python
+df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': y_pred_model_rfc_multimetrica})
+df_submission.head()
+```
+
+```python
+df_submission.to_csv('submissions/random_forestCVMM.csv', index=False)
+```
+
+Este modelo tuvo el siguiente resultado en Kaggle
+![randoForestCVMM](informe/images/randomForestCVMM.png)
+
+
+Vemos que a pesar de todas nuestras mejoras, solo obtuvimos una mejora del 0.2%
 
 
 # XGBoost 
 
+## Modelo base
+
+Generamos un modelo XGBoost base, con los hiperparametros por defecto, de manera que se pueda realizar una comparacion posterior a entrenar un modelo con sus hiperparametros optimmizados
+
+```python
+import xgboost as xgb
+
+xgb_base = xgb.XGBClassifier(random_state=9, n_estimators=100)
+xgb_base.fit(x_train, y_train)
+```
+
+Vemos el comportamiento del modelo base y mostramos las metricas obtenidas en el procesp
+
+```python
+y_pred=xgb_base.predict(x_test)
+
+print(classification_report(y_test,y_pred))
+print('F1-Score: {}'.format(f1_score(y_test, y_pred, average='binary'))) 
+cm = confusion_matrix(y_test,y_pred)
+sns.heatmap(cm, cmap='Blues',annot=True,fmt='g')
+plt.xlabel('Predecido')
+plt.ylabel('Verdadero')
+```
+
+Realizamos una prediccion en kaggle y almacenamos el modelo generado en una primera instancia 
+
+```python
+y_pred = xgb_base.predict(hotelsdf_pruebas)
+y_pred
+df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': y_pred})
+df_submission.to_csv('xgb_base.csv', index=False)
+dump(xgb_base, 'xgb_base.joblib')
+```
+
+## Busqueda de hiperparametros
+
+Realizamos una busqueda para encontrar los mejores hiperparametros del XGBoost y a su vez optimizar el modelo
+
+```python 
+estimadores = [90, 100]
+profundidad_max = [7, 8, 9, 10]
+subsample = [0.5, 0.7, 0.8, 0.9]
+
+params = {
+    #'learning_rate': [0.035, 0.034],
+    'max_depth': profundidad_max,
+    'n_estimators': estimadores,
+    #'subsample': [0.5, 0.7, 0.8, 0.9],
+    #'colsample_bytree': [0.5, 0.7, 0.8, 0.9]
+}
 
 
+xgb_entrenamiento = xgb.XGBClassifier()
+combinaciones = 10
+k_folds = 10
+metrica_fn = make_scorer(sk.metrics.f1_score)
+
+#Random Search con 10 Folds y 10 iteraciones
+parametros = RandomizedSearchCV(
+            estimator=xgb_entrenamiento, 
+            param_distributions = params, 
+            cv=k_folds, 
+            scoring=metrica_fn, 
+            n_iter=combinaciones, 
+            random_state=9)
+    
+parametros.fit(x_train, y_train)
+parametros.cv_results_['mean_test_score']
+```
+
+```python
+print("Mostramos los mejores resultados: ")
+print(parametros.best_params_)
+print()
+print("Mostramos el mejor resultado obtenido de busqueda aleatoria: ")
+print("f1_score = ",parametros.best_score_)
+```
+
+```python
+xgb_optimizado = xgb.XGBClassifier(**parametros.best_params_)
+```
+
+```python
+kfoldcv =StratifiedKFold(n_splits=k_folds) 
+
+resultados = cross_validate(xgb_optimizado,x_train, y_train, cv=kfoldcv,scoring=metrica_fn,return_estimator=True)
+
+metricsCV = resultados['test_score']
+
+xgb_optimizado = resultados['estimator'][np.where(metricsCV==max(metricsCV))[0][0]]
+```
+
+```python
+metric_labelsCV = ['F1 Score']*len(metricsCV) 
+sns.set_context('talk')
+sns.set_style("darkgrid")
+plt.figure()
+sns.boxplot(metricsCV)
+plt.title("Modelo entrenado con 10 folds")
+```
+
+```python
+y_pred= xgb_optimizado.predict(x_test)
+print(classification_report(y_test,y_pred))
+print('F1-Score: {}'.format(f1_score(y_test, y_pred, average='binary'))) 
+cm = confusion_matrix(y_test,y_pred)
+sns.heatmap(cm, cmap='Blues',annot=True,fmt='g')
+plt.xlabel('predecido')
+plt.ylabel('verdadero')
+```
+
+```python
+y_pred = xgb_optimizado.predict(hotelsdf_pruebas)
+y_pred
+df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': y_pred})
+df_submission.to_csv('xgb_optimizado.csv', index=False)
+dump(xgb_optimizado, 'xgb_optimizado.joblib')
+```
 
 # Modelo Voting
 
