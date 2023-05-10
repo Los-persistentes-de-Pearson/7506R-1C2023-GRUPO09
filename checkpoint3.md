@@ -34,6 +34,8 @@ from sklearn import svm
 from sklearn.datasets import make_classification
 from sklearn.metrics import confusion_matrix, classification_report
 from sklearn.utils.fixes import loguniform
+from sklearn.neighbors import KNeighborsClassifier
+
 
 
 #Si estamos  en colab tenemos que instalar la libreria "dtreeviz" aparte. 
@@ -546,26 +548,35 @@ En primera instancia entrenamos un modelo sin optimizar hiperparametros, de mane
 Creamos el modelo y lo entrenamos:
 
 ```python
-#from sklearn.neighbors import KNeighborsClassifier
+if exists('modelos/knn_base.joblib') == False:
+    knn_base = KNeighborsClassifier()
+    knn_base.get_params()
 
-#knn_base = KNeighborsClassifier()
-#knn_base.get_params()
+    knn_base.fit(x_train, y_train)
+    dump(knn_base, 'modelos/knn_base.joblib')
 
-#knn_base.fit(x_train, y_train)
-#y_pred = knn_base.predict(x_test)
+
+```
+
+```python
+knn_base = load('modelos/knn_base.joblib')
+```
+
+```python
+y_pred = knn_base.predict(x_test)
 ```
 
 Observamos el comportamiento del modelo base
 
 ```python
-#print('correctas: ', np.sum(y_test == y_pred))
-#print('total: ', len(y_test))
+print('correctas: ', np.sum(y_test == y_pred))
+print('total: ', len(y_test))
 ```
 
 Realizamos unas primeras medidas de como se desempeña dicho modelo mediante una matriz de confusion
 
 ```python
-#accuracy_score(y_test,y_pred)
+accuracy_score(y_test,y_pred)
 ```
 
 Observamos mediante la matriz de confusion el comportamiento del modelo base con los datos de prueba 
@@ -584,11 +595,10 @@ Basado en el grafico, es posible observar que el modelo base ha obtenido un dese
 Generamos la primera predicción para kaggle y almacenamos el modelo
 
 ```python
-#y_pred = knn_base.predict(hotelsdf_pruebas)
-#y_pred
-#df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': y_pred})
-#df_submission.to_csv('knn_base.csv', index=False)
-#dump(knn_base, 'knn_base.joblib')
+y_pred = knn_base.predict(hotelsdf_pruebas)
+y_pred
+df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': y_pred})
+df_submission.to_csv('submissions/knn_base.csv', index=False)
 ```
 
 ## Busqueda de hiperparametros
@@ -598,15 +608,21 @@ Generamos la primera predicción para kaggle y almacenamos el modelo
 Realizamos una busqueda de cuales son los valores de k para los cuales el modelo tiene un mejor desempeño 
 
 ```python
-metricas = []
+if exists('modelos/metricas.joblib') == False:
 
-cant_vecinos = range(1, 30) 
+    metricas = []
 
-for n in cant_vecinos:
-    knn = KNeighborsClassifier(n_neighbors = n)
-    knn.fit(x_train, y_train)
-    y_pred = knn.predict(x_test)
-    metricas.append( (n, (y_test == y_pred).sum())) 
+    cant_vecinos = range(1, 30) 
+
+    for n in cant_vecinos:
+        knn = KNeighborsClassifier(n_neighbors = n, n_jobs=JOBS)
+        knn.fit(x_train, y_train)
+        y_pred = knn.predict(x_test)
+        metricas.append( (n, (y_test == y_pred).sum())) 
+```
+
+```python
+metricas = load('modelos/metricas.joblib')
 ```
 
 De la prueba anterior observamos el comportamiento que tiene 
@@ -628,7 +644,7 @@ plt.show()
 
 Por otro lado observamos el comportamiento de la presicion 
 
-```python 
+```python
 from sklearn.model_selection import cross_val_score
 knn_metricas = []
 
@@ -649,7 +665,7 @@ plt.show()
 
 ### Random search cross validation
 
-```python 
+```python
 params_grid={ 'n_neighbors':range(1,15), 
               'weights':['distance','uniform'],
               'algorithm':['ball_tree', 'kd_tree'],
@@ -675,7 +691,7 @@ parametros.fit(x_train, y_train)
 parametros.cv_results_['mean_test_score']
 ```
 
-```python 
+```python
 print(parametros)
 print(parametros.best_params_)
 print(parametros.best_score_)
@@ -1183,7 +1199,7 @@ df_submission.to_csv('submissions/random_forest_random.csv', index=False)
 ```
 
 Este modelo tuvo el siguiente resultado en Kaggle
-![randoForestCVMM](informe/images/random_forest_random.png)
+![randoForest](informe/images/randomForest_random.png)
 
 
 ## Cross validation
@@ -1309,7 +1325,6 @@ if exists('modelos/randomForestCVMM.joblib') == False:
     #Entrenamiento
     gs_multimetrica_fit = gs_multimetrica.fit(X = x_train, y = y_train)
     dump(gs_multimetrica_fit, 'modelos/randomForestCVMM.joblib')
-
 ```
 
 ```python
@@ -1485,7 +1500,7 @@ dump(xgb_base, 'xgb_base.joblib')
 
 Realizamos una busqueda para encontrar los mejores hiperparametros del XGBoost y a su vez optimizar el modelo
 
-```python 
+```python
 estimadores = [90, 100]
 profundidad_max = [7, 8, 9, 10]
 subsample = [0.5, 0.7, 0.8, 0.9]
@@ -1569,14 +1584,7 @@ dump(xgb_optimizado, 'xgb_optimizado.joblib')
 # Modelo Voting
 
 
-
-
-
 # Modelo Stacking 
-
-
-
-
 
 
 # Conclusiones 
