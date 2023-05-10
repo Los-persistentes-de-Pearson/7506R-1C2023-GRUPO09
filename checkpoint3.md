@@ -548,7 +548,7 @@ En primera instancia entrenamos un modelo sin optimizar hiperparametros, de mane
 Creamos el modelo y lo entrenamos:
 
 ```python
-if exists('modelos/knn_base.joblib') == False:
+if not exists('modelos/knn_base.joblib'):
     knn_base = KNeighborsClassifier()
     knn_base.get_params()
 
@@ -608,11 +608,10 @@ df_submission.to_csv('submissions/knn_base.csv', index=False)
 Realizamos una busqueda de cuales son los valores de k para los cuales el modelo tiene un mejor desempeño 
 
 ```python
-if exists('modelos/metricas.joblib') == False:
-
     metricas = []
-
     cant_vecinos = range(1, 30) 
+
+if not exists('modelos/metricas.joblib'):
 
     for n in cant_vecinos:
         knn = KNeighborsClassifier(n_neighbors = n, n_jobs=JOBS)
@@ -648,12 +647,17 @@ Por otro lado observamos el comportamiento de la presicion
 from sklearn.model_selection import cross_val_score
 knn_metricas = []
 
-for n in cant_vecinos:
-  knn = KNeighborsClassifier(n_neighbors = n)
-  scores=cross_val_score(knn,x_train,y_train,cv=10,scoring='accuracy')
-  knn_metricas.append(scores.mean())
+if not exists('modelos/knn_metricas.joblib'):
+    for n in cant_vecinos:
+      knn = KNeighborsClassifier(n_neighbors = n)
+      scores=cross_val_score(knn,x_train,y_train,cv=10,scoring='accuracy')
+      knn_metricas.append(scores.mean())
+
 ```
 
+```python
+dump(knn_metricas, 'modelos/knn_metricas.joblib')
+```
 
 ```python
 plt.plot(cant_vecinos, knn_metricas)
@@ -666,29 +670,35 @@ plt.show()
 ### Random search cross validation
 
 ```python
-params_grid={ 'n_neighbors':range(1,15), 
-              'weights':['distance','uniform'],
-              'algorithm':['ball_tree', 'kd_tree'],
-              'metric':['euclidean','manhattan']
-             }
+
+if not exist('modelos/RCV_knn.joblib'):
+
+    params_grid={ 'n_neighbors':range(1,15), 
+                  'weights':['distance','uniform'],
+                  'algorithm':['ball_tree', 'kd_tree'],
+                  'metric':['euclidean','manhattan']
+                 }
 
 
-knn_optimizado = KNeighborsClassifier()
-combinaciones = 10
-k_folds = 10
-metrica_fn = make_scorer(sk.metrics.f1_score)
+    knn_optimizado = KNeighborsClassifier()
+    combinaciones = 10
+    k_folds = 10
+    metrica_fn = make_scorer(sk.metrics.f1_score)
 
-#Random Search con 10 Folds y 10 iteraciones
-parametros = RandomizedSearchCV(
-            estimator=knn_optimizado, 
-            param_distributions = params_grid, 
-            cv=k_folds, 
-            scoring=metrica_fn, 
-            n_iter=combinaciones, 
-            random_state=9)
-    
-parametros.fit(x_train, y_train)
-parametros.cv_results_['mean_test_score']
+    #Random Search con 10 Folds y 10 iteraciones
+    parametros = RandomizedSearchCV(
+                estimator=knn_optimizado, 
+                param_distributions = params_grid, 
+                cv=k_folds, 
+                scoring=metrica_fn, 
+                n_iter=combinaciones, 
+                random_state=9)
+
+    parametros.fit(x_train, y_train)
+    parametros.cv_results_['mean_test_score']
+
+    dump(parametros, 'modelos/RCV_knn.joblib')
+
 ```
 
 ```python
@@ -698,19 +708,18 @@ print(parametros.best_score_)
 ```
 
 ```python
-
-knn_optimizado = KNeighborsClassifier(**parametros.best_params_)
-knn_optimizado.fit(x_train, y_train)
-```
-
-```python
-dump(knn_optimizado, 'knn_optimizado.joblib')
+if not exist('modelos/knn_optimizado.joblib'):
+    knn_optimizado = KNeighborsClassifier(**parametros.best_params_)
+    knn_optimizado.fit(x_train, y_train)
+    dump(knn_optimizado, 'modelos/knn_optimizado.joblib')
 ```
 
 ```python
 y_pred = knn_optimizado.predict(hotelsdf_pruebas)
 df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': y_pred})
-df_submission.to_csv('knn_optimizado.csv', index=False)
+
+if not exist('submissions/knn_optimizado.csv'):
+    df_submission.to_csv('submissions/knn_optimizado.csv', index=False)
 ```
 
 ## Cross validation
@@ -720,22 +729,20 @@ Verificamos la eficacia del modelo y sus hiperparametros mediante la validación
 ```python
 
 kfoldcv =StratifiedKFold(n_splits=k_folds) 
-
 resultados = cross_validate(knn_optimizado,x_train, y_train, cv=kfoldcv,scoring=metrica_fn,return_estimator=True)
+metricas_knn = resultados['test_score']
+knn_optimizado = resultados['estimator'][np.where(metricas_knn==max(metricas_knn))[0][0]]
 
-metricsCV = resultados['test_score']
-
-knn_optimizado = resultados['estimator'][np.where(metricsCV==max(metricsCV))[0][0]]
 ```
 
 Observamos la distribucion de la metrica f1 a lo largo de los entrenamientos
 
 ```python
-metric_labelsCV = ['F1 Score']*len(metricsCV) 
+metric_labelsCV = ['F1 Score']*len(metricas_knn) 
 sns.set_context('talk')
 sns.set_style("darkgrid")
 plt.figure(figsize=(8,8))
-sns.boxplot(metricsCV)
+sns.boxplot(metricas_knn)
 plt.title("Modelo entrenado con 10 folds")
 ```
 
