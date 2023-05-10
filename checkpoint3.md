@@ -599,7 +599,6 @@ y_pred = knn_base.predict(hotelsdf_pruebas)
 y_pred
 df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': y_pred})
 df_submission.to_csv('submissions/knn_base.csv', index=False)
-
 ```
 
 ## Busqueda de hiperparametros
@@ -624,10 +623,6 @@ if exists('modelos/metricas.joblib') == False:
 
 ```python
 metricas = load('modelos/metricas.joblib')
-```
-
-```python
-metricas
 ```
 
 De la prueba anterior observamos el comportamiento que tiene 
@@ -1330,7 +1325,6 @@ if exists('modelos/randomForestCVMM.joblib') == False:
     #Entrenamiento
     gs_multimetrica_fit = gs_multimetrica.fit(X = x_train, y = y_train)
     dump(gs_multimetrica_fit, 'modelos/randomForestCVMM.joblib')
-
 ```
 
 ```python
@@ -1590,14 +1584,7 @@ dump(xgb_optimizado, 'xgb_optimizado.joblib')
 # Modelo Voting
 
 
-
-
-
 # Modelo Stacking 
-
-
-
-
 
 
 # Conclusiones 
