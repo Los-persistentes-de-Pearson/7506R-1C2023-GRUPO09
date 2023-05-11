@@ -659,32 +659,28 @@ Podemos concluir de las graficas anteriores que el modelo tiende a empeorar a me
 Buscamos la mejor combinación de hiperparametros con la intención de mejorar las metricas del modelo y a su vez mejorar la performance del mismo
 
 ```python
+combinaciones = 10
+k_folds = 10
+metrica_fn = make_scorer(sk.metrics.f1_score)
+
 if not exists('modelos/RCV_knn.joblib'):
 
-    params_grid={ 'n_neighbors':range(1,15), 
-                  'weights':['distance','uniform'],
-                  'algorithm':['ball_tree', 'kd_tree'],
-                  'metric':['euclidean','manhattan']
-                 }
+  params_grid={ 'n_neighbors':range(1,15), 
+                'weights':['distance','uniform'],
+                'algorithm':['ball_tree', 'kd_tree'],
+                'metric':['euclidean','manhattan']}
 
-
-    knn_optimizado = KNeighborsClassifier()
-    combinaciones = 10
-    k_folds = 10
-    metrica_fn = make_scorer(sk.metrics.f1_score)
-
-    parametros = RandomizedSearchCV(
-                estimator=knn_optimizado, 
-                param_distributions = params_grid, 
-                cv=k_folds, 
-                scoring=metrica_fn, 
-                n_iter=combinaciones, 
-                random_state=9)
-
-    parametros.fit(x_train, y_train)
-    parametros.cv_results_['mean_test_score']
-
-    dump(parametros, 'modelos/RCV_knn.joblib')
+  knn_optimizado = KNeighborsClassifier()
+  parametros = RandomizedSearchCV(
+              estimator=knn_optimizado, 
+              param_distributions = params_grid, 
+              cv=k_folds, 
+              scoring=metrica_fn, 
+              n_iter=combinaciones, 
+              random_state=9)
+  parametros.fit(x_train, y_train)
+  parametros.cv_results_['mean_test_score']
+  dump(parametros, 'modelos/RCV_knn.joblib')
 else:
     parametros = load('modelos/RCV_knn.joblib')
 ```
@@ -701,8 +697,9 @@ Creamos y entrenamos el modelo con los mejores imperparametros
 
 ```python
 if not exists('modelos/knn_optimizado.joblib'):
-    knn_optimizado = KNeighborsClassifier(**parametros.best_params_)
-    knn_optimizado.fit(x_train, y_train)
+  knn_optimizado = KNeighborsClassifier(**parametros.best_params_)
+  knn_optimizado.fit(x_train, y_train)
+  dump('modelos/knn_optimizado.joblib')
 else:
     knn_optimizado = load('modelos/knn_optimizado.joblib')
 ```
@@ -714,12 +711,14 @@ Verificamos la eficacia del modelo y sus hiperparametros mediante la validación
 ```python
 if not exists('modelos/knn_optimizado.joblib'):
 
-    kfoldcv =StratifiedKFold(n_splits=k_folds) 
-    resultados = cross_validate(knn_optimizado,x_train, y_train, cv=kfoldcv,scoring=metrica_fn,return_estimator=True)
-    metricas_knn = resultados['test_score']
-    knn_optimizado = resultados['estimator'][np.where(metricas_knn==max(metricas_knn))[0][0]]
-    dump(knn_optimizado, 'modelos/knn_optimizado.joblib')
+  kfoldcv =StratifiedKFold(n_splits=k_folds) 
+  resultados_knn = cross_validate(knn_optimizado,x_train, y_train, cv=kfoldcv,scoring=metrica_fn,return_estimator=True)
+  dump(resultados_knn, 'modelos/resultados_knn.joblib')
+else:
+  resultados_knn = load('modelos/resultados_knn.joblib')
 
+metricas_knn = resultados_knn['test_score']
+knn_optimizado = resultados_knn['estimator'][np.where(metricas_knn==max(metricas_knn))[0][0]]
 ```
 
 Observamos la distribucion de la metrica f1 a lo largo de los entrenamientos
@@ -1613,6 +1612,8 @@ if not exists('modelos/RCV_xgb.joblib'):
     parametros.fit(x_train, y_train)
     parametros.cv_results_['mean_test_score']
 
+    dump(parametros, 'modelos/RCV_xgb.joblib')
+
 else:
     parametros = load('modelos/RCV_xgb.joblib')
 ```
@@ -1642,23 +1643,24 @@ Realizamos la validación cruzada del modelo para verificar que no caiga en over
 ```python
 if not exists('modelos/xgb_optimizado.joblib'):
     kfoldcv =StratifiedKFold(n_splits=k_folds) 
-    resultados = cross_validate(xgb_optimizado,x_train, y_train, cv=kfoldcv,scoring=metrica_fn,return_estimator=True)
-    metricsCV = resultados['test_score']
-    xgb_optimizado = resultados['estimator'][np.where(metricsCV==max(metricsCV))[0][0]]
-    dump(xgb_optimizado, 'xgb_optimizado.joblib')
+    resultados_xgb = cross_validate(xgb_optimizado,x_train, y_train, cv=kfoldcv,scoring=metrica_fn,return_estimator=True)
+    dump(resultados_xgb, 'modelos/resultados_xgb')
+    xgb_optimizado = resultados_xgb['estimator'][np.where(metricas_xgb==max(metricas_xgb))[0][0]]
+    dump(xgb_optimizado, 'modelos/xgb_optimizado.joblib')
 
 else:
-    xgb_optimizado = load('modelos/xgb_optimizado.joblib')
+    resultados = load('modelos/resultados_xgb')
+metricas_xgb = resultados_xgb['test_score']
 ```
 
 Observamos el comportamiento del modelo a lo largo de la validacón cruzada 
 
 ```python
-metric_labelsCV = ['F1 Score']*len(metricsCV) 
+metric_labelsCV = ['F1 Score']*len(metricas_xgb) 
 sns.set_context('talk')
 sns.set_style("darkgrid")
 plt.figure()
-sns.boxplot(metricsCV)
+sns.boxplot(metricas_xgb)
 plt.title("Modelo entrenado con 10 folds")
 ```
 
