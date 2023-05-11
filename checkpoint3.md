@@ -897,9 +897,6 @@ svm_lineal_mejor_performance = load('modelos/svm_lineal_mejor_performance.joblib
 
 ```python
 y_pred= svm_lineal_mejor_performance.predict(x_test)
-print(ADVERTENCIA) 
-print("esto tarda, meter en un if si puede ser")
-print(ADVERTENCIA)
 print(classification_report(y_test,y_pred))
 print('F1-Score: {}'.format(f1_score(y_test, y_pred, average='binary'))) 
 cm = confusion_matrix(y_test,y_pred)
@@ -914,9 +911,10 @@ Se puede ver que si bien los resultados no son excelentes, son relativamente bue
 A continuacion deberiamos exportar el csv para submission a Kaggle. Puesto que no representaninguna mejora del score obtenido anteriormente no lo hacemos
 
 ```python
-# df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': y_pred})
-# df_submission.to_csv('submissions/svm_lineal_mejor_performance.csv', index=False)
-
+if not exists('submissions/svm_lineal_mejor_performance.csv'):
+    y_pred = svm_lineal_mejor_performance.predict(hotelsdf_pruebas)
+    df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': y_pred})
+    df_submission.to_csv('submissions/svm_lineal_mejor_performance.csv', index=False)
 ```
 
 ### Polinomico y Radial
