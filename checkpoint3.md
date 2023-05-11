@@ -1700,7 +1700,7 @@ y_pred = xgb_optimizado.predict(hotelsdf_pruebas)
 y_pred
 if not exists('submissions/xgb_optimizado.joblib'):
     df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': y_pred})
-    df_submission.to_csv('xgb_optimizado.csv', index=False)
+    df_submission.to_csv('submissions/xgb_optimizado.csv', index=False)
 ```
 
 El ensamble XGBoost representa el modelo más preciso de todos los modelos entrenados hasta esta sección del analisis
