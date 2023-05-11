@@ -1671,12 +1671,8 @@ El ensamble XGBoost representa el modelo más preciso de todos los modelos entre
 # Modelo Voting
 
 ```python
-print("test")
-```
-
-```python
 #anadir if cuando este list
-if not exists('models/voting.joblib.gz'): #Tenemos el archivo comprimido porque era muy grande
+if not exists('modelos/voting.joblib.gz'): #Tenemos el archivo comprimido porque era muy grande
     knn_clf = knn_optimizado #Knn
     svm_clf = mejor_svm_rbf #SVM
     rf_clf = model_rfc_multimetrica #Random Forest
@@ -1693,7 +1689,7 @@ if not exists('models/voting.joblib.gz'): #Tenemos el archivo comprimido porque 
     accuracy_score(y_test, pred)
     dump(vot_clf, 'modelos/voting.joblib')
 else:
-    !gzip -d -k models/voting.joblib.gz #Descomprimimos
+    !gzip -d -k modelos/voting.joblib.gz #Descomprimimos
     vot_clf = load('modelos/voting.joblib')
     !rm modelos/voting.joblib
 ```
@@ -1709,7 +1705,7 @@ Vamos a quitar el SVM del ensamble ya que nos dio malos resultados. Ademas, vamo
 
 ```python
 #anadir if cuando este list
-if not exists('models/votingNoSvmSoft.joblib'):
+if not exists('modelos/votingNoSvmSoft.joblib.gz'):
     knn_clf = knn_optimizado #Knn
     rf_clf = model_rfc_multimetrica #Random Forest
     xgb_clf = xgb_optimizado #XGBoost
@@ -1724,11 +1720,11 @@ if not exists('models/votingNoSvmSoft.joblib'):
     pred = vot_clf.predict(x_test)
     accuracy_score(y_test, pred)
     dump(vot_clf, 'modelos/votingNoSvmSoft.joblib')
+else:
+    !gzip -d -k modelos/votingNoSvmSoft.joblib.gz #Descomprimimos
+    vot_clfNoSvmSoft = load('modelos/votingNoSvmSoft.joblib')
+    !rm modelos/votingNoSvmSoft.joblib
     
-```
-
-```python
-vot_clfNoSvmSoft = load('modelos/votingNoSvmSoft.joblib')
 ```
 
 ```python
