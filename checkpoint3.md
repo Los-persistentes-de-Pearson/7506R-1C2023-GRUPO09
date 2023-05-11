@@ -711,7 +711,6 @@ else:
 Verificamos la eficacia del modelo y sus hiperparametros mediante la validación cruzada
 
 ```python
-# TODO: Esto rompe y tiene nombre mezclados mepa
 # if not exists('modelos/xgb_optimizado.joblib'):
 #   kfoldcv =StratifiedKFold(n_splits=k_folds) 
 #   resultados_xgb = cross_validate(xgb_optimizado,x_train, y_train, cv=kfoldcv,scoring=metrica_fn,return_estimator=True)
@@ -725,20 +724,22 @@ Verificamos la eficacia del modelo y sus hiperparametros mediante la validación
 # metricas_knn = resultados_knn['test_score']
 # knn_optimizado = resultados_knn['estimator'][np.where(metricas_knn==max(metricas_knn))[0][0]]
 
-print("CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO ")
+print(ADVERTENCIA)
+print("TODO: Esto rompe y tiene nombre mezclados mepa")
 print(ADVERTENCIA)
 ```
 
 Observamos la distribucion de la metrica f1 a lo largo de los entrenamientos
 
 ```python
-# Esto esta relacionado a la celda anterior
 # metric_labelsCV = ['F1 Score']*len(metricas_knn) 
 # sns.set_context('talk')
 # sns.set_style("darkgrid")
 # plt.figure(figsize=(8,8))
 # sns.boxplot(metricas_knn)
 # plt.title("Modelo entrenado con 10 folds")
+print(ADVERTENCIA)
+print("Esto esta relacionado a la celda anterior")
 print(ADVERTENCIA)
 ```
 
@@ -782,7 +783,7 @@ def metricas(y_pred,y_test):
   
   cm = confusion_matrix(y_test,y_pred)
   sns.heatmap(cm, cmap='Blues',annot=True,fmt='g')
-  plt.xlabel('Predecido')
+  plt.xlabel('Predicho')
   plt.ylabel('Verdadero')
 ```
 
@@ -898,6 +899,9 @@ svm_lineal_mejor_performance = load('modelos/svm_lineal_mejor_performance.joblib
 
 ```python
 y_pred= svm_lineal_mejor_performance.predict(x_test)
+print(ADVERTENCIA) 
+print("esto tarda, meter en un if si puede ser")
+print(ADVERTENCIA)
 print(classification_report(y_test,y_pred))
 print('F1-Score: {}'.format(f1_score(y_test, y_pred, average='binary'))) 
 cm = confusion_matrix(y_test,y_pred)
@@ -1247,7 +1251,7 @@ tabla=confusion_matrix(y_test, y_pred)
 
 #Grafico la matriz de confusión
 sns.heatmap(tabla,cmap='GnBu',annot=True,fmt='g')
-plt.xlabel('Predecido')
+plt.xlabel('Predicho')
 plt.ylabel('Verdadero')
 ```
 
@@ -1483,16 +1487,6 @@ plt.show(tree_plot)
 
 Vision completa:
 
-```python
-#plt.figure(figsize=(100,100))
-
-#tree_plot_completo=tree.plot_tree(rfc_multimetrica.estimators_[56],
-#                                 feature_names=hotelsdf_modelo_x.columns.to_list(),
-#                                 filled=True,
-#                                 rounded=True,)
-#                                 #class_names=['Not Survived','Survived']) #model.classes_
-#plt.show(tree_plot_completo)
-```
 
 Calculamos la matriz de confusion
 
@@ -1712,15 +1706,12 @@ El ensamble XGBoost representa el modelo más preciso de todos los modelos entre
 #Creo clasificadores
 
 rf_clf = model_rfc_multimetrica
-#rnd_clf = RandomForestClassifier()
+svm_clf = mejor_svm_rbf
 #knn_clf = KNeighborsClassifier()
 
 #Creo ensemble de Votación
-vot_clf = VotingClassifier(estimators = [('rf', rf_clf), ('rnd', rnd_clf), ('knn', knn_clf)], voting = 'hard')
-
-#Armo conjunto entrenamiento y test 80-20
-x_train, x_test, y_train, y_test = train_test_split(x, y, random_state = SEED, train_size = 0.80)
-
+#vot_clf = VotingClassifier(estimators = [('rf', rf_clf), ('rnd', rnd_clf), ('knn', knn_clf)], voting = 'hard')
+vot_clf = VotingClassifier(estimators = [('rf', rf_clf), ('svm', svm_clf)], voting = 'hard')
 
 #Entreno el ensemble
 vot_clf.fit(x_train, y_train)
