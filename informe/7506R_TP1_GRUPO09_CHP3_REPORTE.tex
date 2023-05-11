@@ -72,8 +72,10 @@ El modelo no representa una mejora predictiva con relación al modelo anteriorme
 
 \section*{SVM} 
 
-Comenzamos este modelo probando los tres kernels (lineal, polinómico y radial) para ver cual era mejor Kernel. Resultó ser el Kernel lineal y nos dio un f1\_score de 0,75. Aun así decidimos probar por separado cada uno de los kernels. El lineal lo optimizamos pero no obtuvimos mejora en el score. \\
-El Kernel polinómico sin optimizar nos dio un score relativamente bajo (0,6). Al intentar optimizar sus hiperparametros, no pudimos terminar de correr el algoritmo debido al tiempo que tomaba. Finalmente el Kernel radial nos dio un f1\_score muy bajo (0,60) y al optimizar hiperparametros apenas mejoró (0,67). Además para este caso no pudimos terminar de entrenar con CV para ver su capacidad de generalización. 
+Comenzamos este modelo probando los tres kernels (lineal, polinómico y radial) para ver cual era mejor Kernel. Resultó ser el Kernel lineal y nos dio un f1\_score de 0,75. Aun así decidimos probar por separado cada uno de los kernels. El lineal lo optimizamos pero no obtuvimos mejora en el score. 
+El Kernel polinómico sin optimizar nos dio un score relativamente bajo (0,6). Al intentar optimizar sus hiperparametros, no pudimos terminar de correr el algoritmo debido al tiempo que tomaba. Los optimizamos a mano y obtuvimos una mejora (f1\_score 0,75).
+Finalmente, el kernel radial sin optimizarlo nos dio un f1\_score muy bajo (0,60) y al optimizar hiperparametros apenas mejoró (0,67). Además para este caso no pudimos terminar de entrenar con CV para ver su capacidad de generalización.
+Como conclusión de SVM, nos quedamos con el svm con kernel lineal debido a su performance y relativamente buen f1\_score (0,75)
 
 \section*{Random Forest} 
 
@@ -90,8 +92,9 @@ Sin embargo, para nuestra sorpresa, obtuvimos resultados peores que con los mode
 
 
 \section*{Stacking} 
+El modelo stacking fue entrenado con los distintos modelos producidos a lo largo del análisis tuvo una precisión menor a lo esperado, los modelos bases usados en su construcción tienen una precisión superior a la predicción global hecha por el modelo, por lo cual, consideramos que tiene buenas métricas pero no representa una mejora considerable a los resultados anteriormente mencionados.
 
-
-
+\section*{General} 
+En base a los resultados observados, se puede inferir que los modelos que emplean árboles de decisión presentan una adaptabilidad notable al generar predicciones sobre los datos. Sin embargo, es importante destacar que los demás modelos no muestran un rendimiento considerablemente inferior en comparación. Un problema que pudieron haber tenido nuestros modelos de ensamble híbrido, es que están usando modelos muy optimizados para sí mismos; esto puede haber introducido un sesgo alto. 
 
 \end{document}
