@@ -38,6 +38,8 @@ from sklearn.ensemble import VotingClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 import xgboost as xgb
+from sklearn.ensemble import StackingClassifier
+from sklearn.linear_model import LogisticRegression
 
 #Si estamos  en colab tenemos que instalar la libreria "dtreeviz" aparte. 
 if IN_COLAB == True:
@@ -1703,9 +1705,6 @@ if not exists('submissions/votingNoSvmSoft.csv'):
 Generamos un modelo stacking usando los modelos previamente entrenados, de manera que sabemos que los modelos bases usados no sufren de overfitting o underfitting, utilizamos un regresor lineal como modelo de decisión para agreagr dinamismo al analisis 
 
 ```python
-from sklearn.ensemble import StackingClassifier
-from sklearn.linear_model import LogisticRegression
-
 modelos_base = [('knn', knn_optimizado),
                ('xgboost', xgb_optimizado),
                ('rf', rfc_multimetrica)]
