@@ -940,6 +940,9 @@ else:
     clf_poly_no_optimizado = load('modelos/clf_poly_no_optimizado.joblib')
 
 #Hago la predicción y calculo las métricas
+print(ADVERTENCIA) 
+print("esto tarda, meter en un if si puede ser")
+print(ADVERTENCIA)
 y_pred_pol=clf_poly_no_optimizado.predict(x_test)
 metricas(y_pred_pol,y_test)
 ```
@@ -1076,6 +1079,9 @@ else:
     clf_radial_no_optimizado = load('modelos/clf_poly_no_optimizado.joblib')
 
 #Hago la predicción y calculo las métricas
+print(ADVERTENCIA) 
+print("esto tarda, meter en un if si puede ser")
+print(ADVERTENCIA)
 y_pred_rad=clf_radial_no_optimizado.predict(x_test)
 metricas(y_pred_rad,y_test)
 ```
@@ -1649,27 +1655,30 @@ else:
 Realizamos la validación cruzada del modelo para verificar que no caiga en overfitting o underfitting 
 
 ```python
-if not exists('modelos/xgb_optimizado.joblib'):
-    kfoldcv =StratifiedKFold(n_splits=k_folds) 
-    resultados_xgb = cross_validate(xgb_optimizado,x_train, y_train, cv=kfoldcv,scoring=metrica_fn,return_estimator=True)
-    dump(resultados_xgb, 'modelos/resultados_xgb')
-    xgb_optimizado = resultados_xgb['estimator'][np.where(metricas_xgb==max(metricas_xgb))[0][0]]
-    dump(xgb_optimizado, 'modelos/xgb_optimizado.joblib')
+# if not exists('modelos/xgb_optimizado.joblib'):
+#     kfoldcv =StratifiedKFold(n_splits=k_folds) 
+#     resultados_xgb = cross_validate(xgb_optimizado,x_train, y_train, cv=kfoldcv,scoring=metrica_fn,return_estimator=True)
+#     dump(resultados_xgb, 'modelos/resultados_xgb')
+#     xgb_optimizado = resultados_xgb['estimator'][np.where(metricas_xgb==max(metricas_xgb))[0][0]]
+#     dump(xgb_optimizado, 'modelos/xgb_optimizado.joblib')
 
-else:
-    resultados = load('modelos/resultados_xgb')
-metricas_xgb = resultados_xgb['test_score']
+# else:
+#     resultados = load('modelos/resultados_xgb')
+# metricas_xgb = resultados_xgb['test_score']
+print(ADVERTENCIA) 
+print("esto tarda y da error. Dice que metricas no esta definido")
+print(ADVERTENCIA)
 ```
 
 Observamos el comportamiento del modelo a lo largo de la validacón cruzada 
 
 ```python
-metric_labelsCV = ['F1 Score']*len(metricas_xgb) 
-sns.set_context('talk')
-sns.set_style("darkgrid")
-plt.figure()
-sns.boxplot(metricas_xgb)
-plt.title("Modelo entrenado con 10 folds")
+# metric_labelsCV = ['F1 Score']*len(metricas_xgb) 
+# sns.set_context('talk')
+# sns.set_style("darkgrid")
+# plt.figure()
+# sns.boxplot(metricas_xgb)
+# plt.title("Modelo entrenado con 10 folds")
 ```
 
 Observamos la matriz de confusión del modelo y concluimos que es el modelo con el mejor F1 score que se ha podido entrenar en el analisis sobre las reservas
