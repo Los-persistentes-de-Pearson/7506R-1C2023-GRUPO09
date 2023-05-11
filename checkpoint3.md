@@ -882,9 +882,6 @@ svm_lineal_mejor_performance = load('modelos/svm_lineal_mejor_performance.joblib
 
 ```python
 y_pred= svm_lineal_mejor_performance.predict(x_test)
-print(ADVERTENCIA) 
-print("esto tarda, meter en un if si puede ser")
-print(ADVERTENCIA)
 print(classification_report(y_test,y_pred))
 print('F1-Score: {}'.format(f1_score(y_test, y_pred, average='binary'))) 
 cm = confusion_matrix(y_test,y_pred)
@@ -899,9 +896,10 @@ Se puede ver que si bien los resultados no son excelentes, son relativamente bue
 A continuacion deberiamos exportar el csv para submission a Kaggle. Puesto que no representaninguna mejora del score obtenido anteriormente no lo hacemos
 
 ```python
-# df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': y_pred})
-# df_submission.to_csv('submissions/svm_lineal_mejor_performance.csv', index=False)
-
+if not exists('submissions/svm_lineal_mejor_performance.csv'):
+    y_pred = svm_lineal_mejor_performance.predict(hotelsdf_pruebas)
+    df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': y_pred})
+    df_submission.to_csv('submissions/svm_lineal_mejor_performance.csv', index=False)
 ```
 
 ### Polinomico y Radial
@@ -910,7 +908,7 @@ A continuacion deberiamos exportar el csv para submission a Kaggle. Puesto que n
 El codigo a continuacion para ambos kernels se encuentra comentado en muchas partes debido al gran tiempo que demora entrenar SVM's con tantos datos (no sabemos cuanto exactamente cuanto ya que nunca pudimos terminar de correrlo). Esto se debe a que al utilizar Kernels Radial y Polinomico los algoritmos crean matrices de NXN demandando mucha RAM y CPU. Dejamos los snippets de codigo como prueba de ello.
 
 
-### Polinomico
+#### Polinomico
 Creamos un SVM con Kernel polynomico con parametros por default (sin parametros)
 
 **ATENCION: 3 MIN con core i5 + 16Gb RAM (sin modelos Joblib) **
@@ -928,9 +926,6 @@ else:
     clf_poly_no_optimizado = load('modelos/clf_poly_no_optimizado.joblib')
 
 #Hago la predicción y calculo las métricas
-print(ADVERTENCIA) 
-print("esto tarda, meter en un if si puede ser")
-print(ADVERTENCIA)
 y_pred_pol=clf_poly_no_optimizado.predict(x_test)
 metricas(y_pred_pol,y_test)
 ```
@@ -1049,7 +1044,7 @@ Como conclusion del kernel polinomico podemos decir que es relativamente bueno y
 #### Mantenemos al kernel lineal como el mejor hasta el momento
 
 
-### Kernel radial
+#### Kernel radial
 
 
 **ATENCION: 5 MIN con core i5 + 16Gb RAM (sin archivos de joblib)**
@@ -1698,7 +1693,7 @@ if not exists('models/voting.joblib'):
 ```
 
 ```python
-if not exists('submissions/voting.joblib'):
+if not exists('submissions/voting.csv'):
     y_pred = vot_clf.predict(hotelsdf_pruebas)
     df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': y_pred})
     df_submission.to_csv('submissions/voting.csv', index=False)
