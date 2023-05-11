@@ -731,12 +731,14 @@ print(ADVERTENCIA)
 Observamos la distribucion de la metrica f1 a lo largo de los entrenamientos
 
 ```python
-metric_labelsCV = ['F1 Score']*len(metricas_knn) 
-sns.set_context('talk')
-sns.set_style("darkgrid")
-plt.figure(figsize=(8,8))
-sns.boxplot(metricas_knn)
-plt.title("Modelo entrenado con 10 folds")
+# Esto esta relacionado a la celda anterior
+# metric_labelsCV = ['F1 Score']*len(metricas_knn) 
+# sns.set_context('talk')
+# sns.set_style("darkgrid")
+# plt.figure(figsize=(8,8))
+# sns.boxplot(metricas_knn)
+# plt.title("Modelo entrenado con 10 folds")
+print(ADVERTENCIA)
 ```
 
 Mostramos la matriz de confusión del modelo y observamos su desempeño global
