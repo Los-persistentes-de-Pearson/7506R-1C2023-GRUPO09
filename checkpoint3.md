@@ -1701,6 +1701,9 @@ El ensamble XGBoost representa el modelo más preciso de todos los modelos entre
 # Modelo Voting
 
 ```python
+print(ADVERTENCIA)
+print("esto va a dar error a proposito, la idea es que apenas anden los modelos lo corremos")
+print(ADVERTENCIA)
 #anadir if cuando este list
 if not exists('models/voting.joblib'):
     #knn_clf = 
