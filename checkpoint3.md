@@ -941,9 +941,6 @@ else:
     clf_poly_no_optimizado = load('modelos/clf_poly_no_optimizado.joblib')
 
 #Hago la predicción y calculo las métricas
-print(ADVERTENCIA) 
-print("esto tarda, meter en un if si puede ser")
-print(ADVERTENCIA)
 y_pred_pol=clf_poly_no_optimizado.predict(x_test)
 metricas(y_pred_pol,y_test)
 ```
