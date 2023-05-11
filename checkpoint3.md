@@ -1662,6 +1662,7 @@ Realizamos la validación cruzada del modelo para verificar que no caiga en over
 # metricas_xgb = resultados_xgb['test_score']
 print(ADVERTENCIA) 
 print("esto tarda y da error. Dice que metricas no esta definido")
+print("@JI Pongo un texto raro para que me encuentres rapido con Ctrl + F: Ramen")
 print(ADVERTENCIA)
 ```
 
