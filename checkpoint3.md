@@ -709,13 +709,15 @@ else:
 Verificamos la eficacia del modelo y sus hiperparametros mediante la validación cruzada
 
 ```python
-if not exists('modelos/knn_optimizado.joblib'):
-
+if not exists('modelos/xgb_optimizado.joblib'):
   kfoldcv =StratifiedKFold(n_splits=k_folds) 
-  resultados_knn = cross_validate(knn_optimizado,x_train, y_train, cv=kfoldcv,scoring=metrica_fn,return_estimator=True)
-  dump(resultados_knn, 'modelos/resultados_knn.joblib')
+  resultados_xgb = cross_validate(xgb_optimizado,x_train, y_train, cv=kfoldcv,scoring=metrica_fn,return_estimator=True)
+  dump(resultados_xgb, 'modelos/resultados_xgb')
 else:
-  resultados_knn = load('modelos/resultados_knn.joblib')
+    resultados = load('modelos/resultados_xgb')
+    
+metricas_xgb = resultados_xgb['test_score']
+xgb_optimizado = resultados_xgb['estimator'][np.where(metricas_xgb==max(metricas_xgb))[0][0]]
 
 metricas_knn = resultados_knn['test_score']
 knn_optimizado = resultados_knn['estimator'][np.where(metricas_knn==max(metricas_knn))[0][0]]
@@ -848,12 +850,11 @@ Hago un entrenamiento con cross validation para ver que el modelo sea generaliza
 **ATENCION: 10 MIN con core i5 + 16Gb RAM (sin archivos de joblib)**
 
 ```python
-if not exists('modelos/svm_lineal_mejor_performance.joblib'):
-
     folds=5
-
-    kfoldcv = StratifiedKFold(n_splits=folds)
     scorer_fn = make_scorer(sk.metrics.f1_score)
+
+if not exists('modelos/svm_lineal_mejor_performance.joblib'):
+    kfoldcv = StratifiedKFold(n_splits=folds)
     resultados = cross_validate(svm_lineal_mejor_performance,x_train, y_train, cv=kfoldcv,scoring=scorer_fn,return_estimator=True)
 
     dump(resultados, 'modelos/resultados_cv_kernel_lineal.joblib')
