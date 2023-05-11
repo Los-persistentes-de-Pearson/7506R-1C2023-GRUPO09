@@ -1216,21 +1216,23 @@ Usando https://www.random.org/, con valor maximo 50 y valor minimo 1, obtuvimos:
 (Criterion fue dejado como entropy)
 
 ```python
-#Creamos un clasificador con hiperparámetros arbitrarios
-rfc = RandomForestClassifier(max_features='auto', 
-                             n_jobs=JOBS,
-                             criterion="entropy", 
-                             random_state=SEED, 
-                             min_samples_leaf=15,
-                             min_samples_split=40,
-                             n_estimators=36 )
-#Entrenamos el modelo
-model = rfc.fit(X = x_train, y = y_train)
+if exists('modelos/randomForest.joblib') == False:
+    #Creamos un clasificador con hiperparámetros arbitrarios
+    rfc = RandomForestClassifier(max_features='auto', 
+                                 n_jobs=JOBS,
+                                 criterion="entropy", 
+                                 random_state=SEED, 
+                                 min_samples_leaf=15,
+                                 min_samples_split=40,
+                                 n_estimators=36 )
+    #Entrenamos el modelo
+    model = rfc.fit(X = x_train, y = y_train)
+    
+    #Nos guardamos este modelo para poder cargarlo en todas las corridas posteriores
+    dump(model, 'modelos/randomForest.joblib')
 ```
 
 ```python
-#Nos guardamos este modelo para poder cargarlo en todas las corridas posteriores
-#dump(model, 'modelos/randomForest.joblib')
 model = load('modelos/randomForest.joblib')
 ```
 
