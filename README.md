@@ -2,7 +2,7 @@
 ## Informe
 
 Informe:
-[Informe checkpoint 2](informe/7506R_TP1_GRUPO09_CHP3_REPORTE.pdf)
+[Informe checkpoint 3](informe/7506R_TP1_GRUPO09_CHP3_REPORTE.pdf)
 
 
 ![Karl Pearson](informe/images/Karl_Pearson.jpg) 
