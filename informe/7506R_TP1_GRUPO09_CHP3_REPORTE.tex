@@ -82,10 +82,12 @@ Después de esto decidimos optimizar los hiperparametros del random forest con v
 
 \section*{XGBoost} 
 
-El modelo XGBoost representa el primer modelo que en su forma base genera la mejor predicción de todos los modelos entrenados en el análisis. Se realiza una búsqueda de los mejores hiperparametros, la cual, no genera una mejora consistente en las capacidades predictivas del modelo. Por lo tanto, se pueden llegar a las conclusiones que los modelos de ensambles usando árboles y los modelos de árboles son los más precisiones  la hora de realizar predicciones 
+El modelo XGBoost representa el primer modelo que en su forma base genera la mejor predicción de todos los modelos entrenados en el análisis. Se realiza una búsqueda de los mejores hiperparametros, la cual, no genera una mejora consistente en las capacidades predictivas del modelo. Por lo tanto, se pueden llegar a las conclusiones que los modelos de ensambles usando árboles y los modelos de árboles son los más precisiones  la hora de realizar predicciones
 
 \section*{Voting} 
-Tanto para el ensamble voting como stacking, decidimos usar los mejores modelos que obtuvimos en las etapas anteriores. Esto lo hicimos para poder sacar el mayor jugo de los modelos que habíamos obtenido antes. 
+Tanto para el ensamble voting como stacking, decidimos usar los mejores modelos que obtuvimos en las etapas anteriores. Esto lo hicimos para poder sacar el mayor jugo de los modelos que habíamos obtenido antes. \\
+Sin embargo, para nuestra sorpresa, obtuvimos resultados peores que con los modelos por separado. Para tratar mejorar este resultado, eliminamos el modelo svm (el cual nos había dado malos resultados) y cambiamos el modelo de votación a una votación ponderada. Esto nos dio resultados mejores, pero no superior al XGBoost
+
 
 \section*{Stacking} 
 
