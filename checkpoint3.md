@@ -925,7 +925,7 @@ A continuacion deberiamos exportar el csv para submission a Kaggle. Puesto que n
 El codigo a continuacion para ambos kernels se encuentra comentado en muchas partes debido al gran tiempo que demora entrenar SVM's con tantos datos (no sabemos cuanto exactamente cuanto ya que nunca pudimos terminar de correrlo). Esto se debe a que al utilizar Kernels Radial y Polinomico los algoritmos crean matrices de NXN demandando mucha RAM y CPU. Dejamos los snippets de codigo como prueba de ello.
 
 
-### Polinomico
+#### Polinomico
 Creamos un SVM con Kernel polynomico con parametros por default (sin parametros)
 
 **ATENCION: 3 MIN con core i5 + 16Gb RAM (sin modelos Joblib) **
@@ -1064,7 +1064,7 @@ Como conclusion del kernel polinomico podemos decir que es relativamente bueno y
 #### Mantenemos al kernel lineal como el mejor hasta el momento
 
 
-### Kernel radial
+#### Kernel radial
 
 
 **ATENCION: 5 MIN con core i5 + 16Gb RAM (sin archivos de joblib)**
