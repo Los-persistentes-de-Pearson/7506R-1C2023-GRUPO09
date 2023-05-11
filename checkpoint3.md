@@ -1711,7 +1711,7 @@ if not exists('models/voting.joblib'):
 ```
 
 ```python
-if not exists('submissions/voting.joblib'):
+if not exists('submissions/voting.csv'):
     y_pred = vot_clf.predict(hotelsdf_pruebas)
     df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': y_pred})
     df_submission.to_csv('submissions/voting.csv', index=False)
