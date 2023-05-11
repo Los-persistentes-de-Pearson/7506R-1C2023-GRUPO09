@@ -586,11 +586,9 @@ Basado en el grafico, es posible observar que el modelo base ha obtenido un dese
 Generamos una prediccón para kaggle con el modelo base
 
 ```python
-y_pred = knn_base.predict(hotelsdf_pruebas)
-y_pred
-df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': y_pred})
-
 if not exists('submissions/knn_base.csv'):
+    y_pred = knn_base.predict(hotelsdf_pruebas)
+    df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': y_pred})
     df_submission.to_csv('submissions/knn_base.csv', index=False)
 ```
 
