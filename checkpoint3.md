@@ -1676,7 +1676,7 @@ print("test")
 
 ```python
 #anadir if cuando este list
-if not exists('models/voting.joblib'):
+if not exists('models/voting.joblib.gz'): #Tenemos el archivo comprimido porque era muy grande
     knn_clf = knn_optimizado #Knn
     svm_clf = mejor_svm_rbf #SVM
     rf_clf = model_rfc_multimetrica #Random Forest
@@ -1692,11 +1692,10 @@ if not exists('models/voting.joblib'):
     pred = vot_clf.predict(x_test)
     accuracy_score(y_test, pred)
     dump(vot_clf, 'modelos/voting.joblib')
-    
-```
-
-```python
-vot_clf = load('modelos/voting.joblib')
+else:
+    !gzip -d -k models/voting.joblib.gz #Descomprimimos
+    vot_clf = load('modelos/voting.joblib')
+    !rm modelos/voting.joblib
 ```
 
 ```python
