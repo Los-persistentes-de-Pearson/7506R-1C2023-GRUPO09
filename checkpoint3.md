@@ -38,6 +38,8 @@ from sklearn.ensemble import VotingClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 import xgboost as xgb
+from sklearn.ensemble import StackingClassifier
+from sklearn.linear_model import LogisticRegression
 
 #Si estamos  en colab tenemos que instalar la libreria "dtreeviz" aparte. 
 if IN_COLAB == True:
@@ -932,43 +934,6 @@ metricas(y_pred_pol,y_test)
 
 Con el kernel polinomico sin parametros obtenemos un f1_score bastante malo (0,6). Intentamos optimizarlo a continuacion.
 
-
-#### Intento mejorar hiperparametros (da error)
-A continuacion se deja el codigo que se intento utlizar para optimizar los hiperparametros con RandomizedSearchCV del SVM con Kernel polinomico. No se pudo obtener un resultado en tiempo razonable por ello se lo deja comentado
-
-```python
-# #vario hiperparaemtros en kernel polinomico
-# clf_poly = SVC(kernel='poly')
-
-# parametros = [ {'C': [0,75, 9, 1, 10, 100], 
-#                 'gamma': [10, 0.001, 0.0001], 
-#                 'kernel': ['poly']},
-#  ]
-
-
-# combinaciones=1 #2,3 se puso 1 para ver si tardaba menos. :(
-
-# scorer_fn = make_scorer(sk.metrics.f1_score)
-
-
-# Randomcv_svm = RandomizedSearchCV(estimator=clf_poly,
-#                               #param_grid= parametros,
-#                               param_distributions = parametros,
-#                               scoring=scorer_fn,
-#                               #cv=kfoldcv,
-#                               n_iter=combinaciones,
-#                               ) 
-
-# #lo entreno sobre los datos
-# Randomcv_svm.fit(x_train, y_train)
-
-# #Hago la predicción y calculo las métricas
-# Randomcv_svm.predict(x_test)
-# metricas(Randomcv_svm,y_test)
-```
-
-Intentamos optimizarlo a mano. :))) (?
-
 ```python
 if not exists ('modelos/svm_poly_mejor_performance.joblib'):
     svm_poly_mejor_performance = SVC(kernel='poly', C=5, degree=1, gamma=1, coef0=1, random_state=9)
@@ -1062,9 +1027,6 @@ else:
     clf_radial_no_optimizado = load('modelos/clf_poly_no_optimizado.joblib')
 
 #Hago la predicción y calculo las métricas
-print(ADVERTENCIA) 
-print("esto tarda, meter en un if si puede ser")
-print(ADVERTENCIA)
 y_pred_rad=clf_radial_no_optimizado.predict(x_test)
 metricas(y_pred_rad,y_test)
 ```
@@ -1743,9 +1705,6 @@ if not exists('submissions/votingNoSvmSoft.csv'):
 Generamos un modelo stacking usando los modelos previamente entrenados, de manera que sabemos que los modelos bases usados no sufren de overfitting o underfitting, utilizamos un regresor lineal como modelo de decisión para agreagr dinamismo al analisis 
 
 ```python
-from sklearn.ensemble import StackingClassifier
-from sklearn.linear_model import LogisticRegression
-
 modelos_base = [('knn', knn_optimizado),
                ('xgboost', xgb_optimizado),
                ('rf', rfc_multimetrica)]
