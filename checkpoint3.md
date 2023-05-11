@@ -1537,7 +1537,6 @@ Vemos que a pesar de todas nuestras mejoras, solo obtuvimos una mejora del 0.2%
 Generamos un modelo XGBoost base, con los hiperparametros por defecto, de manera que se pueda realizar una comparacion posterior a entrenar un modelo con sus hiperparametros optimmizados
 
 ```python
-
 if not exists('modelos/xgb_base.joblib'):
     xgb_base = xgb.XGBClassifier(random_state=9, n_estimators=100) 
     xgb_base.fit(x_train, y_train)
@@ -1549,6 +1548,7 @@ else:
 Vemos el comportamiento del modelo base y mostramos las metricas obtenidas en el procesp
 
 ```python
+y_pred = xgb_base.predict(x_test)
 print(classification_report(y_test,y_pred))
 print('F1-Score: {}'.format(f1_score(y_test, y_pred, average='binary'))) 
 cm = confusion_matrix(y_test,y_pred)
