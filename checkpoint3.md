@@ -537,10 +537,6 @@ x_train, x_test, y_train, y_test = train_test_split(hotelsdf_modelo_x,
                                                     random_state=SEED) #Semilla 9, como el Equipo !!
 ```
 
-```python
-input()
-```
-
 # KNN
 
 Entrenamos un primer modelo de KNN usando los datos previamente tratados
@@ -592,7 +588,7 @@ y_pred = knn_base.predict(hotelsdf_pruebas)
 y_pred
 df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': y_pred})
 
-if not exist('submissions/knn_base.csv'):
+if not exists('submissions/knn_base.csv'):
     df_submission.to_csv('submissions/knn_base.csv', index=False)
 ```
 
@@ -663,7 +659,7 @@ Podemos concluir de las graficas anteriores que el modelo tiende a empeorar a me
 Buscamos la mejor combinación de hiperparametros con la intención de mejorar las metricas del modelo y a su vez mejorar la performance del mismo
 
 ```python
-if not exist('modelos/RCV_knn.joblib'):
+if not exists('modelos/RCV_knn.joblib'):
 
     params_grid={ 'n_neighbors':range(1,15), 
                   'weights':['distance','uniform'],
@@ -704,7 +700,7 @@ print(parametros.best_score_)
 Creamos y entrenamos el modelo con los mejores imperparametros 
 
 ```python
-if not exist('modelos/knn_optimizado.joblib'):
+if not exists('modelos/knn_optimizado.joblib'):
     knn_optimizado = KNeighborsClassifier(**parametros.best_params_)
     knn_optimizado.fit(x_train, y_train)
 else:
@@ -716,7 +712,7 @@ else:
 Verificamos la eficacia del modelo y sus hiperparametros mediante la validación cruzada
 
 ```python
-if not exist('modelos/knn_optimizado.joblib'):
+if not exists('modelos/knn_optimizado.joblib'):
 
     kfoldcv =StratifiedKFold(n_splits=k_folds) 
     resultados = cross_validate(knn_optimizado,x_train, y_train, cv=kfoldcv,scoring=metrica_fn,return_estimator=True)
@@ -755,7 +751,7 @@ Una vez entrenado y guardado el modelo generamos una predicción para kaggle.
 y_pred = knn_optimizado.predict(hotelsdf_pruebas)
 df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': y_pred})
 
-if not exist('submissions/knn_optimizado.csv'):
+if not exists('submissions/knn_optimizado.csv'):
     df_submission.to_csv('submissions/knn_optimizado.csv', index=False)
 ```
 
@@ -1549,7 +1545,7 @@ Generamos un modelo XGBoost base, con los hiperparametros por defecto, de manera
 
 ```python
 
-if not exist('modelos/xgb_base.joblib'):
+if not exists('modelos/xgb_base.joblib'):
     xgb_base = xgb.XGBClassifier(random_state=9, n_estimators=100) 
     xgb_base.fit(x_train, y_train)
     dump(xgb_base, 'xgb_base.joblib')
@@ -1577,7 +1573,7 @@ y_pred = xgb_base.predict(hotelsdf_pruebas)
 y_pred
 df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': y_pred})
 
-if not exist('submissions/xgb_base.csv'):
+if not exists('submissions/xgb_base.csv'):
     df_submission.to_csv('xgb_base.csv', index=False)
 ```
 
@@ -1588,7 +1584,7 @@ Destacamos que este modelo sin recibir ninguna optimización tiene la presición
 Realizamos una busqueda para encontrar los mejores hiperparametros del XGBoost y a su vez optimizar el modelo *Puede tomar tiempo, alrededor de 50 min*
 
 ```python
-if not exist('modelos/RCV_xgb.joblib'):
+if not exists('modelos/RCV_xgb.joblib'):
 
     estimadores = [90, 100, 110, 150]
     profundidad_max = [7, 8, 9, 10, 15]
@@ -1634,7 +1630,7 @@ print("f1_score = ",parametros.best_score_)
 Entrenamos el modelo con sus hiperparametros
 
 ```python
-if not exist('modelos/xgb_optimizado.joblib'):
+if not exists('modelos/xgb_optimizado.joblib'):
     xgb_optimizado = xgb.XGBClassifier(**parametros.best_params_)
     xgb_optimizado.fit(x_train, y_train)
 else:
@@ -1644,13 +1640,13 @@ else:
 Realizamos la validación cruzada del modelo para verificar que no caiga en overfitting o underfitting 
 
 ```python
-if not exist('modelos/xgb_optimizado.joblib'):
+if not exists('modelos/xgb_optimizado.joblib'):
     kfoldcv =StratifiedKFold(n_splits=k_folds) 
     resultados = cross_validate(xgb_optimizado,x_train, y_train, cv=kfoldcv,scoring=metrica_fn,return_estimator=True)
     metricsCV = resultados['test_score']
     xgb_optimizado = resultados['estimator'][np.where(metricsCV==max(metricsCV))[0][0]]
     dump(xgb_optimizado, 'xgb_optimizado.joblib')
-    
+
 else:
     xgb_optimizado = load('modelos/xgb_optimizado.joblib')
 ```
@@ -1683,7 +1679,7 @@ Realizamos la predicción de kaggle
 ```python
 y_pred = xgb_optimizado.predict(hotelsdf_pruebas)
 y_pred
-if not exist('submissions/xgb_optimizado.joblib'):
+if not exists('submissions/xgb_optimizado.joblib'):
     df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': y_pred})
     df_submission.to_csv('xgb_optimizado.csv', index=False)
 ```
