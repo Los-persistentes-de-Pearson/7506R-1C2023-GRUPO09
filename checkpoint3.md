@@ -22,7 +22,6 @@ from sklearn.tree import DecisionTreeClassifier, export_graphviz, export_text
 from sklearn.metrics import confusion_matrix, classification_report , f1_score, make_scorer, precision_score, recall_score, accuracy_score,f1_score
 from sklearn.preprocessing import MinMaxScaler
 from sklearn import tree
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import GridSearchCV
 from sklearn.datasets import load_iris
 from sklearn import preprocessing
@@ -32,7 +31,6 @@ from sklearn import svm
 from sklearn.datasets import make_classification
 from sklearn.metrics import confusion_matrix, classification_report
 from sklearn.utils.fixes import loguniform
-from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestClassifier 
 from sklearn.linear_model import LogisticRegression 
 from sklearn.neighbors import KNeighborsClassifier
