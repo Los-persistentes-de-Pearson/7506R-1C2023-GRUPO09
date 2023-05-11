@@ -709,21 +709,21 @@ else:
 Verificamos la eficacia del modelo y sus hiperparametros mediante la validación cruzada
 
 ```python
-# if not exists('modelos/xgb_optimizado.joblib'):
-#   kfoldcv =StratifiedKFold(n_splits=k_folds) 
-#   resultados_xgb = cross_validate(xgb_optimizado,x_train, y_train, cv=kfoldcv,scoring=metrica_fn,return_estimator=True)
-#   dump(resultados_xgb, 'modelos/resultados_xgb')
-# else:
-#     resultados = load('modelos/resultados_xgb')
+if not exists('modelos/xgb_optimizado.joblib'):
+  kfoldcv =StratifiedKFold(n_splits=k_folds) 
+  resultados_xgb = cross_validate(xgb_optimizado,x_train, y_train, cv=kfoldcv,scoring=metrica_fn,return_estimator=True)
+  dump(resultados_xgb, 'modelos/resultados_xgb')
+else:
+    resultados = load('modelos/resultados_xgb')
 
-# metricas_xgb = resultados_xgb['test_score']
-# xgb_optimizado = resultados_xgb['estimator'][np.where(metricas_xgb==max(metricas_xgb))[0][0]]
+metricas_xgb = resultados_xgb['test_score']
+xgb_optimizado = resultados_xgb['estimator'][np.where(metricas_xgb==max(metricas_xgb))[0][0]]
 
-# metricas_knn = resultados_knn['test_score']
-# knn_optimizado = resultados_knn['estimator'][np.where(metricas_knn==max(metricas_knn))[0][0]]
+metricas_knn = resultados_knn['test_score']
+knn_optimizado = resultados_knn['estimator'][np.where(metricas_knn==max(metricas_knn))[0][0]]
 
 print(ADVERTENCIA)
-print("TODO: Esto rompe y tiene nombre mezclados mepa")
+print("TODO: Esto rompe y tiene nombre mezclados mepa. Ramen")
 print(ADVERTENCIA)
 ```
 
@@ -1564,8 +1564,6 @@ else:
 Vemos el comportamiento del modelo base y mostramos las metricas obtenidas en el procesp
 
 ```python
-y_pred=xgb_base.predict(x_test)
-
 print(classification_report(y_test,y_pred))
 print('F1-Score: {}'.format(f1_score(y_test, y_pred, average='binary'))) 
 cm = confusion_matrix(y_test,y_pred)
@@ -1701,7 +1699,7 @@ if not exists('models/voting.joblib'):
     #knn_clf = 
     svm_clf = mejor_svm_rbf #SVM
     rf_clf = model_rfc_multimetrica #Random Forest
-    #xgb_clf =
+    xgb_clf = xgb_optimizado 
 
     #Creo ensemble de Votación
     vot_clf = VotingClassifier(estimators = [('knn', knn_clf), ('svm', svm_clf), ('rf', rf_clf), ('xgb', xgb_clf)], voting = 'hard')
