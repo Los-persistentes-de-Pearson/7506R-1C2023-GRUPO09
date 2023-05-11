@@ -709,36 +709,21 @@ else:
 Verificamos la eficacia del modelo y sus hiperparametros mediante la validación cruzada
 
 ```python
-if not exists('modelos/xgb_optimizado.joblib'):
-  kfoldcv =StratifiedKFold(n_splits=k_folds) 
-  resultados_xgb = cross_validate(xgb_optimizado,x_train, y_train, cv=kfoldcv,scoring=metrica_fn,return_estimator=True)
-  dump(resultados_xgb, 'modelos/resultados_xgb')
-else:
-    resultados = load('modelos/resultados_xgb')
-
-metricas_xgb = resultados_xgb['test_score']
-xgb_optimizado = resultados_xgb['estimator'][np.where(metricas_xgb==max(metricas_xgb))[0][0]]
-
+kfoldcv =StratifiedKFold(n_splits=k_folds) 
+resultados_knn = cross_validate(knn_optimizado, x_train, y_train, cv=kfoldcv,scoring=metrica_fn,return_estimator=True)
 metricas_knn = resultados_knn['test_score']
 knn_optimizado = resultados_knn['estimator'][np.where(metricas_knn==max(metricas_knn))[0][0]]
-
-print(ADVERTENCIA)
-print("TODO: Esto rompe y tiene nombre mezclados mepa. Ramen")
-print(ADVERTENCIA)
 ```
 
 Observamos la distribucion de la metrica f1 a lo largo de los entrenamientos
 
 ```python
-# metric_labelsCV = ['F1 Score']*len(metricas_knn) 
-# sns.set_context('talk')
-# sns.set_style("darkgrid")
-# plt.figure(figsize=(8,8))
-# sns.boxplot(metricas_knn)
-# plt.title("Modelo entrenado con 10 folds")
-print(ADVERTENCIA)
-print("Esto esta relacionado a la celda anterior")
-print(ADVERTENCIA)
+metric_labelsCV = ['F1 Score']*len(metricas_knn) 
+sns.set_context('talk')
+sns.set_style("darkgrid")
+plt.figure(figsize=(6,5))
+sns.boxplot(metricas_knn)
+plt.title("Modelo entrenado con 10 folds")
 ```
 
 Mostramos la matriz de confusión del modelo y observamos su desempeño global
