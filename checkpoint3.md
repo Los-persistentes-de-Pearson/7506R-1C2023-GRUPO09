@@ -715,7 +715,7 @@ if not exists('modelos/xgb_optimizado.joblib'):
   dump(resultados_xgb, 'modelos/resultados_xgb')
 else:
     resultados = load('modelos/resultados_xgb')
-    
+
 metricas_xgb = resultados_xgb['test_score']
 xgb_optimizado = resultados_xgb['estimator'][np.where(metricas_xgb==max(metricas_xgb))[0][0]]
 
@@ -765,7 +765,7 @@ Si comparamos el desempeño del modelo tanto en ejecución del analisis como en 
 
 
 
-### Librerias y Funciones
+### Librerias y FuncionesPredecid`
 
 ```python
 def metricas(y_pred,y_test):
@@ -774,8 +774,8 @@ def metricas(y_pred,y_test):
   
   cm = confusion_matrix(y_test,y_pred)
   sns.heatmap(cm, cmap='Blues',annot=True,fmt='g')
-  plt.xlabel('Predicted')
-  plt.ylabel('True')
+  plt.xlabel('Predecido')
+  plt.ylabel('Verdadero')
 ```
 
 Hacemos un GridSeacrh para ver cual es el mejor kernel a utilizar.
@@ -894,8 +894,8 @@ print(classification_report(y_test,y_pred))
 print('F1-Score: {}'.format(f1_score(y_test, y_pred, average='binary'))) 
 cm = confusion_matrix(y_test,y_pred)
 sns.heatmap(cm, cmap='Blues',annot=True,fmt='g')
-plt.xlabel('Predicted')
-plt.ylabel('True')
+plt.xlabel('Predecido')
+plt.ylabel('Verdadero')
 ```
 
 Se puede ver que si bien los resultados no son excelentes, son relativamente buenos (f1_score = 0,75). Lo esperado es que, segun lo estudiado en clase, recien al hacer los ensambles con varios estimadores mediocres -muy buena palabra- (un KNN, un SVM y un RF) obtendremos una mejora en el f1_score.
@@ -1040,8 +1040,8 @@ print(classification_report(y_test,y_pred))
 print('F1-Score: {}'.format(f1_score(y_test, y_pred, average='binary'))) 
 cm = confusion_matrix(y_test,y_pred)
 sns.heatmap(cm, cmap='Blues',annot=True,fmt='g')
-plt.xlabel('Predicted')
-plt.ylabel('True')
+plt.xlabel('Predecido')
+plt.ylabel('Verdadero')
 ```
 
 Obtuvimos resultados bastante buenos (f1_score = 0,749)
@@ -1233,8 +1233,8 @@ tabla=confusion_matrix(y_test, y_pred)
 
 #Grafico la matriz de confusión
 sns.heatmap(tabla,cmap='GnBu',annot=True,fmt='g')
-plt.xlabel('Predicted')
-plt.ylabel('True')
+plt.xlabel('Predecido')
+plt.ylabel('Verdadero')
 ```
 
 Vemos que obtuvimos una alta cantidad de falsos positivos
@@ -1324,8 +1324,8 @@ tabla=confusion_matrix(y_test,y_pred_rf_cv_best)
 
 #Grafico matriz de confusión
 sns.heatmap(tabla, cmap='Blues',annot=True,fmt='g')
-plt.xlabel('Predicted')
-plt.ylabel('True')
+plt.xlabel('Predecido')
+plt.ylabel('Verdadero')
 
 #Reporte
 print(classification_report(y_test,y_pred_rf_cv_best))
@@ -1486,8 +1486,8 @@ Calculamos la matriz de confusion
 #Matriz de Confusión
 cm = confusion_matrix(y_test,y_pred_model_rfc_multimetrica)
 sns.heatmap(cm, cmap='Blues',annot=True,fmt='g')
-plt.xlabel('Predicted')
-plt.ylabel('True')
+plt.xlabel('Predecido')
+plt.ylabel('Verdadero')
 
 #Reporte
 print(classification_report(y_test,y_pred_model_rfc_multimetrica))
