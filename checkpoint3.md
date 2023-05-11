@@ -1798,11 +1798,16 @@ df_submission.to_csv('submissions/stacking_model.csv', index=False)
     El modelo SVM con sus diferentes kernels posibles es el modelo con el menor desempeño de todos los modelos entrenados hasta el momento, sin embargo es comparable en eficacia con el KNN, aunque la desventaja es que sus tiempos de entrenamiento son muchisimo mayores 
 
 3. Random Forest:
-    El primer ensamble del analisism, entre todas las instancias generadas del modelo obtuvimos una predicción de la misma magnitud que con el árbol
+    El primer ensamble del analisism, entre todas las instancias generadas del modelo obtuvimos una predicción de la misma presicion que con el árbol individual del checkpoint anterior
 
 4. XGBoost:
-    Es el modelo 
+    Es el modelo que obtuvo la mejor precisión y con el cual generamos las predicciones mejora valoradas en kaggle
 
 5. Voting:
+    Ensamble armado con los modelos generados anterior, es el modelo con el mejor desempeños de todos los ensambles hibridos generados
+
 6. Stacking:
-7. General
+    A pesar de haber usado los modelos generados en el anterior el modelo stacking no presento una mejora si no que redujo la presicion de los modelos bases que tiene integrados
+
+7. General:
+    Posterior a la generación de todos los modelos y de analizar su comportamiento podemos concluir que los modelos de ensambles que usan arboles de decisión fueron los que mejor se desempeñaron a la hora de predecir como también en performance general. En comparación al checkpoint anterior se consigue una mejora de aproximadamente 0.04 con los modelos generados
