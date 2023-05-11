@@ -857,8 +857,8 @@ Hago un entrenamiento con cross validation para ver que el modelo sea generaliza
 **ATENCION: 10 MIN con core i5 + 16Gb RAM (sin archivos de joblib)**
 
 ```python
-    folds=5
-    scorer_fn = make_scorer(sk.metrics.f1_score)
+folds=5
+scorer_fn = make_scorer(sk.metrics.f1_score)
 
 if not exists('modelos/svm_lineal_mejor_performance.joblib'):
     kfoldcv = StratifiedKFold(n_splits=folds)
