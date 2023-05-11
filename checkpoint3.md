@@ -48,6 +48,7 @@ import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 warnings.simplefilter(action='ignore', category=UserWarning)
 
+from advertencia import ADVERTENCIA #Borrar cuando entreguemos
 ```
 
 ```python
@@ -709,18 +710,22 @@ else:
 Verificamos la eficacia del modelo y sus hiperparametros mediante la validación cruzada
 
 ```python
-if not exists('modelos/xgb_optimizado.joblib'):
-  kfoldcv =StratifiedKFold(n_splits=k_folds) 
-  resultados_xgb = cross_validate(xgb_optimizado,x_train, y_train, cv=kfoldcv,scoring=metrica_fn,return_estimator=True)
-  dump(resultados_xgb, 'modelos/resultados_xgb')
-else:
-    resultados = load('modelos/resultados_xgb')
+# TODO: Esto rompe y tiene nombre mezclados mepa
+# if not exists('modelos/xgb_optimizado.joblib'):
+#   kfoldcv =StratifiedKFold(n_splits=k_folds) 
+#   resultados_xgb = cross_validate(xgb_optimizado,x_train, y_train, cv=kfoldcv,scoring=metrica_fn,return_estimator=True)
+#   dump(resultados_xgb, 'modelos/resultados_xgb')
+# else:
+#     resultados = load('modelos/resultados_xgb')
 
-metricas_xgb = resultados_xgb['test_score']
-xgb_optimizado = resultados_xgb['estimator'][np.where(metricas_xgb==max(metricas_xgb))[0][0]]
+# metricas_xgb = resultados_xgb['test_score']
+# xgb_optimizado = resultados_xgb['estimator'][np.where(metricas_xgb==max(metricas_xgb))[0][0]]
 
-metricas_knn = resultados_knn['test_score']
-knn_optimizado = resultados_knn['estimator'][np.where(metricas_knn==max(metricas_knn))[0][0]]
+# metricas_knn = resultados_knn['test_score']
+# knn_optimizado = resultados_knn['estimator'][np.where(metricas_knn==max(metricas_knn))[0][0]]
+
+print("CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO CUIDADO ")
+print(ADVERTENCIA)
 ```
 
 Observamos la distribucion de la metrica f1 a lo largo de los entrenamientos
