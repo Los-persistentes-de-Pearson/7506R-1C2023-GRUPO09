@@ -1706,13 +1706,58 @@ if not exists('submissions/voting.joblib'):
 
 # Modelo Stacking 
 
+Generamos un modelo stacking usando los modelos previamente entrenados, de manera que sabemos que los modelos bases usados no sufren de overfitting o underfitting, utilizamos un regresor lineal como modelo de decisión para agreagr dinamismo al analisis 
+
+```python
+from sklearn.ensemble import StackingClassifier
+from sklearn.linear_model import LogisticRegression
+
+modelos_base = [('knn', knn_optimizado),
+               ('xgboost', xgb_optimizado),
+               ('rf', rfc_multimetrica)]
+
+modelo_final = LogisticRegression()
+
+stacking_model = StackingClassifier(estimators=modelos_base, 
+                                    final_estimator=modelo_final, 
+                                    passthrough=True, 
+                                    cv=5,
+                                    verbose=2)
+
+```
+
+Una vez generado el modelo, lo entrenamos y observamos su comportamiento general con los datos de train 
+
+```python
+stacking_model.fit(x_train,y_train)
+y_pred_st = stacking_model.predict(x_test)
+accuracy_score(y_test, y_pred_st)
+```
+
+Mostramos la matriz de confusión del modelo y mostramos su metrica F1
+
+```python
+print('F1-Score: {}'.format(f1_score(y_test, y_pred_st, average='binary'))) 
+confusion_voting = confusion_matrix(y_test, y_pred_st)
+sns.heatmap(confusion_voting, cmap='Blues',annot=True,fmt='g')
+plt.xlabel('Predicho')
+plt.ylabel('Verdadero')
+```
+
+Podemos concluir que el modelo no representa una mejora considerable a los modelos anteriormente entrenamos y que forman parte del ensamble creado 
 
 # Conclusiones 
 
 
 1. KNN: 
+    El modelo knn no genera una mejora sustancial del modelo anteriormente entrenado. Por otro lado, es el modelo que en comparación mejora considerablemente al comparar con la version base del mismo, el modelo con ajustes de hiperparametros escala aproximadamente 0.05 en relación al base
+
 2. SVM:
+    El modelo SVM con sus diferentes kernels posibles es el modelo con el menor desempeño de todos los modelos entrenados hasta el momento, sin embargo es comparable en eficacia con el KNN, aunque la desventaja es que sus tiempos de entrenamiento son muchisimo mayores 
+
 3. Random Forest:
+    El primer ensamble del analisism, entre todas las instancias generadas del modelo obtuvimos una predicción de la misma magnitud que con el árbol
+
 4. XGBoost:
 5. Voting:
 6. Stacking:
