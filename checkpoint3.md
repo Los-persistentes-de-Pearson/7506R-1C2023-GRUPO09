@@ -17,7 +17,6 @@ from matplotlib import pyplot as plt
 from dict_paises import COUNTRY_ALPHA3_TO_COUNTRY_ALPHA2, COUNTRY_ALPHA2_TO_CONTINENT
 from joblib import dump, load
 from os.path import exists
-
 from sklearn.model_selection import StratifiedKFold, KFold,RandomizedSearchCV, train_test_split, cross_validate
 from sklearn.tree import DecisionTreeClassifier, export_graphviz, export_text
 from sklearn.metrics import confusion_matrix, classification_report , f1_score, make_scorer, precision_score, recall_score, accuracy_score,f1_score
@@ -25,7 +24,6 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn import tree
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import GridSearchCV
-
 from sklearn.datasets import load_iris
 from sklearn import preprocessing
 from sklearn.model_selection import train_test_split, RandomizedSearchCV, GridSearchCV, cross_val_score
@@ -35,7 +33,12 @@ from sklearn.datasets import make_classification
 from sklearn.metrics import confusion_matrix, classification_report
 from sklearn.utils.fixes import loguniform
 from sklearn.neighbors import KNeighborsClassifier
-
+from sklearn.ensemble import RandomForestClassifier 
+from sklearn.linear_model import LogisticRegression 
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.ensemble import VotingClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
 import xgboost as xgb
 
 #Si estamos  en colab tenemos que instalar la libreria "dtreeviz" aparte. 
@@ -1707,6 +1710,27 @@ El ensamble XGBoost representa el modelo más preciso de todos los modelos entre
 
 # Modelo Voting
 
+```python
+#Creo clasificadores
+
+rf_clf = model_rfc_multimetrica
+#rnd_clf = RandomForestClassifier()
+#knn_clf = KNeighborsClassifier()
+
+#Creo ensemble de Votación
+vot_clf = VotingClassifier(estimators = [('rf', rf_clf), ('rnd', rnd_clf), ('knn', knn_clf)], voting = 'hard')
+
+#Armo conjunto entrenamiento y test 80-20
+x_train, x_test, y_train, y_test = train_test_split(x, y, random_state = SEED, train_size = 0.80)
+
+
+#Entreno el ensemble
+vot_clf.fit(x_train, y_train)
+
+#Evaluo en conjunto de test
+pred = vot_clf.predict(x_test)
+accuracy_score(y_test, pred)
+```
 
 # Modelo Stacking 
 
