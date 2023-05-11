@@ -586,11 +586,9 @@ Basado en el grafico, es posible observar que el modelo base ha obtenido un dese
 Generamos una prediccón para kaggle con el modelo base
 
 ```python
-y_pred = knn_base.predict(hotelsdf_pruebas)
-y_pred
-df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': y_pred})
-
 if not exists('submissions/knn_base.csv'):
+    y_pred = knn_base.predict(hotelsdf_pruebas)
+    df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': y_pred})
     df_submission.to_csv('submissions/knn_base.csv', index=False)
 ```
 
@@ -1662,6 +1660,7 @@ Realizamos la validación cruzada del modelo para verificar que no caiga en over
 # metricas_xgb = resultados_xgb['test_score']
 print(ADVERTENCIA) 
 print("esto tarda y da error. Dice que metricas no esta definido")
+print("@JI Pongo un texto raro para que me encuentres rapido con Ctrl + F: Ramen")
 print(ADVERTENCIA)
 ```
 
@@ -1691,9 +1690,8 @@ plt.ylabel('verdadero')
 Realizamos la predicción de kaggle 
 
 ```python
-y_pred = xgb_optimizado.predict(hotelsdf_pruebas)
-y_pred
 if not exists('submissions/xgb_optimizado.joblib'):
+    y_pred = xgb_optimizado.predict(hotelsdf_pruebas)
     df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': y_pred})
     df_submission.to_csv('submissions/xgb_optimizado.csv', index=False)
 ```
@@ -1703,22 +1701,32 @@ El ensamble XGBoost representa el modelo más preciso de todos los modelos entre
 # Modelo Voting
 
 ```python
-#Creo clasificadores
+print(ADVERTENCIA)
+print("esto va a dar error a proposito, la idea es que apenas anden los modelos lo corremos")
+print(ADVERTENCIA)
+#anadir if cuando este list
+if not exists('models/voting.joblib'):
+    #knn_clf = 
+    svm_clf = mejor_svm_rbf #SVM
+    rf_clf = model_rfc_multimetrica #Random Forest
+    #xgb_clf =
 
-rf_clf = model_rfc_multimetrica
-svm_clf = mejor_svm_rbf
-#knn_clf = KNeighborsClassifier()
+    #Creo ensemble de Votación
+    vot_clf = VotingClassifier(estimators = [('knn', knn_clf), ('svm', svm_clf), ('rf', rf_clf), ('xgb', xgb_clf)], voting = 'hard')
 
-#Creo ensemble de Votación
-#vot_clf = VotingClassifier(estimators = [('rf', rf_clf), ('rnd', rnd_clf), ('knn', knn_clf)], voting = 'hard')
-vot_clf = VotingClassifier(estimators = [('rf', rf_clf), ('svm', svm_clf)], voting = 'hard')
+    #Entreno el ensemble
+    vot_clf.fit(x_train, y_train)
 
-#Entreno el ensemble
-vot_clf.fit(x_train, y_train)
+    #Evaluo en conjunto de test
+    pred = vot_clf.predict(x_test)
+    accuracy_score(y_test, pred)
+```
 
-#Evaluo en conjunto de test
-pred = vot_clf.predict(x_test)
-accuracy_score(y_test, pred)
+```python
+if not exists('submissions/voting.joblib'):
+    y_pred = vot_clf.predict(hotelsdf_pruebas)
+    df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': y_pred})
+    df_submission.to_csv('submissions/voting.csv', index=False)
 ```
 
 # Modelo Stacking 
