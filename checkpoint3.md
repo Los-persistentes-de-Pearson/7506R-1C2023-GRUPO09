@@ -537,6 +537,10 @@ x_train, x_test, y_train, y_test = train_test_split(hotelsdf_modelo_x,
                                                     random_state=SEED) #Semilla 9, como el Equipo !!
 ```
 
+```python
+input()
+```
+
 # KNN
 
 Entrenamos un primer modelo de KNN usando los datos previamente tratados
@@ -781,11 +785,11 @@ Hacemos un GridSeacrh para ver cual es el mejor kernel a utilizar.
 OJO, TOMA 32 MIN aprox correrlo
 
 ```python
-if exists('modelos/gridcv_svm_tres.joblib') == False:
+if not exists('modelos/gridcv_svm_kernel.joblib'):
     parametros = { 'kernel': ["linear", "poly","rbf"]}
 
 
-    clf_tres = SVC()
+    clf_tres = SVC(random_state=9)
 
     scorer_fn = make_scorer(sk.metrics.f1_score)
 
@@ -803,17 +807,18 @@ if exists('modelos/gridcv_svm_tres.joblib') == False:
     print()
     print("Mostramos el mejor resultado obtenido de busqueda aleatoria: ")
     print("f1_score: ",gridcv_svm_tres.best_score_)
-    dump(gridcv_svm_tres, 'modelos/gridcv_svm_tres.joblib')
+    
+    dump(gridcv_svm_tres, 'modelos/gridcv_svm_kernel.joblib')
 ```
 
 ```python
-gridcv_svm_tres = load('modelos/gridcv_svm_tres.joblib')
+gridcv_svm_kernel = load('modelos/gridcv_svm_kernel.joblib')
 ```
 
 Obtenemos que el mejor Kernel es el linel con un f1_score de 0,75.
 
 
-A continuacion, probamos de igualmente los 3 Kernels para ver si podemos obtener alguna optimizacion.
+A continuacion, probamos igualmente los 3 Kernels para ver si podemos obtener alguna optimizacion o mejora del valor anterior
 
 
 ### Modifico Kernels para ver cual se adapta mejor
@@ -822,34 +827,52 @@ A continuacion, probamos de igualmente los 3 Kernels para ver si podemos obtener
 ### Lineal 
 
 ```python
-#Creo un clasificador con kernel lineal y lo entreno
-clf_lineal = SVC(kernel='linear', C=5)
-clf_lineal.fit(x_train, y_train)
+if not exists('modelos/svm_lineal_mejor_performance.joblib'):
+    #Creo un clasificador con kernel lineal y lo entreno
+    svm_lineal_mejor_performance = SVC(kernel='linear', C=5, random_state=9)
+    svm_lineal_mejor_performance.fit(x_train, y_train)
 
-#Hago la predicción y calculo las métricas
-y_pred_lin=clf_lineal.predict(x_test)
-metricas(y_pred_lin,y_test)
+    #Hago la predicción y calculo las métricas
+    y_pred_lin=svm_lineal_mejor_performance.predict(x_test)
+    metricas(y_pred_lin,y_test)
+
+    dump(svm_lineal_mejor_performance, 'modelos/svm_lineal_mejor_performance.joblib')
+
+else:
+    svm_lineal_mejor_performance = load('modelos/svm_lineal_mejor_performance.joblib')
+    y_pred_lin=svm_lineal_mejor_performance.predict(x_test)
+    metricas(y_pred_lin,y_test)
+
 ```
 
-Con el kernel lineal, obtebemos un f1_score relativamente bueno (casi igual al obtenido con el GridSearch antes) aunq no mejor que el obtenido con el decission tree en la entrega anterior.Intentamos cambiar su parametro C para ver si conseguimos alguna leve mejora (no lo elevamos demasiado porque ya sabemos que overfittea). Este priceso fue hecho a "fuerza bruta" ya que no encontramos la manera de correr un Random/Grid search para variar solo el parametro C. Se probo con valores de C = [1, 5, 7, 10, 15, 100] y con todos se obtuvo un f1_score muy similar. Optamos por el valor de 5 ya que lo esperado es que un valor de C mas bajo nos entregue un modelo mas generalizable.
+Con el kernel lineal, obtebemos un f1_score relativamente bueno (casi -por no decir exactamente igual- al obtenido con el GridSearch antes) aunq no mejor que el obtenido con el decission tree en la entrega anterior.Intentamos cambiar su parametro C para ver si conseguimos alguna leve mejora (no lo elevamos demasiado porque ya sabemos que overfittea). Este proceso fue hecho a "fuerza bruta" ya que no encontramos la manera de correr un Random/Grid search para variar solo el parametro C. Se probo con valores de C = [1, 5, 7, 10, 15, 100] y con todos se obtuvo un f1_score muy similar. Optamos por el valor de 5 ya que lo esperado es que un valor de C mas bajo nos entregue un modelo mas generalizable.
 
 
 Hago un entrenamiento con cross validation para ver que el modelo sea generalizable\
 
-**ATENCION: 8 MIN con core i5 + 16Gb RAM**
+**ATENCION: 10 MIN con core i5 + 16Gb RAM (sin archivos de joblib)**
 
 ```python
-folds=5
+if not exists('modelos/svm_lineal_mejor_performance.joblib'):
 
-kfoldcv = StratifiedKFold(n_splits=folds)
-scorer_fn = make_scorer(sk.metrics.f1_score)
-resultados = cross_validate(clf_lineal,x_train, y_train, cv=kfoldcv,scoring=scorer_fn,return_estimator=True)
+    folds=5
+
+    kfoldcv = StratifiedKFold(n_splits=folds)
+    scorer_fn = make_scorer(sk.metrics.f1_score)
+    resultados = cross_validate(svm_lineal_mejor_performance,x_train, y_train, cv=kfoldcv,scoring=scorer_fn,return_estimator=True)
+
+    dump(resultados, 'modelos/resultados_cv_kernel_lineal.joblib')
+else:
+    resultados = load('modelos/resultados_cv_kernel_lineal.joblib')
 
 ```
 
 ```python
 metricsCV=resultados['test_score']
-svm_lineal_mejor_performance=resultados['estimator'][np.where(metricsCV==max(metricsCV))[0][0]]
+
+if not exists('modelos/svm_lineal_mejor_performance.joblib'):
+    svm_lineal_mejor_performance=resultados['estimator'][np.where(metricsCV==max(metricsCV))[0][0]]
+    dump(svm_lineal_mejor_performance, 'modelos/svm_lineal_mejor_performance.joblib')
 
 metricsCV
 ```
@@ -866,6 +889,10 @@ plt.title("Modelo entrenado con 5 folds")
 Se puede ver que no hay mucha variacion en los valores obtenidos por lo cual podemos concluir que es un modelo bueno para generalizar. A continuacion los resultados de probar con el dataset de testeo.
 
 ```python
+svm_lineal_mejor_performance = load('modelos/svm_lineal_mejor_performance.joblib')
+```
+
+```python
 y_pred= svm_lineal_mejor_performance.predict(x_test)
 print(classification_report(y_test,y_pred))
 print('F1-Score: {}'.format(f1_score(y_test, y_pred, average='binary'))) 
@@ -875,15 +902,14 @@ plt.xlabel('Predicted')
 plt.ylabel('True')
 ```
 
-```python
-# dump(svm_lineal_mejor_performance, 'modelos/svm_lineal_mejor_performance.joblib')
-```
+Se puede ver que si bien los resultados no son excelentes, son relativamente buenos (f1_score = 0,75). Lo esperado es que, segun lo estudiado en clase, recien al hacer los ensambles con varios estimadores mediocres -muy buena palabra- (un KNN, un SVM y un RF) obtendremos una mejora en el f1_score.
 
-A continuacion deberiamos exportar el csv para submission a Kaggle. Puesto que no representaninguna mejora del score obtenido anteriormente no lo hacemos. Lo esperado es que, segun lo estudiado en clase, recien al hacer los ensambles con varios estimadores mediocres -muy buena palabra- (un KNN, un SVM y un RF) obtendremos una mejora en el f1_score.
+
+A continuacion deberiamos exportar el csv para submission a Kaggle. Puesto que no representaninguna mejora del score obtenido anteriormente no lo hacemos
 
 ```python
-df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': y_pred})
-df_submission.to_csv('submissions/svm_lineal_mejor_performance.csv', index=False)
+# df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': y_pred})
+# df_submission.to_csv('submissions/svm_lineal_mejor_performance.csv', index=False)
 
 ```
 
@@ -896,62 +922,75 @@ El codigo a continuacion para ambos kernels se encuentra comentado en muchas par
 ### Polinomico
 Creamos un SVM con Kernel polynomico con parametros por default (sin parametros)
 
+**ATENCION: 3 MIN con core i5 + 16Gb RAM (sin modelos Joblib) **
+
 ```python
-#Creo un clasificador con kernel polinomico y lo entreno sobre los datos escalados min-max
-clf_poly = SVC(kernel='poly')
-clf_poly.fit(x_train, y_train)
+if not exists('modelos/clf_poly_no_optimizado.joblib'):
+
+    #Creo un clasificador con kernel polinomico y lo entreno sobre los datos
+    clf_poly_no_optimizado = SVC(kernel='poly', random_state=9)
+    clf_poly_no_optimizado.fit(x_train, y_train)
+    
+    dump(clf_poly_no_optimizado, 'modelos/clf_poly_no_optimizado.joblib')
+
+else:
+    clf_poly_no_optimizado = load('modelos/clf_poly_no_optimizado.joblib')
 
 #Hago la predicción y calculo las métricas
-y_pred_pol=clf_poly.predict(x_test)
+y_pred_pol=clf_poly_no_optimizado.predict(x_test)
 metricas(y_pred_pol,y_test)
-
 ```
 
 Con el kernel polinomico sin parametros obtenemos un f1_score bastante malo (0,6). Intentamos optimizarlo a continuacion.
 
 
 #### Intento mejorar hiperparametros (da error)
-A continuacion se deja el codigo que se intento utlizar para optimizar los hiperparametros con RandomizedSearchCV del SVM con Kernel polinomico. No se pudo obtener un resultado en tiempo razonable
+A continuacion se deja el codigo que se intento utlizar para optimizar los hiperparametros con RandomizedSearchCV del SVM con Kernel polinomico. No se pudo obtener un resultado en tiempo razonable por ello se lo deja comentado
 
 ```python
-#vario hiperparaemtros en kernel polinomico
-clf_poly = SVC(kernel='poly')
+# #vario hiperparaemtros en kernel polinomico
+# clf_poly = SVC(kernel='poly')
 
-parametros = [ {'C': [0,75, 9, 1, 10, 100], 
-                'gamma': [10, 0.001, 0.0001], 
-                'kernel': ['poly']},
- ]
-
-
-combinaciones=1 #2,3 se puso 1 para ver si tardaba menos. :(
-
-scorer_fn = make_scorer(sk.metrics.f1_score)
+# parametros = [ {'C': [0,75, 9, 1, 10, 100], 
+#                 'gamma': [10, 0.001, 0.0001], 
+#                 'kernel': ['poly']},
+#  ]
 
 
-Randomcv_svm = RandomizedSearchCV(estimator=clf_poly,
-                              #param_grid= parametros,
-                              param_distributions = parametros,
-                              scoring=scorer_fn,
-                              #cv=kfoldcv,
-                              n_iter=combinaciones,
-                              ) 
+# combinaciones=1 #2,3 se puso 1 para ver si tardaba menos. :(
 
-#lo entreno sobre los datos
-Randomcv_svm.fit(x_train, y_train)
+# scorer_fn = make_scorer(sk.metrics.f1_score)
 
-#Hago la predicción y calculo las métricas
-Randomcv_svm.predict(x_test)
-metricas(Randomcv_svm,y_test)
+
+# Randomcv_svm = RandomizedSearchCV(estimator=clf_poly,
+#                               #param_grid= parametros,
+#                               param_distributions = parametros,
+#                               scoring=scorer_fn,
+#                               #cv=kfoldcv,
+#                               n_iter=combinaciones,
+#                               ) 
+
+# #lo entreno sobre los datos
+# Randomcv_svm.fit(x_train, y_train)
+
+# #Hago la predicción y calculo las métricas
+# Randomcv_svm.predict(x_test)
+# metricas(Randomcv_svm,y_test)
 ```
 
-Intentamos optimizarlo a mano
+Intentamos optimizarlo a mano. :))) (?
 
 ```python
-clf_poly = SVC(kernel='poly', C=5, degree=1, gamma=1, coef0=1)
-clf_poly.fit(x_train, y_train)
-
+if not exists ('modelos/svm_poly_mejor_performance.joblib'):
+    svm_poly_mejor_performance = SVC(kernel='poly', C=5, degree=1, gamma=1, coef0=1, random_state=9)
+    svm_poly_mejor_performance.fit(x_train, y_train)
+    
+    dump(svm_poly_mejor_performance, 'modelos/svm_poly_mejor_performance.joblib')
+else:
+    svm_poly_mejor_performance = load('modelos/svm_poly_mejor_performance.joblib')
+    
 #Hago la predicción y calculo las métricas
-y_pred_pol=clf_poly.predict(x_test)
+y_pred_pol=svm_poly_mejor_performance.predict(x_test)
 metricas(y_pred_pol,y_test)
 ```
 
@@ -961,20 +1000,29 @@ Obtebemos que con valores de c=5, degree = 1, gamma =1 y coef01, el f1_score es 
 Hacemos cross validation para ver que el modelo sea generalizable
 
 
-#### ATENCION tarda 7M 45 seg
+#### ATENCION tarda 12 Min (sin archivos de joblib)
 
 ```python
-folds=5
+if not exists('modelos/svm_poly_mejor_performance.joblib'):
+    folds=5
 
-kfoldcv = StratifiedKFold(n_splits=folds)
-scorer_fn = make_scorer(sk.metrics.f1_score)
-resultados = cross_validate(clf_poly,x_train, y_train, cv=kfoldcv,scoring=scorer_fn,return_estimator=True)
+    kfoldcv = StratifiedKFold(n_splits=folds)
+    scorer_fn = make_scorer(sk.metrics.f1_score)
+    resultados = cross_validate(svm_poly_mejor_performance,x_train, y_train, cv=kfoldcv,scoring=scorer_fn,return_estimator=True)
 
+    dump(resultados, 'modelos/resultados_cv_kernel_poly.joblib')
+else:
+    resultados = load('modelos/resultados_cv_kernel_poly.joblib')
+
+```
+
+```python
 metricsCV=resultados['test_score']
-svm_poly_mejor_performance=resultados['estimator'][np.where(metricsCV==max(metricsCV))[0][0]]
+if not exists('modelos/svm_lineal_mejor_performance.joblib'):
+    svm_poly_mejor_performance=resultados['estimator'][np.where(metricsCV==max(metricsCV))[0][0]]
+    dump(svm_poly_mejor_performance, 'modelos/svm_poly_mejor_performance.joblib')
 
 metricsCV
-
 ```
 
 ```python
@@ -987,6 +1035,10 @@ plt.title("Modelo entrenado con 5 folds")
 ```
 
 ```python
+svm_poly_mejor_performance = load('modelos/svm_poly_mejor_performance.joblib')
+```
+
+```python
 y_pred= svm_poly_mejor_performance.predict(x_test)
 print(classification_report(y_test,y_pred))
 print('F1-Score: {}'.format(f1_score(y_test, y_pred, average='binary'))) 
@@ -996,24 +1048,32 @@ plt.xlabel('Predicted')
 plt.ylabel('True')
 ```
 
-Exportamos el modelo con kernel polinomico sin optimizar, que es el q pudimos terminar de correr
+Obtuvimos resultados bastante buenos (f1_score = 0,749)
 
-```python
-dump(y_pred_pol, 'modelos/svm_poly_mejor_performance.joblib')
-```
 
-Obtuvims resultados bastante buenos. Al igual que con el kernel lineal no exportamos el csv ya que la predccion no fue mejor que la que ya teniamos en Kaggle
+Como conclusion del kernel polinomico podemos decir que es relativamente bueno ya que se obtienen buenos valores de f1_socre (). Sin embargo consideramos que apelar a un Kernerl con esta complejidad para obtener resultados muy parecidos al lineal no es rentable. 
+#### Mantenemos al kernel lineal como el mejor hasta el momento
 
 
 ### Kernel radial
 
+
+**ATENCION: 5 MIN con core i5 + 16Gb RAM (sin archivos de joblib)**
+
 ```python
-#Creo un clasificador con kernel radial y lo entreno
-clf_radial = SVC(kernel='rbf')
-clf_radial.fit(x_train, y_train)
+if not exists('modelos/clf_radial_no_optimizado.joblib'):
+
+    #Creo un clasificador con kernel radial y lo entreno
+    clf_radial_no_optimizado = SVC(kernel='rbf', random_state=9)
+    clf_radial_no_optimizado.fit(x_train, y_train)
+
+    dump(clf_radial_no_optimizado, 'modelos/clf_radial_no_optimizado.joblib')
+
+else:
+    clf_radial_no_optimizado = load('modelos/clf_poly_no_optimizado.joblib')
 
 #Hago la predicción y calculo las métricas
-y_pred_rad=clf_radial.predict(x_test)
+y_pred_rad=clf_radial_no_optimizado.predict(x_test)
 metricas(y_pred_rad,y_test)
 ```
 
@@ -1022,98 +1082,114 @@ Obtenemos resultados bastante malos de f1_score (0,6)
 
 #### Intentamos mejorar los parametros del SVM con kernel raidal haciendo una busquedo con GridSearch.
 
+
+**ATENCION: 2 MIN con core i5 + 16Gb RAM (sin archivos de joblib)**
+
 ```python
-#from sklearn.utils.fixes import loguniform
+if not exists('modelos/gridcv_svm_kernel_radial.joblib'):
 
-parametros = {'C': [1, 9, 10, 100],
- 'gamma': [0, 10, 100],
- 'class_weight':['balanced', None]}
+    parametros = {'C': [1, 9, 10, 100],
+    'gamma': [0, 10, 100],
+    'class_weight':['balanced', None]}
 
-#vario hiperparaemtros en kernel polinomico
-clf_rbf = SVC(kernel ="rbf", cache_size=900, max_iter=100)
-#SVC(kernel='poly', C=5, degree=10, gamma=10, coef0=10)
-#clf.fit(x_train, y_train)
-combinaciones=10
+    #vario hiperparaemtros en kernel polinomico
+    clf_rbf = SVC(kernel ="rbf", cache_size=900, max_iter=100, random_state=9)
+    #SVC(kernel='poly', C=5, degree=10, gamma=10, coef0=10)
+    #clf.fit(x_train, y_train)
+    combinaciones=10
 
-scorer_fn = make_scorer(sk.metrics.f1_score)
+    scorer_fn = make_scorer(sk.metrics.f1_score)
 
-#svmReg = svm.SVR(cache_size=900, max_iter=1000) # El cache es para agilizar el procesado
-# Ademas se limita a 1000 max iter dado que de otra forma el procesamiento tarda demasiado.
+    #svmReg = svm.SVR(cache_size=900, max_iter=1000) # El cache es para agilizar el procesado
+    # Ademas se limita a 1000 max iter dado que de otra forma el procesamiento tarda demasiado.
 
 
-gridcv_svm = GridSearchCV(estimator=clf_rbf,
-                              param_grid= parametros,
-                              #param_distributions = parametros,
-                              scoring=scorer_fn,
-                              #cv=kfoldcv,
-                              #n_iter=combinaciones
-                              ) 
+    gridcv_svm_kernel_radial = GridSearchCV(estimator=clf_rbf,
+                                param_grid= parametros,
+                                #param_distributions = parametros,
+                                scoring=scorer_fn,
+                                #cv=kfoldcv,
+                                #n_iter=combinaciones
+                                ) 
 
-#lo entreno sobre los datos
-gridcv_svm.fit(x_train, y_train)
+    #lo entreno sobre los datos
+    gridcv_svm_kernel_radial.fit(x_train, y_train)
 
+    dump(gridcv_svm_kernel_radial, 'modelos/gridcv_svm_kernel_radial.joblib')
+
+else:
+    gridcv_svm_kernel_radial = load('modelos/gridcv_svm_kernel.joblib')
+
+#con o sin el archivo joblib...
 print("Mostramos los mejores resultados: ")
-print(gridcv_svm.best_params_)
+print(gridcv_svm_kernel_radial.best_params_)
 print()
 print("Mostramos el mejor resultado obtenido de busqueda aleatoria: ")
-print("f1_score: ",gridcv_svm.best_score_)
-
+print("f1_score: ",gridcv_svm_kernel_radial.best_score_)
 ```
 
 Se oibtuvieron resultados de f1_score apenas mejores q en el caso anterior (0.67). No representan una mejora respecto al SVM creado por default.
 
 
-A continuacion, creamos el SVM con ""mejores"" parametros y realizamos la prediccion. Se comenta el codigo debido a que TOMA MUCHO TIEMPO ENTRENARLO(No sabemos cuanto realmente)
+A continuacion, creamos el SVM con ""mejores"" parametros y realizamos la prediccion. <br /> 
+
+**ATENCION: 15 MIN con core i5 + 16Gb RAM (sin archivos de joblib)**<br />
+
 
 ```python
-# mejor_svm_rbf = SVC().set_params(**gridcv_svm.best_params_)
-# mejor_svm_rbf.fit(x_train, y_train)
+if not exists('modelos/svm_kernel_radial_mejor.joblib'):
 
-# y_pred_rad_mejorado=mejor_svm_rbf.predict(x_test)
-# metricas(y_pred_rad_mejorado,y_test)
+    mejor_svm_rbf = SVC().set_params(**gridcv_svm_kernel_radial.best_params_)
+    mejor_svm_rbf.fit(x_train, y_train)
+    dump(svm_lineal_mejor_performance, 'modelos/svm_kernel_radial_mejor.joblib')
+
+else:
+    mejor_svm_rbf = load('modelos/svm_kernel_radial_mejor.joblib')
+
+
 ```
 
-##### Hacemos Cross validation con svm radial encontrado con parametrops por default. NO pudimos terminar de correrlo debido a que toma mucho tiempo
-
-
-ATENCION no sabemos cuanto toma
+**2 minutos toma lo que sigue**
 
 ```python
-# folds=5
-
-# kfoldcv = StratifiedKFold(n_splits=folds)
-# scorer_fn = make_scorer(sk.metrics.f1_score)
-# resultados = cross_validate(clf_radial,x_train, y_train, cv=kfoldcv,scoring=scorer_fn,return_estimator=True)
-
-# metricsCV=resultados['test_score']
-
-# svm_poly_mejor_performance=resultados['estimator'][np.where(metricsCV==max(metricsCV))[0][0]]
-
-# metricsCV
+y_pred_rad_mejorado=mejor_svm_rbf.predict(x_test)
+metricas(y_pred_rad_mejorado,y_test)
 ```
+
+Podemos ver que las metricas mejoraron sustancialmente pero no supera el f1_score de 0,75 alcanzado con el kernels lineal/ polinomico. Ademas existe cierto sesgo ya que el modelo tiene mayor capacidad para predecir la clase 1 sobre la clase 0.
+
+
+A pesar de ello...
+
+
+##### Hacemos Cross validation con el svm radial con mejores paraemetros encontrado.
+**El siguiente codigo se encuentra comentado ya que no pudimos terminar de correrlo debido al tiempo que toma (minimo 35 minutos con core i5 y 16Gb RAM)**
+
 
 ```python
-# metric_labelsCV = ['F1 Score']*len(metricsCV) 
-# sns.set_context('talk')
-# sns.set_style("darkgrid")
-# plt.figure(figsize=(8,8))
-# sns.boxplot(metricsCV)
-# plt.title("Modelo entrenado con 5 folds")
+# if not exists('moswloa/svm_kernel_radial_mejor.joblib'):
+
+#     folds=5
+
+#     kfoldcv = StratifiedKFold(n_splits=folds)
+#     scorer_fn = make_scorer(sk.metrics.f1_score)
+#     resultados = cross_validate(mejor_svm_rbf,x_train, y_train, cv=kfoldcv,scoring=scorer_fn,return_estimator=True)
+
+#     metricsCV=resultados['test_score']
+
+#     clf_poly_no_optimizado=resultados['estimator'][np.where(metricsCV==max(metricsCV))[0][0]]
+    
+
+#     metricsCV
 ```
 
-Al no poder terminar de correr cross validation no podemos afirmar que el modelo con Kernel radial es generalizable, lo descartamos para su utilizacion en el ensmable.
+Al no poder terminar de correr cross validation no podemos afirmar que el modelo con Kernel radial sea generalizable. En caso de que lo fuere, posee un score bajo (f1_score =0,73) respecto a los otros kernels y por si fuera poco se encuentra sesgado como se dijo mas arriba.<br />
+**Se descarta para su utilizacion en el ensmable**.
 
 
 ## Conclusion SVM
-Con lo visto en clase, las pruebas hechas durante la realizacion del tp, lo googleado, lo Chatgetepeado Y lo BARDeado (AI de google en prueba) se concluye que al trabjar con una cantidad tan grande de datos de testeo lo mejor es utilzar un Kernel lineal(ver seccion anterior). Este sera el utilizado para el ensable en su correspondiente seccion
+Con lo visto en clase, las pruebas hechas durante la realizacion del tp, lo googleado, lo Chatgetepeado Y lo BARDeado (AI de google en prueba) se concluye que al trabjar con una cantidad tan grande de datos de testeo lo mejor es utilzar un Kernel lineal(ver primera seccion de SVM). Este sera el utilizado para el ensable en su correspondiente seccion.
 
-
-A continuacion repetimos la predccion para que quede mas a mano
-
-```python
-# y_pred_lin=clf_lineal.predict(x_test)
-# metricas(y_pred_lin,y_test)
-```
 
 # Random Forest 
 
