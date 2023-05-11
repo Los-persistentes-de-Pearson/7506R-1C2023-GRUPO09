@@ -65,15 +65,31 @@
   \end{center}
 \end{titlepage}
 
-\section*{Arbol de desicion}
-Comenzamos este segundo checkpoint adaptando el dataset de testeo al Dataset de train con el que trabajamos en la primera parte. Esto consistió principalmente en adaptar el dataset de testeo al dataset de entrenamiento para sean compatibles con el modelo que creamos. En el camino tuvimos algunos registros con datos que no habíamos contemplado anteriormente (e incluso datos faltantes); estos los tuvimos que adaptar a nuestro dataframe de entrenamiento para usar el modelo de predicción. Luego aplicamos en ambos Datasets la técnica de One Hot Encoding para generar columnas numéricas correspondientes a las variables categóricas. Esto es necesario ya que los árboles de decisión que usamos en el tp sólo pueden trabajar con valores numéricos.
+\section*{KNN} 
 
-Una vez realizado el emparejamiento entre datasets de test y train, comenzamos a trabajar con árboles. Primero separamos el dataset de train hotels\_train.csv en dos datasets: Uno lo utilizamos para entrenar nuestro modelo y el otro para testear el modelo obtenido. Elegimos una proporción de 80/20. Inicialmente, probamos con un árbol con una profundidad máxima de 20 y creamos un árbol utilizando el criterio Gini. Este modelo fue generado directamente tomando en cuenta todos los valores y sin generar ningún tipo de poda, para observar cómo se comporta el modelo sin hiper parámetros. Al graficarlo obtenemos, por supuesto, un árbol muy grande y extremadamente complejo. Al hacer nuestra primera predicción exportando el csv obtuvimos un score de 0,79 en la competencia de Kaggle (nada mal para un árbol sin ningún tipo de optimización).
+El modelo Knn es capaz de predecir con una precisión aceptable. Por un lado el modelo base tiene una precisión aproximada de 0.70, al someterlo a la búsqueda de hiperparametros y observar su comportamiento mientras se agregan más vecinos observamos que puede llegar a mejorar, de tal manera que toma una precisión aproximada de 0.74, lo cual representa una mejora considera con relación al modelo base. \\
+El modelo no representa una mejora predictiva con relación al modelo anteriormente entrenado, el árbol de decisión. No se puede destacar tampoco la performance del modelo con relación a los modelos anteriores
 
-Para mejorar nuestra predicción y encontrar un árbol más performante, procedimos a crear un nuevo árbol con el que trabajamos para mejorar sus hiperparametros. En éste, usamos 10 folds y probamos 15 combinaciones posibles entre los parámetros para buscar la mejor entre todas ellas. Para ellos se buscó la optimización del F1\_score, el cual fue seleccionado debido a que es un buen equilibrio entre la precisión y el recall. Con este árbol obtuvimos un valor levemente mejor de F1\_score. Sin embargo el mayor beneficio es que simplifica de manera significativa las reglas utilizadas para predecir y disminuye considerablemente el tamaño del árbol.
+\section*{SVM} 
 
-Por último, para evaluar el árbol obtenido utilizamos la técnica de Cross Validation con 10 folds. Así comprobamos que el modelo no cae en los fenómenos del overfitting ni underfitting.
+Comenzamos este modelo probando los tres kernels (lineal, polinómico y radial) para ver cual era mejor Kernel. Resultó ser el Kernel lineal y nos dio un f1\_score de 0,75. Aun así decidimos probar por separado cada uno de los kernels. El lineal lo optimizamos pero no obtuvimos mejora en el score. \\
+El Kernel polinómico sin optimizar nos dio un score relativamente bajo (0,6). Al intentar optimizar sus hiperparametros, no pudimos terminar de correr el algoritmo debido al tiempo que tomaba. Finalmente el Kernel radial nos dio un f1\_score muy bajo (0,60) y al optimizar hiperparametros apenas mejoró (0,67). Además para este caso no pudimos terminar de entrenar con CV para ver su capacidad de generalización. 
 
-Para concluir el análisis es importante destacar que en los múltiples entrenamientos obtuvimos resultados en un rango de 0.79 a 0.81 (con muy poca variación entre si). Esto nos indicaría que si bien el árbol de decisión es buen método de predicción; la mejora de sus hiper parámetros no implicó un aumento significativo del F1 score (independientemente de su tamaño). 
+\section*{Random Forest} 
+
+Para el modelo random forest realizamos tres instancias. En la primera hicimos un modelo utilizando hiperparametros totalmente aleatorios. Para nuestra sorpresa, obtuvimos resultados bastante decentes (Un 80\% de precisión en el set de testeo).\\
+Después de esto decidimos optimizar los hiperparametros del random forest con validación cruzada usando grid search optimizando la f1 score.  Estas optimizaciones implicaron una mejora del $\sim$ 3\% en el set de datos de testeos. Finalmente, decidimos hacer una optimización por validación cruzada con grid search buscando mejorar la mayor cantidad de métricas simultáneamente (precisamente: accuracy , f1 score, área bajo la curva roc, recall y precisión). A pesar de toda esta optimización, no hubo ninguna mejora considerable a la hora de predecir el set de testeo (solo hubo una mejora del $\sim$ 0.01). 
+
+\section*{XGBoost} 
+
+El modelo XGBoost representa el primer modelo que en su forma base genera la mejor predicción de todos los modelos entrenados en el análisis. Se realiza una búsqueda de los mejores hiperparametros, la cual, no genera una mejora consistente en las capacidades predictivas del modelo. Por lo tanto, se pueden llegar a las conclusiones que los modelos de ensambles usando árboles y los modelos de árboles son los más precisiones  la hora de realizar predicciones 
+
+\section*{Voting} 
+Tanto para el ensamble voting como stacking, decidimos usar los mejores modelos que obtuvimos en las etapas anteriores. Esto lo hicimos para poder sacar el mayor jugo de los modelos que habíamos obtenido antes. 
+
+\section*{Stacking} 
+
+
+
 
 \end{document}

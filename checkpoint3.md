@@ -1671,6 +1671,10 @@ El ensamble XGBoost representa el modelo más preciso de todos los modelos entre
 # Modelo Voting
 
 ```python
+print("test")
+```
+
+```python
 #anadir if cuando este list
 if not exists('models/voting.joblib'):
     knn_clf = knn_optimizado #Knn
@@ -1679,7 +1683,7 @@ if not exists('models/voting.joblib'):
     xgb_clf = xgb_optimizado #XGBoost
 
     #Creo ensemble de Votación
-    vot_clf = VotingClassifier(estimators = [('knn', knn_clf), ('svm', svm_clf), ('rf', rf_clf), ('xgb', xgb_clf)], voting = 'hard')
+    vot_clf = VotingClassifier(estimators = [('knn', knn_clf), ('svm', svm_clf), ('rf', rf_clf), ('xgb', xgb_clf)], voting = 'hard', n_jobs=JOBS)
 
     #Entreno el ensemble
     vot_clf.fit(x_train, y_train)
@@ -1687,6 +1691,10 @@ if not exists('models/voting.joblib'):
     #Evaluo en conjunto de test
     pred = vot_clf.predict(x_test)
     accuracy_score(y_test, pred)
+```
+
+```python
+print("test 23")
 ```
 
 ```python
