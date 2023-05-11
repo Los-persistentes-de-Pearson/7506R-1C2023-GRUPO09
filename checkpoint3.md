@@ -882,9 +882,6 @@ svm_lineal_mejor_performance = load('modelos/svm_lineal_mejor_performance.joblib
 
 ```python
 y_pred= svm_lineal_mejor_performance.predict(x_test)
-print(ADVERTENCIA) 
-print("esto tarda, meter en un if si puede ser")
-print(ADVERTENCIA)
 print(classification_report(y_test,y_pred))
 print('F1-Score: {}'.format(f1_score(y_test, y_pred, average='binary'))) 
 cm = confusion_matrix(y_test,y_pred)
@@ -899,9 +896,10 @@ Se puede ver que si bien los resultados no son excelentes, son relativamente bue
 A continuacion deberiamos exportar el csv para submission a Kaggle. Puesto que no representaninguna mejora del score obtenido anteriormente no lo hacemos
 
 ```python
-# df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': y_pred})
-# df_submission.to_csv('submissions/svm_lineal_mejor_performance.csv', index=False)
-
+if not exists('submissions/svm_lineal_mejor_performance.csv'):
+    y_pred = svm_lineal_mejor_performance.predict(hotelsdf_pruebas)
+    df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': y_pred})
+    df_submission.to_csv('submissions/svm_lineal_mejor_performance.csv', index=False)
 ```
 
 ### Polinomico y Radial
@@ -910,7 +908,7 @@ A continuacion deberiamos exportar el csv para submission a Kaggle. Puesto que n
 El codigo a continuacion para ambos kernels se encuentra comentado en muchas partes debido al gran tiempo que demora entrenar SVM's con tantos datos (no sabemos cuanto exactamente cuanto ya que nunca pudimos terminar de correrlo). Esto se debe a que al utilizar Kernels Radial y Polinomico los algoritmos crean matrices de NXN demandando mucha RAM y CPU. Dejamos los snippets de codigo como prueba de ello.
 
 
-### Polinomico
+#### Polinomico
 Creamos un SVM con Kernel polynomico con parametros por default (sin parametros)
 
 **ATENCION: 3 MIN con core i5 + 16Gb RAM (sin modelos Joblib) **
@@ -928,9 +926,6 @@ else:
     clf_poly_no_optimizado = load('modelos/clf_poly_no_optimizado.joblib')
 
 #Hago la predicción y calculo las métricas
-print(ADVERTENCIA) 
-print("esto tarda, meter en un if si puede ser")
-print(ADVERTENCIA)
 y_pred_pol=clf_poly_no_optimizado.predict(x_test)
 metricas(y_pred_pol,y_test)
 ```
@@ -1049,7 +1044,7 @@ Como conclusion del kernel polinomico podemos decir que es relativamente bueno y
 #### Mantenemos al kernel lineal como el mejor hasta el momento
 
 
-### Kernel radial
+#### Kernel radial
 
 
 **ATENCION: 5 MIN con core i5 + 16Gb RAM (sin archivos de joblib)**
@@ -1537,7 +1532,6 @@ Vemos que a pesar de todas nuestras mejoras, solo obtuvimos una mejora del 0.2%
 Generamos un modelo XGBoost base, con los hiperparametros por defecto, de manera que se pueda realizar una comparacion posterior a entrenar un modelo con sus hiperparametros optimmizados
 
 ```python
-
 if not exists('modelos/xgb_base.joblib'):
     xgb_base = xgb.XGBClassifier(random_state=9, n_estimators=100) 
     xgb_base.fit(x_train, y_train)
@@ -1549,6 +1543,7 @@ else:
 Vemos el comportamiento del modelo base y mostramos las metricas obtenidas en el procesp
 
 ```python
+y_pred = xgb_base.predict(x_test)
 print(classification_report(y_test,y_pred))
 print('F1-Score: {}'.format(f1_score(y_test, y_pred, average='binary'))) 
 cm = confusion_matrix(y_test,y_pred)
@@ -1676,18 +1671,15 @@ El ensamble XGBoost representa el modelo más preciso de todos los modelos entre
 # Modelo Voting
 
 ```python
-print(ADVERTENCIA)
-print("esto va a dar error a proposito, la idea es que apenas anden los modelos lo corremos")
-print(ADVERTENCIA)
 #anadir if cuando este list
-if not exists('models/voting.joblib'):
-    #knn_clf = 
+if not exists('modelos/voting.joblib.gz'): #Tenemos el archivo comprimido porque era muy grande
+    knn_clf = knn_optimizado #Knn
     svm_clf = mejor_svm_rbf #SVM
     rf_clf = model_rfc_multimetrica #Random Forest
-    xgb_clf = xgb_optimizado 
+    xgb_clf = xgb_optimizado #XGBoost
 
     #Creo ensemble de Votación
-    vot_clf = VotingClassifier(estimators = [('knn', knn_clf), ('svm', svm_clf), ('rf', rf_clf), ('xgb', xgb_clf)], voting = 'hard')
+    vot_clf = VotingClassifier(estimators = [('knn', knn_clf), ('svm', svm_clf), ('rf', rf_clf), ('xgb', xgb_clf)], voting = 'hard', n_jobs=JOBS)
 
     #Entreno el ensemble
     vot_clf.fit(x_train, y_train)
@@ -1695,13 +1687,55 @@ if not exists('models/voting.joblib'):
     #Evaluo en conjunto de test
     pred = vot_clf.predict(x_test)
     accuracy_score(y_test, pred)
+    dump(vot_clf, 'modelos/voting.joblib')
+    !gzip modelos/voting.joblib #Comprimimos
+
+else:
+    !gzip -d -k modelos/voting.joblib.gz #Descomprimimos
+    vot_clf = load('modelos/voting.joblib')
+    !rm modelos/voting.joblib
 ```
 
 ```python
-if not exists('submissions/voting.joblib'):
+if not exists('submissions/voting.csv'):
     y_pred = vot_clf.predict(hotelsdf_pruebas)
     df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': y_pred})
     df_submission.to_csv('submissions/voting.csv', index=False)
+```
+
+Vamos a quitar el SVM del ensamble ya que nos dio malos resultados. Ademas, vamos a cambiar el tipo de voting de hard a soft, para tener una votacion ponderada
+
+```python
+#anadir if cuando este list
+if not exists('modelos/votingNoSvmSoft.joblib.gz'):
+    knn_clf = knn_optimizado #Knn
+    rf_clf = model_rfc_multimetrica #Random Forest
+    xgb_clf = xgb_optimizado #XGBoost
+
+    #Creo ensemble de Votación
+    vot_clf = VotingClassifier(estimators = [('knn', knn_clf), ('rf', rf_clf), ('xgb', xgb_clf)], voting = 'soft', n_jobs=JOBS)
+
+    #Entreno el ensemble
+    vot_clf.fit(x_train, y_train)
+
+    #Evaluo en conjunto de test
+    pred = vot_clf.predict(x_test)
+    accuracy_score(y_test, pred)
+    dump(vot_clf, 'modelos/votingNoSvmSoft.joblib')
+    !gzip modelos/votingNoSvmSoft.joblib #Comprimimos
+
+else:
+    !gzip -d -k modelos/votingNoSvmSoft.joblib.gz #Descomprimimos
+    vot_clfNoSvmSoft = load('modelos/votingNoSvmSoft.joblib')
+    !rm modelos/votingNoSvmSoft.joblib
+    
+```
+
+```python
+if not exists('submissions/votingNoSvmSoft.csv'):
+    y_pred = vot_clf.predict(hotelsdf_pruebas)
+    df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': y_pred})
+    df_submission.to_csv('submissions/votingNoSvmSoft.csv', index=False)
 ```
 
 # Modelo Stacking 
