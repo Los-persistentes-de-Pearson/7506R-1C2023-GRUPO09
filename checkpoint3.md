@@ -1780,6 +1780,14 @@ plt.ylabel('Verdadero')
 
 Podemos concluir que el modelo no representa una mejora considerable a los modelos anteriormente entrenamos y que forman parte del ensamble creado 
 
+Generamos la prediccion con el modelo para kaggle
+
+```python
+y_pred = stacking_model.predict(hotelsdf_pruebas)
+df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': y_pred})
+df_submission.to_csv('submissions/stacking_model.csv', index=False)
+```
+
 # Conclusiones 
 
 
@@ -1793,6 +1801,8 @@ Podemos concluir que el modelo no representa una mejora considerable a los model
     El primer ensamble del analisism, entre todas las instancias generadas del modelo obtuvimos una predicción de la misma magnitud que con el árbol
 
 4. XGBoost:
+    Es el modelo 
+
 5. Voting:
 6. Stacking:
 7. General
