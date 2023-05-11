@@ -1688,6 +1688,8 @@ if not exists('modelos/voting.joblib.gz'): #Tenemos el archivo comprimido porque
     pred = vot_clf.predict(x_test)
     accuracy_score(y_test, pred)
     dump(vot_clf, 'modelos/voting.joblib')
+    !gzip modelos/voting.joblib #Comprimimos
+
 else:
     !gzip -d -k modelos/voting.joblib.gz #Descomprimimos
     vot_clf = load('modelos/voting.joblib')
@@ -1720,6 +1722,8 @@ if not exists('modelos/votingNoSvmSoft.joblib.gz'):
     pred = vot_clf.predict(x_test)
     accuracy_score(y_test, pred)
     dump(vot_clf, 'modelos/votingNoSvmSoft.joblib')
+    !gzip modelos/votingNoSvmSoft.joblib #Comprimimos
+
 else:
     !gzip -d -k modelos/votingNoSvmSoft.joblib.gz #Descomprimimos
     vot_clfNoSvmSoft = load('modelos/votingNoSvmSoft.joblib')
