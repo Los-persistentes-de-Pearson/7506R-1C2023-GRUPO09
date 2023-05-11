@@ -1691,10 +1691,12 @@ if not exists('models/voting.joblib'):
     #Evaluo en conjunto de test
     pred = vot_clf.predict(x_test)
     accuracy_score(y_test, pred)
+    dump(vot_clf, 'modelos/voting.joblib')
+    
 ```
 
 ```python
-print("test 23")
+vot_clf = load('modelos/voting.joblib')
 ```
 
 ```python
@@ -1702,6 +1704,39 @@ if not exists('submissions/voting.csv'):
     y_pred = vot_clf.predict(hotelsdf_pruebas)
     df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': y_pred})
     df_submission.to_csv('submissions/voting.csv', index=False)
+```
+
+Vamos a quitar el SVM del ensamble ya que nos dio malos resultados. Ademas, vamos a cambiar el tipo de voting de hard a soft, para tener una votacion ponderada
+
+```python
+#anadir if cuando este list
+if not exists('models/votingNoSvmSoft.joblib'):
+    knn_clf = knn_optimizado #Knn
+    rf_clf = model_rfc_multimetrica #Random Forest
+    xgb_clf = xgb_optimizado #XGBoost
+
+    #Creo ensemble de Votación
+    vot_clf = VotingClassifier(estimators = [('knn', knn_clf), ('rf', rf_clf), ('xgb', xgb_clf)], voting = 'soft', n_jobs=JOBS)
+
+    #Entreno el ensemble
+    vot_clf.fit(x_train, y_train)
+
+    #Evaluo en conjunto de test
+    pred = vot_clf.predict(x_test)
+    accuracy_score(y_test, pred)
+    dump(vot_clf, 'modelos/votingNoSvmSoft.joblib')
+    
+```
+
+```python
+vot_clfNoSvmSoft = load('modelos/votingNoSvmSoft.joblib')
+```
+
+```python
+if not exists('submissions/votingNoSvmSoft.csv'):
+    y_pred = vot_clf.predict(hotelsdf_pruebas)
+    df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': y_pred})
+    df_submission.to_csv('submissions/votingNoSvmSoft.csv', index=False)
 ```
 
 # Modelo Stacking 
