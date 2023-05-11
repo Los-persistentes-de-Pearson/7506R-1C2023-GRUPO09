@@ -1676,15 +1676,12 @@ El ensamble XGBoost representa el modelo más preciso de todos los modelos entre
 # Modelo Voting
 
 ```python
-print(ADVERTENCIA)
-print("esto va a dar error a proposito, la idea es que apenas anden los modelos lo corremos")
-print(ADVERTENCIA)
 #anadir if cuando este list
 if not exists('models/voting.joblib'):
-    #knn_clf = 
+    knn_clf = knn_optimizado #Knn
     svm_clf = mejor_svm_rbf #SVM
     rf_clf = model_rfc_multimetrica #Random Forest
-    xgb_clf = xgb_optimizado 
+    xgb_clf = xgb_optimizado #XGBoost
 
     #Creo ensemble de Votación
     vot_clf = VotingClassifier(estimators = [('knn', knn_clf), ('svm', svm_clf), ('rf', rf_clf), ('xgb', xgb_clf)], voting = 'hard')
