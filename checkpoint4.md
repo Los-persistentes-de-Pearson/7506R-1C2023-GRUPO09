@@ -216,14 +216,22 @@ y_pred
 Predecimos sobre el de testeo
 
 ```python
-# y_pred_testeo = modelo_hotels_1.predict(hotelsdf_testeo_filtrado)
+y_pred_testeo = modelo_hotels_1.predict(hotelsdf_testeo_filtrado)
 ```
 
 ```python
-# y_pred_testeo
+y_pred_testeo
 ```
 
 ```python
-# df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': y_pred_testeo.tolist()})
-# df_submission.to_csv('submissions/red_1.csv', index=False)
+y_predic_cat_ej1 = np.where(y_pred_testeo>0.3,1,0)
+```
+
+```python
+resultados = pd.DataFrame(y_predic_cat_ej1)[0]
+```
+
+```python
+df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': resultados})
+df_submission.to_csv('submissions/red_1.csv', index=False)
 ```
