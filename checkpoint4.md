@@ -62,6 +62,9 @@ warnings.simplefilter(action='ignore', category=UserWarning)
 
 from advertencia import ADVERTENCIA #Borrar cuando entreguemos
 
+import tensorflow as tf
+from tensorflow import keras
+from keras.utils.vis_utils import plot_model
 ```
 
 Constantes
@@ -70,6 +73,10 @@ Constantes
 # Constantes
 JOBS=-2
 SEED=9
+
+
+np.random.seed(SEED)
+tf.random.set_seed(SEED) 
 ```
 
 importo el dataframe original para tener los ids
@@ -119,19 +126,6 @@ x_test
 ```
 
 Imports para armar la red
-
-```python
-import tensorflow as tf
-from tensorflow import keras
-from keras.utils.vis_utils import plot_model
-# import visualkeras
-
-np.random.seed(9)
-tf.random.set_seed(9) 
-
-import warnings
-warnings.filterwarnings("ignore", category=DeprecationWarning) 
-```
 
 ```python
 # from sklearn.datasets import load_iris
