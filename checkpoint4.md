@@ -171,20 +171,11 @@ Imports para armar la red
 # x_test_scaled = x_test.to_list()
 ```
 
-```python
-x_train[valoresNoBinarios]
-```
-
-```python
-print(ADVERTENCIA)
-print("No estoy seguro si es entre 0 y 1")
-```
-
-Tenemos que escalar todos los valores de nuestro data set a un valor entre 1 y 0 (excepto los valores producidos por el one hot encoding
+Tenemos que escalar todos los valores de nuestro data set (excepto los valores producidos por el one hot encoding
 
 ```python
 sScaler = StandardScaler()
-sScaler.fit(pd.DataFrame(x_train[valoresNoBinarios]))
+sScaler.fit_transform(pd.DataFrame(x_train[valoresNoBinarios]))
 ```
 
 ```python
@@ -209,25 +200,11 @@ x_train_escalado
 ```
 
 ```python
-len(y_train)
-```
-
-```python
-len(x_train_escalado.columns)
-```
-
-```python
-# from sklearn.datasets import load_iris
-
-# iris = load_iris()
-# feature_names = iris['feature_names']
-# feature_names
-```
-
-```python
 # calcula la cantidad de clases
 #cant_clases=len(np.unique(y))
-cant_clases = len(np.unique(y_train))
+#cant_clases = len(np.unique(y_train))
+cant_clases = 1
+
 
 #d_in=len(y_train)
 d_in=len(x_train_escalado.columns)
@@ -274,10 +251,6 @@ plt.show()
 
 ```python
 y_predic_iris = modelo_hotels_1.predict(x_test_scaled)
-```
-
-```python
-x_test_scaled
 ```
 
 ```python
