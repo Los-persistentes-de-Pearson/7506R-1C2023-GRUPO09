@@ -40,6 +40,8 @@ from sklearn.tree import DecisionTreeClassifier, export_graphviz, export_text
 from sklearn.metrics import confusion_matrix, classification_report , f1_score, make_scorer, precision_score, recall_score, accuracy_score,f1_score
 from sklearn.preprocessing import MinMaxScaler
 from sklearn import tree
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
+
 
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import train_test_split, RandomizedSearchCV, GridSearchCV, cross_val_score
@@ -73,7 +75,6 @@ Constantes
 # Constantes
 JOBS=-2
 SEED=9
-
 
 np.random.seed(SEED)
 tf.random.set_seed(SEED) 
@@ -121,15 +122,25 @@ x_train, x_test, y_train, y_test = train_test_split(hotelsdf_modelo_x,
                                                     random_state=SEED) #Semilla 9, como el Equipo !!
 ```
 
+Buscamos los valores que no fueron generados por el one hot encoder
+
 ```python
-x_test
+x_train.columns
+```
+
+```python
+valoresNoBinarios = ['lead_time', 'arrival_year', 'arrival_week_number', 'arrival_month_day',
+       'weekend_nights_num', 'week_nights_num', 'adult_num', 'children_num',
+       'babies_num', 'previous_cancellations_num',
+       'booking_changes_num', 'days_in_waiting_list',
+       'average_daily_rate', 'required_car_parking_spaces_num',
+       'special_requests_num', 'dias_totales']
 ```
 
 Imports para armar la red
 
 ```python
 # from sklearn.datasets import load_iris
-# from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
 # iris = load_iris()
 
@@ -147,17 +158,68 @@ Imports para armar la red
 # # One hot encoding
 # enc = OneHotEncoder()
 
-y_train_tensor = tf.convert_to_tensor(y_train)
+#y_train_tensor = tf.convert_to_tensor(y_train)
 # y_train_encoder = y_train.to_list()
-y_test_tensor = tf.convert_to_tensor(y_test)
+#y_test_tensor = tf.convert_to_tensor(y_test)
 # y_test_encoder = y_test.to_list()
 
 
-# # scaler = StandardScaler()
-x_train_tensor = tf.convert_to_tensor(x_train)
+
+#x_train_tensor = tf.convert_to_tensor(x_train)
 # x_train_scaled = x_train.to_list()
-x_test_tensor = tf.convert_to_tensor(x_test)
+#x_test_tensor = tf.convert_to_tensor(x_test)
 # x_test_scaled = x_test.to_list()
+```
+
+```python
+x_train[valoresNoBinarios]
+```
+
+```python
+print(ADVERTENCIA)
+print("No estoy seguro si es entre 0 y 1")
+```
+
+Tenemos que escalar todos los valores de nuestro data set a un valor entre 1 y 0 (excepto los valores producidos por el one hot encoding
+
+```python
+sScaler = StandardScaler()
+sScaler.fit(pd.DataFrame(x_train[valoresNoBinarios]))
+```
+
+```python
+x_train_transform_1=sScaler.transform(pd.DataFrame(x_train[valoresNoBinarios]))
+```
+
+```python
+#Creamos un nuevo dataframe con los valores escalados
+x_train_escalado = x_train.copy()
+```
+
+```python
+#Le asignamos los nuevos valores escalados y mantenemos los valores del one hot encoding
+for i in range(len(valoresNoBinarios)):
+    x_train_escalado[valoresNoBinarios[i]]=x_train_transform_1[:,i]
+```
+
+```python
+x_train_escalado
+```
+
+```python
+x_train
+```
+
+```python
+len(x_train_transform_1)
+```
+
+```python
+ej1_x_train_transform_1
+```
+
+```python
+input()
 ```
 
 ```python
