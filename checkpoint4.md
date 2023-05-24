@@ -137,6 +137,30 @@ valoresNoBinarios = ['lead_time', 'arrival_year', 'arrival_week_number', 'arriva
        'special_requests_num', 'dias_totales']
 ```
 
+```python
+cuantitativas = [
+"adult_num",
+"arrival_month_day",
+"arrival_week_number",
+"arrival_year",
+"average_daily_rate",
+"babies_num",
+"booking_changes_num",
+"children_num",
+"days_in_waiting_list",
+"lead_time",
+"previous_cancellations_num",
+"required_car_parking_spaces_num",
+"special_requests_num",
+"weekend_nights_num",
+"week_nights_num",
+]
+```
+
+```python
+len(cuantitativas)
+```
+
 Imports para armar la red
 
 ```python
@@ -184,6 +208,10 @@ x_test_transform_1=sScaler.transform(pd.DataFrame(x_test[valoresNoBinarios]))
 ```
 
 ```python
+x_train_transform_1
+```
+
+```python
 #Creamos un nuevo dataframe con los valores escalados
 x_train_escalado = x_train.copy()
 x_test_escalado = x_test.copy()
@@ -192,8 +220,10 @@ x_test_escalado = x_test.copy()
 ```python
 #Le asignamos los nuevos valores escalados y mantenemos los valores del one hot encoding
 for i in range(len(valoresNoBinarios)):
-    x_train_escalado[valoresNoBinarios[i]]=x_train_transform_1[:,i]
-    x_test_escalado[valoresNoBinarios[i]]=x_test_transform_1[:,i]
+#     x_train_escalado[valoresNoBinarios[i]]=x_train_transform_1[:,i]
+#     x_test_escalado[valoresNoBinarios[i]]=x_test_transform_1[:,i]
+    x_train_escalado[valoresNoBinarios[i]]=x_train_transform_1[:,0]
+    x_test_escalado[valoresNoBinarios[i]]=x_test_transform_1[:,0]
 ```
 
 ```python
@@ -202,6 +232,10 @@ x_train_escalado
 
 ```python
 x_test_escalado
+```
+
+```python
+len(np.unique(y_train))
 ```
 
 ```python
@@ -216,13 +250,13 @@ d_in=len(x_train_escalado.columns)
 
 modelo_hotels_1 = keras.Sequential([
     # input_shape solo en la primer capa
-#     keras.layers.Dense(8,input_shape=(d_in,),activation ='relu'),
-#     keras.layers.Dense(16,input_shape=(d_in,),activation ='relu'),
-#     keras.layers.Dense(32,input_shape=(d_in,),activation ='relu'),
-#     keras.layers.Dense(64,input_shape=(d_in,),activation ='relu'),
-#     keras.layers.Dense(cant_clases, activation='sigmoid'),
-    keras.layers.Dense(1,input_shape=(d_in,)),
-    keras.layers.Dense(1, activation='sigmoid')
+    keras.layers.Dense(8,input_shape=(d_in,),activation ='relu'),
+    keras.layers.Dense(16,input_shape=(d_in,),activation ='relu'),
+    keras.layers.Dense(32,input_shape=(d_in,),activation ='relu'),
+    keras.layers.Dense(64,input_shape=(d_in,),activation ='relu'),
+    keras.layers.Dense(cant_clases, activation='sigmoid'),
+#     keras.layers.Dense(1,input_shape=(d_in,)),
+#     keras.layers.Dense(1, activation='sigmoid')
 ])
 
 
@@ -239,11 +273,11 @@ modelo_hotels_1.compile(
 
 cant_epochs=10
 
-historia_modelo_hotel_1=modelo_hotels_1.fit(x_train,y_train,epochs=cant_epochs,batch_size=16,verbose=False)
+historia_modelo_hotel_1=modelo_hotels_1.fit(x_train_escalado,y_train,epochs=cant_epochs,batch_size=16,verbose=False)
 ```
 
 ```python
-y_pred = modelo_hotels_1.predict(x_test)
+y_pred = modelo_hotels_1.predict(x_test_escalado)
 y_predic_cat_ej1 = np.where(y_pred>0.7,1,0)
 
 ds_validacion=pd.DataFrame(y_predic_cat_ej1,y_test).reset_index()
@@ -251,6 +285,7 @@ ds_validacion.columns=['y_pred','y_real']
 
 tabla=pd.crosstab(ds_validacion.y_pred, ds_validacion.y_real)
 grf=sns.heatmap(tabla,annot=True, cmap = 'Blues')
+#plt.ticklabel_format(style='plain', axis='both')
 plt.show()
 ```
 
