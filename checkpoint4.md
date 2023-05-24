@@ -189,6 +189,8 @@ sScaler.fit(pd.DataFrame(x_train[valoresNoBinarios]))
 
 ```python
 x_train_transform_1=sScaler.transform(pd.DataFrame(x_train[valoresNoBinarios]))
+x_test_scaled=sScaler.transform(pd.DataFrame(x_test[valoresNoBinarios]))
+#  = scaler.transform(x_test)
 ```
 
 ```python
@@ -207,11 +209,28 @@ x_train_escalado
 ```
 
 ```python
+len(y_train)
+```
+
+```python
+len(x_train_escalado.columns)
+```
+
+```python
+# from sklearn.datasets import load_iris
+
+# iris = load_iris()
+# feature_names = iris['feature_names']
+# feature_names
+```
+
+```python
 # calcula la cantidad de clases
 #cant_clases=len(np.unique(y))
 cant_clases = len(np.unique(y_train))
 
-d_in=len(x_train.columns)
+#d_in=len(y_train)
+d_in=len(x_train_escalado.columns)
 
 modelo_hotels_1 = keras.Sequential([
     # input_shape solo en la primer capa
@@ -254,7 +273,11 @@ plt.show()
 ```
 
 ```python
+y_predic_iris = modelo_hotels_1.predict(x_test_scaled)
+```
 
+```python
+x_test_scaled
 ```
 
 ```python
