@@ -175,28 +175,33 @@ Tenemos que escalar todos los valores de nuestro data set (excepto los valores p
 
 ```python
 sScaler = StandardScaler()
-sScaler.fit_transform(pd.DataFrame(x_train[valoresNoBinarios]))
+sScaler.fit(pd.DataFrame(x_train[valoresNoBinarios]))
 ```
 
 ```python
 x_train_transform_1=sScaler.transform(pd.DataFrame(x_train[valoresNoBinarios]))
-x_test_scaled=sScaler.transform(pd.DataFrame(x_test[valoresNoBinarios]))
-#  = scaler.transform(x_test)
+x_test_transform_1=sScaler.transform(pd.DataFrame(x_test[valoresNoBinarios]))
 ```
 
 ```python
 #Creamos un nuevo dataframe con los valores escalados
 x_train_escalado = x_train.copy()
+x_test_escalado = x_test.copy()
 ```
 
 ```python
 #Le asignamos los nuevos valores escalados y mantenemos los valores del one hot encoding
 for i in range(len(valoresNoBinarios)):
     x_train_escalado[valoresNoBinarios[i]]=x_train_transform_1[:,i]
+    x_test_escalado[valoresNoBinarios[i]]=x_test_transform_1[:,i]
 ```
 
 ```python
 x_train_escalado
+```
+
+```python
+x_test_escalado
 ```
 
 ```python
