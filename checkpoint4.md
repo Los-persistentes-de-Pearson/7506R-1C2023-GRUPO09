@@ -207,18 +207,6 @@ x_train_escalado
 ```
 
 ```python
-x_train
-```
-
-```python
-len(x_train_transform_1)
-```
-
-```python
-ej1_x_train_transform_1
-```
-
-```python
 input()
 ```
 
