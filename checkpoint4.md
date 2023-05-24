@@ -220,10 +220,10 @@ x_test_escalado = x_test.copy()
 ```python
 #Le asignamos los nuevos valores escalados y mantenemos los valores del one hot encoding
 for i in range(len(valoresNoBinarios)):
-#     x_train_escalado[valoresNoBinarios[i]]=x_train_transform_1[:,i]
-#     x_test_escalado[valoresNoBinarios[i]]=x_test_transform_1[:,i]
-    x_train_escalado[valoresNoBinarios[i]]=x_train_transform_1[:,0]
-    x_test_escalado[valoresNoBinarios[i]]=x_test_transform_1[:,0]
+    x_train_escalado[valoresNoBinarios[i]]=x_train_transform_1[:,i]
+    x_test_escalado[valoresNoBinarios[i]]=x_test_transform_1[:,i]
+#     x_train_escalado[valoresNoBinarios[i]]=x_train_transform_1[:,0]
+#     x_test_escalado[valoresNoBinarios[i]]=x_test_transform_1[:,0]
 ```
 
 ```python
