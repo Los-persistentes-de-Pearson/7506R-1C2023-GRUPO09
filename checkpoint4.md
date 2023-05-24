@@ -207,23 +207,22 @@ x_train_escalado
 ```
 
 ```python
-input()
-```
-
-```python
 # calcula la cantidad de clases
 #cant_clases=len(np.unique(y))
-cant_clases = 1
+cant_clases = len(np.unique(y_train))
 
 d_in=len(x_train.columns)
 
 modelo_hotels_1 = keras.Sequential([
     # input_shape solo en la primer capa
-    keras.layers.Dense(8,input_shape=(d_in,),activation ='relu'),
-    keras.layers.Dense(16,input_shape=(d_in,),activation ='relu'),
-    keras.layers.Dense(32,input_shape=(d_in,),activation ='relu'),
-    keras.layers.Dense(64,input_shape=(d_in,),activation ='relu'),
-    keras.layers.Dense(cant_clases, activation='sigmoid'),])
+#     keras.layers.Dense(8,input_shape=(d_in,),activation ='relu'),
+#     keras.layers.Dense(16,input_shape=(d_in,),activation ='relu'),
+#     keras.layers.Dense(32,input_shape=(d_in,),activation ='relu'),
+#     keras.layers.Dense(64,input_shape=(d_in,),activation ='relu'),
+#     keras.layers.Dense(cant_clases, activation='sigmoid'),
+    keras.layers.Dense(1,input_shape=(d_in,)),
+    keras.layers.Dense(1, activation='sigmoid')
+])
 
 
 modelo_hotels_1.summary()
@@ -239,7 +238,7 @@ modelo_hotels_1.compile(
 
 cant_epochs=10
 
-historia_modelo_iris_1=modelo_hotels_1.fit(x_train,y_train,epochs=cant_epochs,batch_size=16,verbose=False)
+historia_modelo_hotel_1=modelo_hotels_1.fit(x_train,y_train,epochs=cant_epochs,batch_size=16,verbose=False)
 ```
 
 ```python
@@ -252,6 +251,14 @@ ds_validacion.columns=['y_pred','y_real']
 tabla=pd.crosstab(ds_validacion.y_pred, ds_validacion.y_real)
 grf=sns.heatmap(tabla,annot=True, cmap = 'Blues')
 plt.show()
+```
+
+```python
+
+```
+
+```python
+input()
 ```
 
 ```python
@@ -279,4 +286,10 @@ resultados = pd.DataFrame(y_predic_cat_ej1)[0]
 ```python
 df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': resultados})
 df_submission.to_csv('submissions/red_1.csv', index=False)
+```
+
+## Validacion cruzada
+
+```python
+
 ```
