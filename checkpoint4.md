@@ -290,7 +290,7 @@ plt.show()
 ```
 
 ```python
-y_predic_iris = modelo_hotels_1.predict(x_test_scaled)
+#y_predic_iris = modelo_hotels_1.predict(x_test_scaled)
 ```
 
 ```python
