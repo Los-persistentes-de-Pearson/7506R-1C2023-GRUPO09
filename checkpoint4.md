@@ -360,23 +360,69 @@ param_grid = { "learning_rate" :  [0.0001, 0.001, 0.01, 0.1],
 ```
 
 ```python
-rs = GridSearchCV(estimator=model, param_grid=param_grid,n_jobs=JOBS, cv=3)
+rs = RandomizedSearchCV(estimator=model, param_distributions=param_grid,n_jobs=JOBS, cv=3)
 ```
 
 ```python
-gs_fit = rs.fit(X = x_train_escalado, y = y_train)
+if exists('modelos/rs_fit.joblib') == False:
+    rs_fit = rs.fit(X = x_train_escalado, y = y_train)
+    dump(rs_fit, 'modelos/rs_fit.joblib')
+else:
+    rs_fit = load('modelos/rs_fit.joblib')
 ```
 
 ```python
-gs_fit.best_params_
+rs_fit.best_params_
 ```
 
 ```python
-dump(modelo_hotels_2, 'modelos/gridsearch_red.joblib')
+modelo_rs = keras.Sequential()
+modelo_rs.add(keras.layers.Dense(5, activation=rs_fit.best_params_["activation"], input_shape=(d_in,)))
+    
+for i in range(rs_fit.best_params_["hidden_layers"]):
+        # Add one hidden layer
+    modelo_rs.add(keras.layers.Dense(rs_fit.best_params_["output"], activation=rs_fit.best_params_["activation"]))
+
+modelo_rs.add(keras.layers.Dense(1, activation=rs_fit.best_params_["activation"]))
+    
+modelo_rs.compile(
+    optimizer=optimizer,
+    loss=loss, 
+    metrics=metrics, 
+    )
+```
+
+```python
+cant_epochs=50
+
+historia_modelo_hotel_1=modelo_rs.fit(x_train_escalado,y_train,epochs=cant_epochs,batch_size=16,verbose=False)
+```
+
+```python
+y_pred = modelo_rs.predict(x_test_escalado)
+y_predic_cat_ej1 = np.where(y_pred>0.7,1,0)
+
+ds_validacion=pd.DataFrame(y_predic_cat_ej1,y_test).reset_index()
+ds_validacion.columns=['y_pred','y_real']
+
+tabla=pd.crosstab(ds_validacion.y_pred, ds_validacion.y_real)
+grf=sns.heatmap(tabla,annot=True, cmap = 'Blues', fmt='g')
+#plt.ticklabel_format(style='plain', axis='both')
+plt.show()
 ```
 
 ```python
 input()
+```
+
+```python
+if not exists('submissions/red_neuronal_rf.csv'):
+    y_pred_testeo = modelo_hotels_1.predict(hotelsdf_testeo_filtrado)
+    y_pred_testeo_cat = np.where(y_pred_testeo>0.70,1,0)
+    df_resultados_pred = pd.DataFrame.from_records(y_pred_testeo_cat,columns = ["resultado"])
+    df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': df_resultados_pred["resultado"]})
+    df_submission.to_csv('submissions/red_neuronal_rf.csv', index=False)
+    
 ```
 
 ```python
