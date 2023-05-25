@@ -372,6 +372,10 @@ gs_fit.best_params_
 ```
 
 ```python
+dump(modelo_hotels_2, 'modelos/gridsearch_red.joblib')
+```
+
+```python
 input()
 ```
 
