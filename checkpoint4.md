@@ -62,11 +62,11 @@ import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 warnings.simplefilter(action='ignore', category=UserWarning)
 
-from advertencia import ADVERTENCIA #Borrar cuando entreguemos
-
 import tensorflow as tf
 from tensorflow import keras
 from keras.utils.vis_utils import plot_model
+
+from keras.wrappers.scikit_learn import KerasClassifier #Libreria para usarg Grid Search con kerss
 ```
 
 Constantes
@@ -250,8 +250,8 @@ d_in=len(x_train_escalado.columns)
 
 modelo_hotels_1 = keras.Sequential([
     # input_shape solo en la primer capa
-    keras.layers.Dense(2,input_shape=(d_in,),activation ='relu'),
-#     keras.layers.Dense(8,input_shape=(d_in,),activation ='relu'),
+#     keras.layers.Dense(1,input_shape=(d_in,),activation ='relu'),
+    keras.layers.Dense(8,input_shape=(d_in,),activation ='relu'),
 #     keras.layers.Dense(16,input_shape=(d_in,),activation ='relu'),
 #     keras.layers.Dense(32,input_shape=(d_in,),activation ='relu'),
 #     keras.layers.Dense(64,input_shape=(d_in,),activation ='relu'),
@@ -299,40 +299,100 @@ if not exists('submissions/red_neuronal_basica.csv'):
     df_submission.to_csv('submissions/red_neuronal_basica.csv', index=False)
 ```
 
+# Validacion cruzada
+
+
+En esta etapa vamos a realizar unas series de validaciones cruzadas en la busqueda de encontrar el mejor resultado
+
+
+Para usar la libreria Keras Classifier necesitamos crear una funcion que cree una modelo.
+
+```python
+loss='binary_crossentropy'
+metrics=['AUC']
+optimizer="adam",
+
+def creador_modelo(learning_rate = 0.1, activation = 'sigmoid', output = 2, 
+                   hidden_layers = 2):
+    # Add an input layer
+    model = keras.Sequential()
+    model.add(keras.layers.Dense(5, activation=activation, input_shape=(5,)))
+    
+    for i in range(hidden_layers):
+        # Add one hidden layer
+        model.add(keras.layers.Dense(output, activation=activation))
+    
+    model.compile(
+#       optimizer=keras.optimizers.SGD(learning_rate=learning_rate), 
+      optimizer=optimizer,
+      loss=loss, 
+      # metricas para ir calculando en cada iteracion o batch 
+      metrics=metrics, 
+    )
+    return model
+```
+
+Vamos a empezar con una baja cantidad de epochs y batch_size
+
+```python
+batch_size = 16
+epochs = 10
+```
+
+```python
+model = KerasClassifier(build_fn=creador_modelo, 
+                        epochs=epochs, 
+                        batch_size = batch_size, 
+                        verbose=1)
+```
+
+```python
+param_grid = { "learning_rate" :  [0.0001, 0.001, 0.01, 0.1],
+                   "hidden_layers" : [1, 5, 10, 15, 20], 
+                    "output" : [1, 2, 4, 8, 32, 64], 
+                   "activation": ["sigmoid", "relu", "softmax", "softplus", "elu", ]
+             } 
+```
+
+```python
+rs = GridSearchCV(estimator=model, param_grid=param_grid,n_jobs=JOBS, cv=3)
+```
+
+```python
+gs_fit = rs.fit(X = x_train_escalado, y = y_train)
+```
+
+```python
+gs_fit.best_params_
+```
+
 ```python
 input()
 ```
 
-## Validacion cruzada
-
 ```python
-df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': resultados})
-df_submission.to_csv('submissions/red_1.csv', index=False)
-```
+cant_clases = 1
 
-```python
-y_pred
-```
+#d_in=len(y_train)
+d_in=len(x_train_escalado.columns)
 
-Predecimos sobre el de testeo
-
-```python
-y_pred_testeo = modelo_hotels_1.predict(hotelsdf_testeo_filtrado)
-```
-
-```python
-y_predic_cat_ej1 = np.where(y_pred_testeo>0.3,1,0)
-```
-
-```python
-resultados = pd.DataFrame(y_predic_cat_ej1)[0]
-```
-
-```python
+modelo_hotels_1 = keras.Sequential([
+    # input_shape solo en la primer capa
+    keras.layers.Dense(100,input_shape=(d_in,),activation ='relu'),
+    keras.layers.Dense(100,input_shape=(d_in,),activation ='relu'),
+    keras.layers.Dense(100,input_shape=(d_in,),activation ='relu'),
+    keras.layers.Dense(100,input_shape=(d_in,),activation ='relu'),
+    keras.layers.Dense(100,input_shape=(d_in,),activation ='relu'),
+    keras.layers.Dense(cant_clases, activation='sigmoid'),
+])
 
 ```
 
 # Amongus
+
+```python
+input()
+```
 
 ```python colab={"base_uri": "https://localhost:8080/"} id="60da0c2b" outputId="c3379a9e-f818-40ee-b033-2a56c767619b" vscode={"languageId": "python"}
 cant_clases = 1
