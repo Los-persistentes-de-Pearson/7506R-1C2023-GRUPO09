@@ -310,17 +310,22 @@ Para usar la libreria Keras Classifier necesitamos crear una funcion que cree un
 ```python
 loss='binary_crossentropy'
 metrics=['AUC']
-optimizer="adam",
+optimizer="adam"
 
-def creador_modelo(learning_rate = 0.1, activation = 'sigmoid', output = 2, 
-                   hidden_layers = 2):
+def creador_modelo(learning_rate = 0.1, 
+                   activation = 'sigmoid', 
+                   output = 2, 
+                  hidden_layers = 2
+                  ):
     # Add an input layer
     model = keras.Sequential()
-    model.add(keras.layers.Dense(5, activation=activation, input_shape=(5,)))
+    model.add(keras.layers.Dense(5, activation=activation, input_shape=(d_in,)))
     
     for i in range(hidden_layers):
         # Add one hidden layer
         model.add(keras.layers.Dense(output, activation=activation))
+
+    model.add(keras.layers.Dense(1, activation=activation))
     
     model.compile(
 #       optimizer=keras.optimizers.SGD(learning_rate=learning_rate), 
@@ -348,7 +353,7 @@ model = KerasClassifier(build_fn=creador_modelo,
 
 ```python
 param_grid = { "learning_rate" :  [0.0001, 0.001, 0.01, 0.1],
-                   "hidden_layers" : [1, 5, 10, 15, 20], 
+                  "hidden_layers" : [1, 5, 10, 15, 20], 
                     "output" : [1, 2, 4, 8, 32, 64], 
                    "activation": ["sigmoid", "relu", "softmax", "softplus", "elu", ]
              } 
