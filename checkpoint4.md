@@ -328,8 +328,8 @@ def creador_modelo(learning_rate = 0.1,
     model.add(keras.layers.Dense(1, activation=activation))
     
     model.compile(
-      optimizer=keras.optimizers.SGD(learning_rate=learning_rate), 
-#       optimizer=optimizer,
+#       optimizer=keras.optimizers.SGD(learning_rate=learning_rate), 
+      optimizer=optimizer,
       loss=loss, 
       # metricas para ir calculando en cada iteracion o batch 
       metrics=metrics, 
@@ -340,27 +340,30 @@ def creador_modelo(learning_rate = 0.1,
 Vamos a empezar con una baja cantidad de epochs y batch_size
 
 ```python
-batch_size = 16
-epochs = 10
+# batch_size = 16
+# epochs = 10
 ```
 
 ```python
 model = KerasClassifier(build_fn=creador_modelo, 
-                        epochs=epochs, 
-                        batch_size = batch_size, 
+#                         epochs=epochs, 
+#                         batch_size = batch_size, 
                         verbose=1)
 ```
 
 ```python
-param_grid = { "learning_rate" :  [0.0001, 0.001, 0.01, 0.1],
+param_grid = { 
+#             "learning_rate" :  [0.0001, 0.001, 0.01, 0.1],
                   "hidden_layers" : [1, 5, 10, 15, 20], 
                     "output" : [1, 2, 4, 8, 32, 64], 
+                    "batch_size" : [5, 10, 20],
+                    "epochs" : [50, 100, 150],
                    "activation": ["sigmoid", "relu", "softmax", "softplus", "elu", ]
              } 
 ```
 
 ```python
-rs = RandomizedSearchCV(estimator=model, param_distributions=param_grid,n_jobs=JOBS, cv=3,n_iter=50)
+rs = RandomizedSearchCV(estimator=model, param_distributions=param_grid,n_jobs=JOBS, cv=3,n_iter=10)
 ```
 
 ```python
@@ -386,14 +389,17 @@ for i in range(rs_fit.best_params_["hidden_layers"]):
 modelo_rs.add(keras.layers.Dense(1, activation=rs_fit.best_params_["activation"]))
     
 modelo_rs.compile(
-    optimizer=optimizer,
+    optimizer=keras.optimizers.SGD(learning_rate=rs_fit.best_params_["learning_rate"]), 
+#     optimizer=optimizer,
     loss=loss, 
     metrics=metrics, 
     )
 ```
 
 ```python
-cant_epochs=50
+# cant_epochs=10
+cant_epochs=rs_fit.best_params_["epochs"]
+batch_size=rs_fit.best_params_["batch_size"]
 
 historia_modelo_hotel_1=modelo_rs.fit(x_train_escalado,y_train,epochs=cant_epochs,batch_size=16,verbose=False)
 ```
@@ -413,6 +419,26 @@ plt.show()
 
 ```python
 input()
+```
+
+```python
+# cant_epochs=10
+cant_epochs=50
+
+historia_modelo_hotel_2=modelo_rs.fit(x_train_escalado,y_train,epochs=cant_epochs,batch_size=16,verbose=False)
+```
+
+```python
+y_pred = modelo_rs.predict(x_test_escalado)
+y_predic_cat_ej1 = np.where(y_pred>0.7,1,0)
+
+ds_validacion=pd.DataFrame(y_predic_cat_ej1,y_test).reset_index()
+ds_validacion.columns=['y_pred','y_real']
+
+tabla=pd.crosstab(ds_validacion.y_pred, ds_validacion.y_real)
+grf=sns.heatmap(tabla,annot=True, cmap = 'Blues', fmt='g')
+#plt.ticklabel_format(style='plain', axis='both')
+plt.show()
 ```
 
 ```python
