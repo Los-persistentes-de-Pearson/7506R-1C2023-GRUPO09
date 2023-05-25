@@ -328,8 +328,8 @@ def creador_modelo(learning_rate = 0.1,
     model.add(keras.layers.Dense(1, activation=activation))
     
     model.compile(
-#       optimizer=keras.optimizers.SGD(learning_rate=learning_rate), 
-      optimizer=optimizer,
+      optimizer=keras.optimizers.SGD(learning_rate=learning_rate), 
+#       optimizer=optimizer,
       loss=loss, 
       # metricas para ir calculando en cada iteracion o batch 
       metrics=metrics, 
@@ -360,7 +360,7 @@ param_grid = { "learning_rate" :  [0.0001, 0.001, 0.01, 0.1],
 ```
 
 ```python
-rs = RandomizedSearchCV(estimator=model, param_distributions=param_grid,n_jobs=JOBS, cv=3)
+rs = RandomizedSearchCV(estimator=model, param_distributions=param_grid,n_jobs=JOBS, cv=3,n_iter=50)
 ```
 
 ```python
