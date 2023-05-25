@@ -291,35 +291,6 @@ plt.show()
 ```
 
 ```python
-tabla
-```
-
-```python
-hotelsdf_pruebasOriginal['id']
-```
-
-```python
-y_pred
-```
-
-```python
-    y_pred_testeo_cat = np.where(y_pred>0.50,1,0)
-
-```
-
-```python
-y_pred_testeo_cat
-```
-
-```python
-df_resultados_pred = pd.DataFrame.from_records(y_pred_testeo_cat,columns = ["resultado"])
-```
-
-```python
-df_resultados_pred
-```
-
-```python
 if not exists('submissions/red_neuronal_basica.csv'):
     y_pred_testeo = modelo_hotels_1.predict(hotelsdf_testeo_filtrado)
     y_pred_testeo_cat = np.where(y_pred_testeo>0.70,1,0)
