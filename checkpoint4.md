@@ -7,7 +7,7 @@ jupyter:
       format_version: '1.3'
       jupytext_version: 1.14.5
   kernelspec:
-    display_name: Python 3
+    display_name: Python 3 (ipykernel)
     language: python
     name: python3
 ---
@@ -260,7 +260,7 @@ ds_validacion=pd.DataFrame(y_predic_cat_modelo_1,y_test).reset_index()
 ds_validacion.columns=['y_pred','y_real']
 
 tabla=pd.crosstab(ds_validacion.y_pred, ds_validacion.y_real)
-grf=sns.heatmap(tabla,annot=True, cmap = 'Blues')
+grf=sns.heatmap(tabla,annot=True, cmap = 'Blues',fmt='g')
 
 #plt.ticklabel_format(style='plain', axis='both')
 plt.show()
