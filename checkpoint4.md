@@ -250,10 +250,11 @@ d_in=len(x_train_escalado.columns)
 
 modelo_hotels_1 = keras.Sequential([
     # input_shape solo en la primer capa
-    keras.layers.Dense(8,input_shape=(d_in,),activation ='relu'),
-    keras.layers.Dense(16,input_shape=(d_in,),activation ='relu'),
-    keras.layers.Dense(32,input_shape=(d_in,),activation ='relu'),
-    keras.layers.Dense(64,input_shape=(d_in,),activation ='relu'),
+    keras.layers.Dense(2,input_shape=(d_in,),activation ='relu'),
+#     keras.layers.Dense(8,input_shape=(d_in,),activation ='relu'),
+#     keras.layers.Dense(16,input_shape=(d_in,),activation ='relu'),
+#     keras.layers.Dense(32,input_shape=(d_in,),activation ='relu'),
+#     keras.layers.Dense(64,input_shape=(d_in,),activation ='relu'),
     keras.layers.Dense(cant_clases, activation='sigmoid'),
 #     keras.layers.Dense(1,input_shape=(d_in,)),
 #     keras.layers.Dense(1, activation='sigmoid')
@@ -294,11 +295,41 @@ tabla
 ```
 
 ```python
+hotelsdf_pruebasOriginal['id']
+```
+
+```python
 y_pred
 ```
 
 ```python
-#y_predic_iris = modelo_hotels_1.predict(x_test_scaled)
+    y_pred_testeo_cat = np.where(y_pred>0.50,1,0)
+
+```
+
+```python
+y_pred_testeo_cat
+```
+
+```python
+df_resultados_pred = pd.DataFrame.from_records(y_pred_testeo_cat,columns = ["resultado"])
+```
+
+```python
+df_resultados_pred
+```
+
+```python
+if not exists('submissions/red_neuronal_basica.csv'):
+    y_pred_testeo = modelo_hotels_1.predict(hotelsdf_testeo_filtrado)
+    y_pred_testeo_cat = np.where(y_pred_testeo>0.70,1,0)
+    df_resultados_pred = pd.DataFrame.from_records(y_pred_testeo_cat,columns = ["resultado"])
+    df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': df_resultados_pred["resultado"]})
+    df_submission.to_csv('submissions/red_neuronal_basica.csv', index=False)
+```
+
+```python
+input()
 ```
 
 ## Validacion cruzada
@@ -463,7 +494,7 @@ dump(modelo_hotels_2, 'modelos/una_red_zafable_2.joblib')
 ```
 
 ```python id="a82b6519" vscode={"languageId": "python"}
-y_pred_testeo = modelo_hotels_2.predict(hotelsdf_testeo_filtrado)
+y_pred_testeo = modelo_hotels_1.predict(hotelsdf_testeo_filtrado)
 ```
 
 ```python id="2fd7ed7e" vscode={"languageId": "python"}
@@ -484,4 +515,8 @@ df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled
 df_submission.to_csv('submissions/red_zafable_2.csv', index=False)
 df_submission
 df_submission.head()
+```
+
+```python
+
 ```
