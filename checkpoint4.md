@@ -7,7 +7,7 @@ jupyter:
       format_version: '1.3'
       jupytext_version: 1.14.5
   kernelspec:
-    display_name: Python 3 (ipykernel)
+    display_name: Python 3
     language: python
     name: python3
 ---
@@ -129,7 +129,7 @@ cuantitativas = [
 ```
 
 <!-- #region id="01a3e171" -->
-# Generacion de datos para el entrenamiento de los modelos
+## Generacion de datos para el entrenamiento de los modelos
 
 Se genera un dataset con los datos necesarios para predecir la cancelacion y creamos un dataset conteniendo el target, para luego, generar conjuntos de test y train
 <!-- #endregion -->
@@ -152,6 +152,8 @@ x_train, x_test, y_train, y_test = train_test_split(hotelsdf_modelo_x,
 ```python id="478e26fa" vscode={"languageId": "python"}
 x_test
 ```
+
+## Escalado de los datasets de test y train
 
 ```python id="HmrQe9Tflfgt" vscode={"languageId": "python"}
 cuantitativas = [
@@ -221,6 +223,11 @@ import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning) 
 ```
 
+### RED 1
+
+
+Creamos una red muy simple con una unica capa oculta y funcion de activacion relu
+
 ```python colab={"base_uri": "https://localhost:8080/"} id="60da0c2b" outputId="c3379a9e-f818-40ee-b033-2a56c767619b" vscode={"languageId": "python"}
 cant_clases = 1
 
@@ -233,6 +240,8 @@ modelo_hotels_1 = keras.Sequential([
 
 modelo_hotels_1.summary()
 ```
+
+La entrenamos con el optimizador Nadam puesto que vimos en clase que es el mejor. 
 
 ```python id="e0599e98" vscode={"languageId": "python"}
 modelo_hotels_1.compile(
@@ -247,6 +256,8 @@ cant_epochs=80
 historia_modelo_hotels_1=modelo_hotels_1.fit(x_train,y_train,epochs=cant_epochs,batch_size=16,verbose=False)
 ```
 
+Miramos la metrica AUC en funcion de la cantidad de epocas para enocntrar un valor aceptable
+
 ```python vscode={"languageId": "python"}
 epochs = range(cant_epochs)
 
@@ -256,21 +267,14 @@ plt.ylabel("AUC")
 plt.legend()
 ```
 
-Mostramos los resultados de este primer modelo
+Predecimos
 
 ```python vscode={"languageId": "python"}
 y_pred_modelo_1 = modelo_hotels_1.predict(x_test)
 y_predic_cat_modelo_1 = np.where(y_pred_modelo_1>0.50,1,0)
-
-ds_validacion=pd.DataFrame(y_predic_cat_modelo_1,y_test).reset_index()
-ds_validacion.columns=['y_pred','y_real']
-
-tabla=pd.crosstab(ds_validacion.y_pred, ds_validacion.y_real)
-grf=sns.heatmap(tabla,annot=True, cmap = 'Blues', fmt='g')
-
-#plt.ticklabel_format(style='plain', axis='both')
-plt.show()
 ```
+
+Mostramos los resultados de este primer modelo
 
 ```python vscode={"languageId": "python"}
 print(classification_report(y_test,y_predic_cat_modelo_1))
@@ -281,12 +285,10 @@ plt.xlabel('predecido')
 plt.ylabel('verdadero')
 ```
 
-```python vscode={"languageId": "python"}
-#dump(grid, 'modelos/grid_search_red.joblib')
-#dump(grid, 'modelos/grid_search_resultados_red.joblib')
-```
+Los resultados son relativamente buenos y no se ve que el modelo este muy sesgado. Aumentamos la cantidad de nueronas para intentar mejorar el f1_score
 
-Si bien los resultados son relativamente buenos y no se ve que el modelo este muy sesgado, vemos q a partir de 30/ epocas se mantiene relativamente coinstante. Pruebo con ese valor. Ademas aumentamos la cantidad de neuras para mejorar la efectiviad de la red.
+
+### RED 2
 
 ```python vscode={"languageId": "python"}
 cant_clases = 1
@@ -321,8 +323,6 @@ plt.ylabel("auc")
 plt.legend()
 ```
 
-Dio mucho mejor!!!!!!! Mass cte, con menos epocas
-
 ```python colab={"base_uri": "https://localhost:8080/", "height": 1000} id="4ab27167" outputId="c6e52f3c-6c96-47c1-ac4b-d14b378ff8d9" vscode={"languageId": "python"}
 y_pred_modelo_2 = modelo_hotels_2.predict(x_test)
 y_pred_modelo_2
@@ -335,17 +335,6 @@ y_predic_cat_modelo_2 = np.where(y_pred_modelo_2>0.40,1,0)
 ```
 
 ```python vscode={"languageId": "python"}
-ds_validacion=pd.DataFrame(y_predic_cat_modelo_2,y_test).reset_index()
-ds_validacion.columns=['y_pred','y_real']
-
-tabla=pd.crosstab(ds_validacion.y_pred, ds_validacion.y_real)
-grf=sns.heatmap(tabla,annot=True, cmap = 'Blues', fmt='g' )
-
-#plt.ticklabel_format(style='plain', axis='both')
-plt.show()
-```
-
-```python vscode={"languageId": "python"}
 print(classification_report(y_test,y_predic_cat_modelo_2))
 print('F1-Score: {}'.format(f1_score(y_test, y_predic_cat_modelo_2, average='binary'))) 
 cm = confusion_matrix(y_test,y_predic_cat_modelo_2)
@@ -354,16 +343,76 @@ plt.xlabel('predecido')
 plt.ylabel('verdadero')
 ```
 
+### RED 3
+
+
+El f1_score practicamente no mejoro con el aumnento de neruronas y capas. Sin embargo en ambos modelos (modelo_hotels_1 y 2) vemos que a partir de las 40 epocas el AUC practicamente no varia. Entonces bajamos la cantidad de epocas hasta ese valor para obtener una red mas optima Y tambien quito algunas capas para que la red sea mas simple porque no tiene sentido dejar una red mas compleja que no mejora el f1_score
+
 ```python vscode={"languageId": "python"}
-dump(modelo_hotels_2, 'modelos/una_red_zafable_posta_2.joblib')
+cant_clases = 1
+
+d_in=len(x_train.columns)
+
+modelo_hotels_3= keras.Sequential([
+    keras.layers.Dense(8,input_shape=(d_in,),activation ='relu'),
+    keras.layers.Dense(16,input_shape=(d_in,),activation ='relu'),
+    keras.layers.Dense(cant_clases, activation='sigmoid'),])
+
+modelo_hotels_3.compile(
+  optimizer=keras.optimizers.Nadam(learning_rate=0.01), 
+  loss='binary_crossentropy', 
+  # metricas para ir calculando en cada iteracion o batch 
+  metrics=['AUC'], 
+)
+
+cant_epochs=40
+
+historia_modelo_hotels_3=modelo_hotels_3.fit(x_train,y_train,epochs=cant_epochs,batch_size=16,verbose=False)
+```
+
+Vemos el AUC contra la cantidad de epocas
+
+```python vscode={"languageId": "python"}
+epochs = range(cant_epochs)
+
+plt.plot(epochs, historia_modelo_hotels_3.history['auc'], color='orange', label='AUC')
+plt.xlabel("epochs")
+plt.ylabel("auc")
+plt.legend()
+```
+
+```python vscode={"languageId": "python"}
+y_pred_modelo_3 = modelo_hotels_3.predict(x_test)
+y_pred_modelo_3
+```
+
+```python vscode={"languageId": "python"}
+y_predic_cat_modelo_3 = np.where(y_pred_modelo_3>0.40,1,0)
+```
+
+Graficamos
+
+```python vscode={"languageId": "python"}
+print(classification_report(y_test,y_predic_cat_modelo_3))
+print('F1-Score: {}'.format(f1_score(y_test, y_predic_cat_modelo_3, average='binary'))) 
+cm = confusion_matrix(y_test,y_predic_cat_modelo_3)
+sns.heatmap(cm, cmap='Blues',annot=True,fmt='g')
+plt.xlabel('predecido')
+plt.ylabel('verdadero')
+```
+
+Con la mitad de epocas y menor cantidad de capas y neuronas el valor del f1_score es practicamente el mismo. Nos quedamos con esta ultima red
+
+
+### Prediccion final
+
+```python vscode={"languageId": "python"}
+dump(modelo_hotels_3, 'modelos/red_neuronal_3.joblib')
 
 ```
 
 ```python id="a82b6519" vscode={"languageId": "python"}
 y_pred_testeo = modelo_hotels_2.predict(hotelsdf_testeo_filtrado)
-```
-
-```python id="2fd7ed7e" vscode={"languageId": "python"}
 y_pred_testeo
 ```
 
@@ -378,7 +427,7 @@ df_resultados_pred
 
 ```python id="5cb7fc52" vscode={"languageId": "python"}
 df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': df_resultados_pred["resultado"]})
-df_submission.to_csv('submissions/red_zafable_posta_2.csv', index=False)
+df_submission.to_csv('submissions/red_neuronal_3.csv', index=False)
 df_submission
 df_submission.head()
 ```
