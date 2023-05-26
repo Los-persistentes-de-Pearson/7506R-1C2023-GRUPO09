@@ -1,0 +1,82 @@
+\documentclass{article}
+\usepackage[parfill]{parskip}
+\usepackage[a4paper, total={6in, 9in}]{geometry}
+
+\usepackage{titlesec}
+\titlespacing*{\section}{0pt}{0.01\baselineskip}{0.01\baselineskip}
+
+\usepackage{graphicx} %Paquete para incluir imagenes
+
+\titleformat{\paragraph}
+{\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
+\titlespacing*{\paragraph}
+{0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
+
+
+\graphicspath{ {./images/} }
+%\usepackage[margin=1cm]{geometry} % Centra el texto
+
+\begin{document}
+
+\begin{titlepage}
+  \vspace*{1cm}
+
+  \begin{center}
+    {\Huge{Informe del Trabajo Practico 1}}
+  \end{center}
+
+  \vspace{0.4cm}
+
+  \begin{center}
+    {\LARGE{Facultad de Ingeniería de la Universidad de Buenos Aires}}\\
+    \vspace{0.3cm}
+  \end{center}
+
+  \vspace{0.8cm}
+  \begin{center}
+    \includegraphics[scale=0.8]{Logo-fiuba}
+  \end{center}
+
+  \vspace{0.4cm}
+  \begin{center}
+    {\Large{Grupo 09}}\\
+    \vspace{0.6cm}
+    {\begin{minipage}[t]{.32\textwidth}
+        \begin{center}
+	Castro  Martinez, Jose Ignacio\\
+          {\small{Padrón: 106957}}\\
+          {\small{email: jacastrom@fi.uba.ar}}
+        \end{center}
+	\end{minipage}
+	\begin{minipage}[t]{.32\textwidth}
+        \begin{center}
+	Douce, German Alejandro\\
+          {\small{Padrón: 106001}}\\
+          {\small{email: gdouce@fi.uba.ar}}\\
+        \end{center}
+      \end{minipage}
+      \begin{minipage}[t]{.32\textwidth}
+        \begin{center}
+          Orsi, Tomas Fabrizio\\
+          {\small{Padrón: 109735}}\\
+          {\small{email: torsi@fi.uba.ar}}
+        \end{center}
+      \end{minipage}}
+  \end{center}
+\end{titlepage}
+
+\section*{Reporte checkpoint 4}
+Para esta etapa construimos una red neuronal. Usamos el mismo pre procesamiento de los datos que en el checkpoint anterior. 
+
+Sin embargo, tuvimos que escalar los datos de las variables no binarias de nuestro dataset para poder usarlas en la red neuronal. Para esto usamos un escalador estándar.
+
+Primero creamos una red neuronal muy simple con una baja cantidad de neuronas. Dicha red la “compilamos” usando el optimizador nadam, ya que fue el que nos resultó más eficiente. Esta nos dio resultados bastante subóptimos. También hicimos un gráfico de la métrica AUC contra la cantidad de épocas para hallar el valor más óptimo. En esta primera red vimos que a partir de las 40 épocas el valor de AUC no variaba significativamente.
+
+Después intentamos optimizarla aumentando la cantidad de neuronas y capas ocultas (4 capas de 8, 16, 32, 64 neuronas respectivamente). Sin embargo no obtuvimos los resultados esperados. El f1\_score se mantuvo prácticamente constante.
+
+Por esto último, decidimos armar una 3era red entrando con 40 épocas y con solo 2 capas ocultas de 8 y 16 neuronas respectivamente. Esta red resultó ser más simple y dio un f1\_score muy parecido a los anteriores. 
+
+Finalmente, para tratar de conseguir los mejores valores posibles, decidimos hacer una validación cruzada usando random search. En esta búsqueda buscábamos encontrar la mejor cantidad de capas intermedias, épocas, batch size y el tamaño del output de cada una de las capas. Según la validación cruzada, necesitábamos más capas intermedias y confirmar nuestra creencia de que la función  relu para las capas intermedias era la más eficiente.
+
+
+\end{document}
