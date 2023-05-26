@@ -137,63 +137,8 @@ valoresNoBinarios = ['lead_time', 'arrival_year', 'arrival_week_number', 'arriva
        'special_requests_num', 'dias_totales']
 ```
 
-```python
-cuantitativas = [
-"adult_num",
-"arrival_month_day",
-"arrival_week_number",
-"arrival_year",
-"average_daily_rate",
-"babies_num",
-"booking_changes_num",
-"children_num",
-"days_in_waiting_list",
-"lead_time",
-"previous_cancellations_num",
-"required_car_parking_spaces_num",
-"special_requests_num",
-"weekend_nights_num",
-"week_nights_num",
-]
-```
-
-```python
-len(cuantitativas)
-```
-
 Imports para armar la red
 
-```python
-# from sklearn.datasets import load_iris
-
-# iris = load_iris()
-
-# x = iris['data']
-# y = iris['target']
-# names = iris['target_names']
-# feature_names = iris['feature_names']
-
-# # Split the data set into training and testing
-# x_train, x_test, y_train, y_test = train_test_split(x, y, 
-#                                                     test_size=0.5,
-#                                                     stratify = y,
-#                                                     random_state=22)
-
-# # One hot encoding
-# enc = OneHotEncoder()
-
-#y_train_tensor = tf.convert_to_tensor(y_train)
-# y_train_encoder = y_train.to_list()
-#y_test_tensor = tf.convert_to_tensor(y_test)
-# y_test_encoder = y_test.to_list()
-
-
-
-#x_train_tensor = tf.convert_to_tensor(x_train)
-# x_train_scaled = x_train.to_list()
-#x_test_tensor = tf.convert_to_tensor(x_test)
-# x_test_scaled = x_test.to_list()
-```
 
 Tenemos que escalar todos los valores de nuestro data set (excepto los valores producidos por el one hot encoding
 
@@ -222,8 +167,6 @@ x_test_escalado = x_test.copy()
 for i in range(len(valoresNoBinarios)):
     x_train_escalado[valoresNoBinarios[i]]=x_train_transform_1[:,i]
     x_test_escalado[valoresNoBinarios[i]]=x_test_transform_1[:,i]
-#     x_train_escalado[valoresNoBinarios[i]]=x_train_transform_1[:,0]
-#     x_test_escalado[valoresNoBinarios[i]]=x_test_transform_1[:,0]
 ```
 
 ```python
@@ -235,13 +178,6 @@ x_test_escalado
 ```
 
 ```python
-len(np.unique(y_train))
-```
-
-```python
-# calcula la cantidad de clases
-#cant_clases=len(np.unique(y))
-#cant_clases = len(np.unique(y_train))
 cant_clases = 1
 
 
@@ -249,15 +185,8 @@ cant_clases = 1
 d_in=len(x_train_escalado.columns)
 
 modelo_hotels_1 = keras.Sequential([
-    # input_shape solo en la primer capa
-#     keras.layers.Dense(1,input_shape=(d_in,),activation ='relu'),
     keras.layers.Dense(8,input_shape=(d_in,),activation ='relu'),
-#     keras.layers.Dense(16,input_shape=(d_in,),activation ='relu'),
-#     keras.layers.Dense(32,input_shape=(d_in,),activation ='relu'),
-#     keras.layers.Dense(64,input_shape=(d_in,),activation ='relu'),
     keras.layers.Dense(cant_clases, activation='sigmoid'),
-#     keras.layers.Dense(1,input_shape=(d_in,)),
-#     keras.layers.Dense(1, activation='sigmoid')
 ])
 
 
@@ -286,7 +215,6 @@ ds_validacion.columns=['y_pred','y_real']
 
 tabla=pd.crosstab(ds_validacion.y_pred, ds_validacion.y_real)
 grf=sns.heatmap(tabla,annot=True, cmap = 'Blues', fmt='g')
-#plt.ticklabel_format(style='plain', axis='both')
 plt.show()
 ```
 
@@ -317,21 +245,17 @@ def creador_modelo(learning_rate = 0.1,
                    output = 2, 
                   hidden_layers = 2
                   ):
-    # Add an input layer
     model = keras.Sequential()
     model.add(keras.layers.Dense(5, activation=activation, input_shape=(d_in,)))
     
     for i in range(hidden_layers):
-        # Add one hidden layer
         model.add(keras.layers.Dense(output, activation=activation))
 
     model.add(keras.layers.Dense(1, activation=activation))
     
     model.compile(
-#       optimizer=keras.optimizers.SGD(learning_rate=learning_rate), 
       optimizer=optimizer,
       loss=loss, 
-      # metricas para ir calculando en cada iteracion o batch 
       metrics=metrics, 
     )
     return model
@@ -340,20 +264,12 @@ def creador_modelo(learning_rate = 0.1,
 Vamos a empezar con una baja cantidad de epochs y batch_size
 
 ```python
-# batch_size = 16
-# epochs = 10
-```
-
-```python
 model = KerasClassifier(build_fn=creador_modelo, 
-#                         epochs=epochs, 
-#                         batch_size = batch_size, 
                         verbose=1)
 ```
 
 ```python
 param_grid = { 
-#             "learning_rate" :  [0.0001, 0.001, 0.01, 0.1],
                   "hidden_layers" : [1, 5, 10, 15, 20], 
                     "output" : [1, 2, 4, 8, 32, 64], 
                     "batch_size" : [5, 10, 20],
@@ -418,220 +334,4 @@ tabla=pd.crosstab(ds_validacion.y_pred, ds_validacion.y_real)
 grf=sns.heatmap(tabla,annot=True, cmap = 'Blues', fmt='g')
 #plt.ticklabel_format(style='plain', axis='both')
 plt.show()
-```
-
-```python
-input()
-```
-
-```python
-# cant_epochs=10
-cant_epochs=50
-
-historia_modelo_hotel_2=modelo_rs.fit(x_train_escalado,y_train,epochs=cant_epochs,batch_size=16,verbose=False)
-```
-
-```python
-y_pred = modelo_rs.predict(x_test_escalado)
-y_predic_cat_ej1 = np.where(y_pred>0.7,1,0)
-
-ds_validacion=pd.DataFrame(y_predic_cat_ej1,y_test).reset_index()
-ds_validacion.columns=['y_pred','y_real']
-
-tabla=pd.crosstab(ds_validacion.y_pred, ds_validacion.y_real)
-grf=sns.heatmap(tabla,annot=True, cmap = 'Blues', fmt='g')
-#plt.ticklabel_format(style='plain', axis='both')
-plt.show()
-```
-
-```python
-if not exists('submissions/red_neuronal_rf.csv'):
-    y_pred_testeo = modelo_hotels_1.predict(hotelsdf_testeo_filtrado)
-    y_pred_testeo_cat = np.where(y_pred_testeo>0.70,1,0)
-    df_resultados_pred = pd.DataFrame.from_records(y_pred_testeo_cat,columns = ["resultado"])
-    df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': df_resultados_pred["resultado"]})
-    df_submission.to_csv('submissions/red_neuronal_rf.csv', index=False)
-    
-```
-
-```python
-cant_clases = 1
-
-#d_in=len(y_train)
-d_in=len(x_train_escalado.columns)
-
-modelo_hotels_1 = keras.Sequential([
-    # input_shape solo en la primer capa
-    keras.layers.Dense(100,input_shape=(d_in,),activation ='relu'),
-    keras.layers.Dense(100,input_shape=(d_in,),activation ='relu'),
-    keras.layers.Dense(100,input_shape=(d_in,),activation ='relu'),
-    keras.layers.Dense(100,input_shape=(d_in,),activation ='relu'),
-    keras.layers.Dense(100,input_shape=(d_in,),activation ='relu'),
-    keras.layers.Dense(cant_clases, activation='sigmoid'),
-])
-
-```
-
-# Amongus
-
-```python
-input()
-```
-
-```python colab={"base_uri": "https://localhost:8080/"} id="60da0c2b" outputId="c3379a9e-f818-40ee-b033-2a56c767619b" vscode={"languageId": "python"}
-cant_clases = 1
-
-d_in=len(x_train.columns)
-
-modelo_hotels_1 = keras.Sequential([
-    keras.layers.Dense(8,input_shape=(d_in,),activation ='relu'),
-    keras.layers.Dense(16,input_shape=(d_in,),activation ='relu'),
-    keras.layers.Dense(32,input_shape=(d_in,),activation ='relu'),
-    keras.layers.Dense(cant_clases, activation='sigmoid'),])
-
-
-modelo_hotels_1.summary()
-```
-
-```python id="e0599e98" vscode={"languageId": "python"}
-modelo_hotels_1.compile(
-  optimizer=keras.optimizers.SGD(learning_rate=0.01), 
-  loss='binary_crossentropy', 
-  # metricas para ir calculando en cada iteracion o batch 
-  metrics=['AUC'], 
-)
-
-cant_epochs=10
-
-historia_modelo_hotels_1=modelo_hotels_1.fit(x_train,y_train,epochs=cant_epochs,batch_size=16,verbose=False)
-```
-
-```python vscode={"languageId": "python"}
-epochs = range(cant_epochs)
-
-plt.plot(epochs, historia_modelo_hotels_1.history['auc'], color='orange', label='AUC')
-plt.xlabel("epochs")
-plt.ylabel("AUC")
-plt.legend()
-```
-
-Mostramos los resultados de este primer modelo
-
-```python vscode={"languageId": "python"}
-y_pred_modelo_1 = modelo_hotels_1.predict(x_test)
-y_predic_cat_modelo_1 = np.where(y_pred_modelo_1>0.50,1,0)
-
-ds_validacion=pd.DataFrame(y_predic_cat_modelo_1,y_test).reset_index()
-ds_validacion.columns=['y_pred','y_real']
-
-tabla=pd.crosstab(ds_validacion.y_pred, ds_validacion.y_real)
-grf=sns.heatmap(tabla,annot=True, cmap = 'Blues', fmt='g')
-
-#plt.ticklabel_format(style='plain', axis='both')
-plt.show()
-```
-
-Si bien los resultados son relativamente buenos y no se ve que el modelo este muy sesgado, vemos q a partir de ???? NO SE QUE JUSTIFICAR
-
-```python vscode={"languageId": "python"}
-cant_clases = 1
-
-d_in=len(x_train.columns)
-
-modelo_hotels_2= keras.Sequential([
-    keras.layers.Dense(8,input_shape=(d_in,),activation ='relu'),
-    keras.layers.Dense(16,input_shape=(d_in,),activation ='relu'),
-    keras.layers.Dense(32,input_shape=(d_in,),activation ='relu'),
-    keras.layers.Dense(cant_clases, activation='sigmoid'),])
-
-modelo_hotels_2.compile(
-  optimizer=keras.optimizers.SGD(learning_rate=0.01), 
-  loss='binary_crossentropy', 
-  # metricas para ir calculando en cada iteracion o batch 
-  metrics=['AUC'], 
-)
-
-cant_epochs=30
-
-historia_modelo_hotels_2=modelo_hotels_1.fit(x_train,y_train,epochs=cant_epochs,batch_size=16,verbose=False)
-```
-
-```python vscode={"languageId": "python"}
-epochs = range(cant_epochs)
-
-plt.plot(epochs, historia_modelo_hotels_2.history['auc'], color='orange', label='AUC')
-plt.xlabel("epochs")
-plt.ylabel("auc")
-plt.legend()
-```
-
-```python colab={"base_uri": "https://localhost:8080/", "height": 1000} id="4ab27167" outputId="c6e52f3c-6c96-47c1-ac4b-d14b378ff8d9" vscode={"languageId": "python"}
-y_pred_modelo_2 = modelo_hotels_2.predict(x_test)
-```
-
-<!-- #region id="7d618a5e" -->
-Predecimos sobre el de testeo
-<!-- #endregion -->
-
-```python colab={"base_uri": "https://localhost:8080/"} id="6eec6f7e" outputId="202daf1d-1b24-466e-99e2-9714509fbfff" vscode={"languageId": "python"}
-y_pred_modelo_2
-```
-
-Graficamos
-
-```python vscode={"languageId": "python"}
-y_predic_cat_modelo_2 = np.where(y_pred_modelo_2>0.50,1,0)
-```
-
-```python vscode={"languageId": "python"}
-ds_validacion=pd.DataFrame(y_predic_cat_modelo_2,y_test).reset_index()
-ds_validacion.columns=['y_pred','y_real']
-
-tabla=pd.crosstab(ds_validacion.y_pred, ds_validacion.y_real)
-grf=sns.heatmap(tabla,annot=True, cmap = 'Blues')
-
-#plt.ticklabel_format(style='plain', axis='both')
-plt.show()
-```
-
-```python vscode={"languageId": "python"}
-print(classification_report(y_test,y_predic_cat_modelo_2))
-print('F1-Score: {}'.format(f1_score(y_test, y_predic_cat_modelo_2, average='binary'))) 
-cm = confusion_matrix(y_test,y_predic_cat_modelo_2)
-sns.heatmap(cm, cmap='Blues',annot=True,fmt='g')
-plt.xlabel('predecido')
-plt.ylabel('verdadero')
-```
-
-```python vscode={"languageId": "python"}
-dump(modelo_hotels_2, 'modelos/una_red_zafable_2.joblib')
-
-```
-
-```python id="a82b6519" vscode={"languageId": "python"}
-y_pred_testeo = modelo_hotels_1.predict(hotelsdf_testeo_filtrado)
-```
-
-```python id="2fd7ed7e" vscode={"languageId": "python"}
-y_pred_testeo
-```
-
-```python id="7498d2e6" vscode={"languageId": "python"}
-y_pred_testeo_cat = np.where(y_pred_testeo>0.50,1,0)
-```
-
-```python vscode={"languageId": "python"}
-df_resultados_pred = pd.DataFrame.from_records(y_pred_testeo_cat,columns = ["resultado"])
-df_resultados_pred
-```
-
-```python id="5cb7fc52" vscode={"languageId": "python"}
-df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': df_resultados_pred["resultado"]})
-df_submission.to_csv('submissions/red_zafable_2.csv', index=False)
-df_submission
-df_submission.head()
-```
-
-```python
-
 ```
