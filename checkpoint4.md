@@ -182,10 +182,14 @@ sscaler.fit(pd.DataFrame(x_train[cuantitativas]))
 ```python id="IIm5Jlngl37a" vscode={"languageId": "python"}
 x_train_transform_1=sscaler.transform(pd.DataFrame(x_train[cuantitativas]))
 x_test_transform_1=sscaler.transform(pd.DataFrame(x_test[cuantitativas]))
+hotelsdf_testeo_transform=sscaler.transform(pd.DataFrame(hotelsdf_testeo_filtrado[cuantitativas]))
+
+
 
 for cuantitativa in cuantitativas:
   x_train[cuantitativa] = x_train_transform_1[:,0]
   x_test[cuantitativa] = x_test_transform_1[:,0]
+  hotelsdf_testeo_filtrado[cuantitativa] = hotelsdf_testeo_transform[:,0]
 ```
 
 ```python colab={"base_uri": "https://localhost:8080/", "height": 488} id="Z-xFqBuIowOz" outputId="f5e31bdd-0959-463b-dc03-cec50bb75041" vscode={"languageId": "python"}
@@ -194,6 +198,10 @@ x_train[cuantitativas]
 
 ```python colab={"base_uri": "https://localhost:8080/", "height": 488} id="Z_J1rY1Vo7p4" outputId="9ceb4bc3-6729-4e8e-de6c-7b67646bf3bc" vscode={"languageId": "python"}
 x_test[cuantitativas]
+```
+
+```python vscode={"languageId": "python"}
+hotelsdf_testeo_filtrado[cuantitativas]
 ```
 
 <!-- #region id="f076865e" -->
@@ -220,8 +228,6 @@ d_in=len(x_train.columns)
 
 modelo_hotels_1 = keras.Sequential([
     keras.layers.Dense(8,input_shape=(d_in,),activation ='relu'),
-    keras.layers.Dense(16,input_shape=(d_in,),activation ='relu'),
-    keras.layers.Dense(32,input_shape=(d_in,),activation ='relu'),
     keras.layers.Dense(cant_clases, activation='sigmoid'),])
 
 
@@ -230,7 +236,7 @@ modelo_hotels_1.summary()
 
 ```python id="e0599e98" vscode={"languageId": "python"}
 modelo_hotels_1.compile(
-  optimizer=keras.optimizers.SGD(learning_rate=0.01), 
+  optimizer=keras.optimizers.Nadam(learning_rate=0.01), 
   loss='binary_crossentropy', 
   # metricas para ir calculando en cada iteracion o batch 
   metrics=['AUC'], 
@@ -260,13 +266,27 @@ ds_validacion=pd.DataFrame(y_predic_cat_modelo_1,y_test).reset_index()
 ds_validacion.columns=['y_pred','y_real']
 
 tabla=pd.crosstab(ds_validacion.y_pred, ds_validacion.y_real)
-grf=sns.heatmap(tabla,annot=True, cmap = 'Blues')
+grf=sns.heatmap(tabla,annot=True, cmap = 'Blues', fmt='g')
 
 #plt.ticklabel_format(style='plain', axis='both')
 plt.show()
 ```
 
-Si bien los resultados son relativamente buenos y no se ve que el modelo este muy sesgado, vemos q a partir de ???? NO SE QUE JUSTIFICAR
+```python vscode={"languageId": "python"}
+print(classification_report(y_test,y_predic_cat_modelo_1))
+print('F1-Score: {}'.format(f1_score(y_test, y_predic_cat_modelo_1, average='binary'))) 
+cm = confusion_matrix(y_test,y_predic_cat_modelo_1)
+sns.heatmap(cm, cmap='Blues',annot=True,fmt='g')
+plt.xlabel('predecido')
+plt.ylabel('verdadero')
+```
+
+```python vscode={"languageId": "python"}
+#dump(grid, 'modelos/grid_search_red.joblib')
+#dump(grid, 'modelos/grid_search_resultados_red.joblib')
+```
+
+Si bien los resultados son relativamente buenos y no se ve que el modelo este muy sesgado, vemos q a partir de 30/ epocas se mantiene relativamente coinstante. Pruebo con ese valor. Ademas aumentamos la cantidad de neuras para mejorar la efectiviad de la red.
 
 ```python vscode={"languageId": "python"}
 cant_clases = 1
@@ -277,18 +297,19 @@ modelo_hotels_2= keras.Sequential([
     keras.layers.Dense(8,input_shape=(d_in,),activation ='relu'),
     keras.layers.Dense(16,input_shape=(d_in,),activation ='relu'),
     keras.layers.Dense(32,input_shape=(d_in,),activation ='relu'),
+    keras.layers.Dense(64,input_shape=(d_in,),activation ='relu'),
     keras.layers.Dense(cant_clases, activation='sigmoid'),])
 
 modelo_hotels_2.compile(
-  optimizer=keras.optimizers.SGD(learning_rate=0.01), 
+  optimizer=keras.optimizers.Nadam(learning_rate=0.01), 
   loss='binary_crossentropy', 
   # metricas para ir calculando en cada iteracion o batch 
   metrics=['AUC'], 
 )
 
-cant_epochs=30
+cant_epochs=80
 
-historia_modelo_hotels_2=modelo_hotels_1.fit(x_train,y_train,epochs=cant_epochs,batch_size=16,verbose=False)
+historia_modelo_hotels_2=modelo_hotels_2.fit(x_train,y_train,epochs=cant_epochs,batch_size=16,verbose=False)
 ```
 
 ```python vscode={"languageId": "python"}
@@ -300,22 +321,17 @@ plt.ylabel("auc")
 plt.legend()
 ```
 
+Dio mucho mejor!!!!!!! Mass cte, con menos epocas
+
 ```python colab={"base_uri": "https://localhost:8080/", "height": 1000} id="4ab27167" outputId="c6e52f3c-6c96-47c1-ac4b-d14b378ff8d9" vscode={"languageId": "python"}
 y_pred_modelo_2 = modelo_hotels_2.predict(x_test)
-```
-
-<!-- #region id="7d618a5e" -->
-Predecimos sobre el de testeo
-<!-- #endregion -->
-
-```python colab={"base_uri": "https://localhost:8080/"} id="6eec6f7e" outputId="202daf1d-1b24-466e-99e2-9714509fbfff" vscode={"languageId": "python"}
 y_pred_modelo_2
 ```
 
 Graficamos
 
 ```python vscode={"languageId": "python"}
-y_predic_cat_modelo_2 = np.where(y_pred_modelo_2>0.50,1,0)
+y_predic_cat_modelo_2 = np.where(y_pred_modelo_2>0.40,1,0)
 ```
 
 ```python vscode={"languageId": "python"}
@@ -323,7 +339,7 @@ ds_validacion=pd.DataFrame(y_predic_cat_modelo_2,y_test).reset_index()
 ds_validacion.columns=['y_pred','y_real']
 
 tabla=pd.crosstab(ds_validacion.y_pred, ds_validacion.y_real)
-grf=sns.heatmap(tabla,annot=True, cmap = 'Blues')
+grf=sns.heatmap(tabla,annot=True, cmap = 'Blues', fmt='g' )
 
 #plt.ticklabel_format(style='plain', axis='both')
 plt.show()
@@ -339,7 +355,7 @@ plt.ylabel('verdadero')
 ```
 
 ```python vscode={"languageId": "python"}
-dump(modelo_hotels_2, 'modelos/una_red_zafable_2.joblib')
+dump(modelo_hotels_2, 'modelos/una_red_zafable_posta_2.joblib')
 
 ```
 
@@ -352,7 +368,7 @@ y_pred_testeo
 ```
 
 ```python id="7498d2e6" vscode={"languageId": "python"}
-y_pred_testeo_cat = np.where(y_pred_testeo>0.50,1,0)
+y_pred_testeo_cat = np.where(y_pred_testeo>0.4,1,0)
 ```
 
 ```python vscode={"languageId": "python"}
@@ -362,7 +378,7 @@ df_resultados_pred
 
 ```python id="5cb7fc52" vscode={"languageId": "python"}
 df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': df_resultados_pred["resultado"]})
-df_submission.to_csv('submissions/red_zafable_2.csv', index=False)
+df_submission.to_csv('submissions/red_zafable_posta_2.csv', index=False)
 df_submission
 df_submission.head()
 ```
