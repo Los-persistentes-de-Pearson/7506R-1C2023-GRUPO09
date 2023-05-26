@@ -512,7 +512,6 @@ ds_validacion.columns=['y_pred','y_real']
 
 tabla=pd.crosstab(ds_validacion.y_pred, ds_validacion.y_real)
 grf=sns.heatmap(tabla,annot=True, cmap = 'Blues', fmt='g')
-#plt.ticklabel_format(style='plain', axis='both')
 plt.show()
 ```
 
@@ -526,14 +525,10 @@ plt.ylabel('verdadero')
 ```
 
 ```python
-y_pred_testeo = modelo_hotels_4.predict(hotelsdf_testeo_filtrado)
+y_pred_testeo = modelo_rs.predict(hotelsdf_testeo_filtrado)
 y_pred_testeo_cat = np.where(y_pred_testeo>0.5,1,0)
 df_resultados_pred = pd.DataFrame.from_records(y_pred_testeo_cat,columns = ["resultado"])
 df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': df_resultados_pred["resultado"]})
 df_submission.to_csv('submissions/red_neuronal_rs.csv', index=False)
 df_submission.head()
-```
-
-```python
-
 ```
