@@ -297,7 +297,7 @@ historia_modelo_hotel_1=modelo_hotels_1.fit(x_train_escalado,y_train,epochs=cant
 ```python
 y_pred = modelo_hotels_1.predict(x_test_escalado)
 y_predic_cat_ej1 = np.where(y_pred>0.7,1,0)
-historia_modelo_hotels_1=modelo_hotels_1.fit(x_train,y_train,epochs=cant_epochs,batch_size=16,verbose=False)
+historia_modelo_hotels_1=modelo_hotels_1.fit(x_train_escalado,y_train,epochs=cant_epochs,batch_size=16,verbose=False)
 ```
 
 Miramos la metrica AUC en funcion de la cantidad de epocas para enocntrar un valor aceptable
@@ -314,7 +314,7 @@ plt.legend()
 Predecimos
 
 ```python vscode={"languageId": "python"}
-y_pred_modelo_1 = modelo_hotels_1.predict(x_test)
+y_pred_modelo_1 = modelo_hotels_1.predict(x_test_escalado)
 y_predic_cat_modelo_1 = np.where(y_pred_modelo_1>0.50,1,0)
 ```
 
@@ -337,7 +337,7 @@ Los resultados son relativamente buenos y no se ve que el modelo este muy sesgad
 ```python vscode={"languageId": "python"}
 cant_clases = 1
 
-d_in=len(x_train.columns)
+d_in=len(x_train_escalado.columns)
 
 modelo_hotels_2= keras.Sequential([
     keras.layers.Dense(8,input_shape=(d_in,),activation ='relu'),
@@ -355,7 +355,7 @@ modelo_hotels_2.compile(
 
 cant_epochs=80
 
-historia_modelo_hotels_2=modelo_hotels_2.fit(x_train,y_train,epochs=cant_epochs,batch_size=16,verbose=False)
+historia_modelo_hotels_2=modelo_hotels_2.fit(x_train_escalado,y_train,epochs=cant_epochs,batch_size=16,verbose=False)
 ```
 
 ```python vscode={"languageId": "python"}
@@ -368,7 +368,7 @@ plt.legend()
 ```
 
 ```python colab={"base_uri": "https://localhost:8080/", "height": 1000} id="4ab27167" outputId="c6e52f3c-6c96-47c1-ac4b-d14b378ff8d9" vscode={"languageId": "python"}
-y_pred_modelo_2 = modelo_hotels_2.predict(x_test)
+y_pred_modelo_2 = modelo_hotels_2.predict(x_test_escalado)
 y_pred_modelo_2
 ```
 
@@ -395,7 +395,7 @@ El f1_score practicamente no mejoro con el aumnento de neruronas y capas. Sin em
 ```python vscode={"languageId": "python"}
 cant_clases = 1
 
-d_in=len(x_train.columns)
+d_in=len(x_train_escalado.columns)
 
 modelo_hotels_3= keras.Sequential([
     keras.layers.Dense(8,input_shape=(d_in,),activation ='relu'),
@@ -411,7 +411,7 @@ modelo_hotels_3.compile(
 
 cant_epochs=40
 
-historia_modelo_hotels_3=modelo_hotels_3.fit(x_train,y_train,epochs=cant_epochs,batch_size=16,verbose=False)
+historia_modelo_hotels_3=modelo_hotels_3.fit(x_train_escalado,y_train,epochs=cant_epochs,batch_size=16,verbose=False)
 ```
 
 Vemos el AUC contra la cantidad de epocas
@@ -426,7 +426,7 @@ plt.legend()
 ```
 
 ```python vscode={"languageId": "python"}
-y_pred_modelo_3 = modelo_hotels_3.predict(x_test)
+y_pred_modelo_3 = modelo_hotels_3.predict(x_test_escalado)
 y_pred_modelo_3
 ```
 
