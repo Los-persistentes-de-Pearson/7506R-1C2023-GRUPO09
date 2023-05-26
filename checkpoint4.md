@@ -115,27 +115,6 @@ print('Sobran en arbol:', added)
 Guardo datos antes de separacion train test
 <!-- #endregion -->
 
-```python id="KzIl_G3Nkhrq" vscode={"languageId": "python"}
-cuantitativas = [
-"adult_num",
-"arrival_month_day",
-"arrival_week_number",
-"arrival_year",
-"average_daily_rate",
-"babies_num",
-"booking_changes_num",
-"children_num",
-"days_in_waiting_list",
-"lead_time",
-"previous_bookings_not_canceled_num",
-"previous_cancellations_num",
-"required_car_parking_spaces_num",
-"special_requests_num",
-"weekend_nights_num",
-"week_nights_num",
-]
-```
-
 <!-- #region id="01a3e171" -->
 ## Generacion de datos para el entrenamiento de los modelos
 
@@ -171,10 +150,10 @@ valoresNoBinarios = ['lead_time', 'arrival_year', 'arrival_week_number', 'arriva
        'average_daily_rate', 'required_car_parking_spaces_num',
        'special_requests_num', 'dias_totales']
 ```
-```python
 ## Escalado de los datasets de test y train
 
 
+```python
 #Tenemos que escalar todos los valores de nuestro data set (excepto los valores producidos por el one hot encoding
 
 sScaler = StandardScaler()
@@ -201,61 +180,6 @@ for i in range(len(valoresNoBinarios)):
     x_train_escalado[valoresNoBinarios[i]]=x_train_transform_1[:,i]
     x_test_escalado[valoresNoBinarios[i]]=x_test_transform_1[:,i]
     hotelsdf_testeo_filtrado[valoresNoBinarios[i]] = hotelsdf_testeo_transform[:,i]
-```
-
-```python
-# cuantitativas = [
-# "adult_num",
-# "arrival_month_day",
-# "arrival_week_number",
-# "arrival_year",
-# "average_daily_rate",
-# "babies_num",
-# "booking_changes_num",
-# "children_num",
-# "days_in_waiting_list",
-# "lead_time",
-# "previous_cancellations_num",
-# "required_car_parking_spaces_num",
-# "special_requests_num",
-# "weekend_nights_num",
-# "week_nights_num",
-# ]
-
-
-# from sklearn.preprocessing import StandardScaler
-# sscaler=StandardScaler()
-# sscaler.fit(pd.DataFrame(x_train[cuantitativas])
-```
-
-```python id="IIm5Jlngl37a" vscode={"languageId": "python"}
-# x_train_transform_1=sscaler.transform(pd.DataFrame(x_train[cuantitativas]))
-# x_test_transform_1=sscaler.transform(pd.DataFrame(x_test[cuantitativas]))
-# hotelsdf_testeo_transform=sscaler.transform(pd.DataFrame(hotelsdf_testeo_filtrado[cuantitativas]))
-
-
-
-# for cuantitativa in cuantitativas:
-#   x_train[cuantitativa] = x_train_transform_1[:,0]
-#   x_test[cuantitativa] = x_test_transform_1[:,0]
-#   hotelsdf_testeo_filtrado[cuantitativa] = hotelsdf_testeo_transform[:,0]
-```
-
-<!-- #region id="f076865e" -->
-Imports para armar la red
-<!-- #endregion -->
-
-```python id="22bb34c5" vscode={"languageId": "python"}
-# import tensorflow as tf
-# from tensorflow import keras
-# from keras.utils.vis_utils import plot_model
-# # import visualkeras
-
-# np.random.seed(9)
-# tf.random.set_seed(9) 
-
-# import warnings
-# warnings.filterwarnings("ignore", category=DeprecationWarning) 
 ```
 
 ### RED 1
@@ -455,7 +379,7 @@ dump(modelo_hotels_3, 'modelos/red_neuronal_3.joblib')
 ```
 
 ```python id="a82b6519" vscode={"languageId": "python"}
-y_pred_testeo = modelo_hotels_2.predict(hotelsdf_testeo_filtrado)
+y_pred_testeo = modelo_hotels_3.predict(hotelsdf_testeo_filtrado)
 y_pred_testeo
 ```
 
@@ -473,23 +397,6 @@ df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled
 df_submission.to_csv('submissions/red_neuronal_3.csv', index=False)
 df_submission
 df_submission.head()
-```
-
-# Validacion Cruzada
-
-```python
-tabla=pd.crosstab(ds_validacion.y_pred, ds_validacion.y_real)
-grf=sns.heatmap(tabla,annot=True, cmap = 'Blues', fmt='g')
-plt.show()
-```
-
-```python
-if not exists('submissions/red_neuronal_basica.csv'):
-    y_pred_testeo = modelo_hotels_1.predict(hotelsdf_testeo_filtrado)
-    y_pred_testeo_cat = np.where(y_pred_testeo>0.70,1,0)
-    df_resultados_pred = pd.DataFrame.from_records(y_pred_testeo_cat,columns = ["resultado"])
-    df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': df_resultados_pred["resultado"]})
-    df_submission.to_csv('submissions/red_neuronal_basica.csv', index=False)
 ```
 
 # Validacion cruzada
@@ -571,7 +478,6 @@ modelo_rs.add(keras.layers.Dense(1, activation="sigmoid"))
 
     
 modelo_rs.compile(
-#     optimizer=keras.optimizers.SGD(learning_rate=rs_fit.best_params_["learning_rate"]), 
     optimizer=optimizer,
     loss=loss, 
     metrics=metrics, 
@@ -579,7 +485,6 @@ modelo_rs.compile(
 ```
 
 ```python
-# cant_epochs=10
 cant_epochs=rs_fit.best_params_["epochs"]
 batch_size=rs_fit.best_params_["batch_size"]
 
@@ -592,17 +497,43 @@ historia_modelo_hotel_4=modelo_rs.fit(x_train_escalado,y_train,
 ```python
 epochs = range(cant_epochs)
 
-plt.plot(epochs, historia_modelo_hotels_1.history['auc'], color='orange', label='AUC')
+plt.plot(epochs, historia_modelo_hotel_4.history['auc'], color='orange', label='AUC')
 plt.xlabel("epochs")
 plt.ylabel("AUC")
 plt.legend()
 ```
 
 ```python
+y_pred = modelo_rs.predict(x_test_escalado)
+y_predic_cat_modelo4 = np.where(y_pred>0.5,1,0)
+
+ds_validacion=pd.DataFrame(y_predic_cat_modelo4,y_test).reset_index()
+ds_validacion.columns=['y_pred','y_real']
+
+tabla=pd.crosstab(ds_validacion.y_pred, ds_validacion.y_real)
+grf=sns.heatmap(tabla,annot=True, cmap = 'Blues', fmt='g')
+#plt.ticklabel_format(style='plain', axis='both')
+plt.show()
+```
+
+```python
 print(classification_report(y_test,y_predic_cat_modelo_1))
-print('F1-Score: {}'.format(f1_score(y_test, y_predic_cat_modelo_1, average='binary'))) 
+print('F1-Score: {}'.format(f1_score(y_test, y_predic_cat_modelo4, average='binary'))) 
 cm = confusion_matrix(y_test,y_predic_cat_modelo_1)
 sns.heatmap(cm, cmap='Blues',annot=True,fmt='g')
 plt.xlabel('predecido')
 plt.ylabel('verdadero')
+```
+
+```python
+y_pred_testeo = modelo_hotels_4.predict(hotelsdf_testeo_filtrado)
+y_pred_testeo_cat = np.where(y_pred_testeo>0.5,1,0)
+df_resultados_pred = pd.DataFrame.from_records(y_pred_testeo_cat,columns = ["resultado"])
+df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': df_resultados_pred["resultado"]})
+df_submission.to_csv('submissions/red_neuronal_rs.csv', index=False)
+df_submission.head()
+```
+
+```python
+
 ```
