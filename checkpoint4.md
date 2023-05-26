@@ -302,7 +302,8 @@ for i in range(rs_fit.best_params_["hidden_layers"]):
         # Add one hidden layer
     modelo_rs.add(keras.layers.Dense(rs_fit.best_params_["output"], activation=rs_fit.best_params_["activation"]))
 
-modelo_rs.add(keras.layers.Dense(1, activation=rs_fit.best_params_["activation"]))
+modelo_rs.add(keras.layers.Dense(1, activation="sigmoid"))
+
     
 modelo_rs.compile(
 #     optimizer=keras.optimizers.SGD(learning_rate=rs_fit.best_params_["learning_rate"]), 
@@ -317,7 +318,7 @@ modelo_rs.compile(
 cant_epochs=rs_fit.best_params_["epochs"]
 batch_size=rs_fit.best_params_["batch_size"]
 
-historia_modelo_hotel_1=modelo_rs.fit(x_train_escalado,y_train,
+historia_modelo_hotel_2=modelo_rs.fit(x_train_escalado,y_train,
                                       epochs=cant_epochs,
                                       batch_size=batch_size,verbose=False)
 
@@ -334,4 +335,8 @@ tabla=pd.crosstab(ds_validacion.y_pred, ds_validacion.y_real)
 grf=sns.heatmap(tabla,annot=True, cmap = 'Blues', fmt='g')
 #plt.ticklabel_format(style='plain', axis='both')
 plt.show()
+```
+
+```python
+
 ```
