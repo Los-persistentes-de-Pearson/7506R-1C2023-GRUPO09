@@ -583,8 +583,26 @@ modelo_rs.compile(
 cant_epochs=rs_fit.best_params_["epochs"]
 batch_size=rs_fit.best_params_["batch_size"]
 
-historia_modelo_hotel_2=modelo_rs.fit(x_train_escalado,y_train,
+historia_modelo_hotel_4=modelo_rs.fit(x_train_escalado,y_train,
                                       epochs=cant_epochs,
                                       batch_size=batch_size,verbose=False)
 
+```
+
+```python
+epochs = range(cant_epochs)
+
+plt.plot(epochs, historia_modelo_hotels_1.history['auc'], color='orange', label='AUC')
+plt.xlabel("epochs")
+plt.ylabel("AUC")
+plt.legend()
+```
+
+```python
+print(classification_report(y_test,y_predic_cat_modelo_1))
+print('F1-Score: {}'.format(f1_score(y_test, y_predic_cat_modelo_1, average='binary'))) 
+cm = confusion_matrix(y_test,y_predic_cat_modelo_1)
+sns.heatmap(cm, cmap='Blues',annot=True,fmt='g')
+plt.xlabel('predecido')
+plt.ylabel('verdadero')
 ```
