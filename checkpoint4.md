@@ -507,15 +507,6 @@ plt.legend()
 y_pred = modelo_rs.predict(x_test_escalado)
 y_predic_cat_modelo4 = np.where(y_pred>0.5,1,0)
 
-ds_validacion=pd.DataFrame(y_predic_cat_modelo4,y_test).reset_index()
-ds_validacion.columns=['y_pred','y_real']
-
-tabla=pd.crosstab(ds_validacion.y_pred, ds_validacion.y_real)
-grf=sns.heatmap(tabla,annot=True, cmap = 'Blues', fmt='g')
-plt.show()
-```
-
-```python
 print(classification_report(y_test,y_predic_cat_modelo_1))
 print('F1-Score: {}'.format(f1_score(y_test, y_predic_cat_modelo4, average='binary'))) 
 cm = confusion_matrix(y_test,y_predic_cat_modelo_1)
