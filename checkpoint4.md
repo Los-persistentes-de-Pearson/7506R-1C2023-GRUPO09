@@ -331,7 +331,7 @@ y_pred_modelo_2
 Graficamos
 
 ```python vscode={"languageId": "python"}
-y_predic_cat_modelo_2 = np.where(y_pred_modelo_2>0.40,1,0)
+y_predic_cat_modelo_2 = np.where(y_pred_modelo_2>0.50,1,0)
 ```
 
 ```python vscode={"languageId": "python"}
@@ -343,10 +343,10 @@ plt.xlabel('predecido')
 plt.ylabel('verdadero')
 ```
 
-### RED 3
-
-
 El f1_score practicamente no mejoro con el aumnento de neruronas y capas. Sin embargo en ambos modelos (modelo_hotels_1 y 2) vemos que a partir de las 40 epocas el AUC practicamente no varia. Entonces bajamos la cantidad de epocas hasta ese valor para obtener una red mas optima Y tambien quito algunas capas para que la red sea mas simple porque no tiene sentido dejar una red mas compleja que no mejora el f1_score
+
+
+### RED 3
 
 ```python vscode={"languageId": "python"}
 cant_clases = 1
@@ -387,7 +387,7 @@ y_pred_modelo_3
 ```
 
 ```python vscode={"languageId": "python"}
-y_predic_cat_modelo_3 = np.where(y_pred_modelo_3>0.40,1,0)
+y_predic_cat_modelo_3 = np.where(y_pred_modelo_3>0.50,1,0)
 ```
 
 Graficamos
@@ -404,7 +404,7 @@ plt.ylabel('verdadero')
 Con la mitad de epocas y menor cantidad de capas y neuronas el valor del f1_score es practicamente el mismo. Nos quedamos con esta ultima red
 
 
-### Prediccion final
+### Prediccion mejor red
 
 ```python vscode={"languageId": "python"}
 dump(modelo_hotels_3, 'modelos/red_neuronal_3.joblib')
