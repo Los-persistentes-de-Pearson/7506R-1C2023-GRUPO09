@@ -7,7 +7,7 @@ jupyter:
       format_version: '1.3'
       jupytext_version: 1.14.5
   kernelspec:
-    display_name: Python 3
+    display_name: Python 3 (ipykernel)
     language: python
     name: python3
 ---
@@ -41,6 +41,8 @@ from sklearn.tree import DecisionTreeClassifier, export_graphviz, export_text
 from sklearn.metrics import confusion_matrix, classification_report , f1_score, make_scorer, precision_score, recall_score, accuracy_score,f1_score
 from sklearn.preprocessing import MinMaxScaler
 from sklearn import tree
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
+
 
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import train_test_split, RandomizedSearchCV, GridSearchCV, cross_val_score
@@ -61,8 +63,11 @@ import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 warnings.simplefilter(action='ignore', category=UserWarning)
 
-from advertencia import ADVERTENCIA #Borrar cuando entreguemos
+import tensorflow as tf
+from tensorflow import keras
+from keras.utils.vis_utils import plot_model
 
+from keras.wrappers.scikit_learn import KerasClassifier #Libreria para usarg Grid Search con kerss
 ```
 
 <!-- #region id="dcf41670" -->
@@ -73,6 +78,9 @@ Constantes
 # Constantes
 JOBS=-2
 SEED=9
+
+np.random.seed(SEED)
+tf.random.set_seed(SEED) 
 ```
 
 <!-- #region id="18257c34" -->
@@ -107,27 +115,6 @@ print('Sobran en arbol:', added)
 Guardo datos antes de separacion train test
 <!-- #endregion -->
 
-```python id="KzIl_G3Nkhrq" vscode={"languageId": "python"}
-cuantitativas = [
-"adult_num",
-"arrival_month_day",
-"arrival_week_number",
-"arrival_year",
-"average_daily_rate",
-"babies_num",
-"booking_changes_num",
-"children_num",
-"days_in_waiting_list",
-"lead_time",
-"previous_bookings_not_canceled_num",
-"previous_cancellations_num",
-"required_car_parking_spaces_num",
-"special_requests_num",
-"weekend_nights_num",
-"week_nights_num",
-]
-```
-
 <!-- #region id="01a3e171" -->
 ## Generacion de datos para el entrenamiento de los modelos
 
@@ -149,78 +136,50 @@ x_train, x_test, y_train, y_test = train_test_split(hotelsdf_modelo_x,
                                                     random_state=SEED) #Semilla 9, como el Equipo !!
 ```
 
-```python id="478e26fa" vscode={"languageId": "python"}
-x_test
+Buscamos los valores que no fueron generados por el one hot encoder
+
+```python
+x_train.columns
 ```
 
+```python
+valoresNoBinarios = ['lead_time', 'arrival_year', 'arrival_week_number', 'arrival_month_day',
+       'weekend_nights_num', 'week_nights_num', 'adult_num', 'children_num',
+       'babies_num', 'previous_cancellations_num',
+       'booking_changes_num', 'days_in_waiting_list',
+       'average_daily_rate', 'required_car_parking_spaces_num',
+       'special_requests_num', 'dias_totales']
+```
 ## Escalado de los datasets de test y train
 
-```python id="HmrQe9Tflfgt" vscode={"languageId": "python"}
-cuantitativas = [
-"adult_num",
-"arrival_month_day",
-"arrival_week_number",
-"arrival_year",
-"average_daily_rate",
-"babies_num",
-"booking_changes_num",
-"children_num",
-"days_in_waiting_list",
-"lead_time",
-"previous_cancellations_num",
-"required_car_parking_spaces_num",
-"special_requests_num",
-"weekend_nights_num",
-"week_nights_num",
-]
+
+```python
+#Tenemos que escalar todos los valores de nuestro data set (excepto los valores producidos por el one hot encoding
+
+sScaler = StandardScaler()
+sScaler.fit(pd.DataFrame(x_train[valoresNoBinarios]))
+
 ```
 
-```python colab={"base_uri": "https://localhost:8080/", "height": 75} id="32OMckC_lcpR" outputId="f85f31d5-6d0b-4d9d-b67f-89bac02aa9f3" vscode={"languageId": "python"}
-from sklearn.preprocessing import StandardScaler
-sscaler=StandardScaler()
-sscaler.fit(pd.DataFrame(x_train[cuantitativas]))
+```python
+x_train_transform_1=sScaler.transform(pd.DataFrame(x_train[valoresNoBinarios]))
+x_test_transform_1=sScaler.transform(pd.DataFrame(x_test[valoresNoBinarios]))
+hotelsdf_testeo_transform=sScaler.transform(pd.DataFrame(hotelsdf_testeo_filtrado[valoresNoBinarios]))
 ```
 
-```python id="IIm5Jlngl37a" vscode={"languageId": "python"}
-x_train_transform_1=sscaler.transform(pd.DataFrame(x_train[cuantitativas]))
-x_test_transform_1=sscaler.transform(pd.DataFrame(x_test[cuantitativas]))
-hotelsdf_testeo_transform=sscaler.transform(pd.DataFrame(hotelsdf_testeo_filtrado[cuantitativas]))
-
-
-
-for cuantitativa in cuantitativas:
-  x_train[cuantitativa] = x_train_transform_1[:,0]
-  x_test[cuantitativa] = x_test_transform_1[:,0]
-  hotelsdf_testeo_filtrado[cuantitativa] = hotelsdf_testeo_transform[:,0]
+```python
+#Creamos un nuevo dataframe con los valores escalados
+x_train_escalado = x_train.copy()
+x_test_escalado = x_test.copy()
+hotelsdf_testeo_escalado = hotelsdf_testeo_filtrado.copy()
 ```
 
-```python colab={"base_uri": "https://localhost:8080/", "height": 488} id="Z-xFqBuIowOz" outputId="f5e31bdd-0959-463b-dc03-cec50bb75041" vscode={"languageId": "python"}
-x_train[cuantitativas]
-```
-
-```python colab={"base_uri": "https://localhost:8080/", "height": 488} id="Z_J1rY1Vo7p4" outputId="9ceb4bc3-6729-4e8e-de6c-7b67646bf3bc" vscode={"languageId": "python"}
-x_test[cuantitativas]
-```
-
-```python vscode={"languageId": "python"}
-hotelsdf_testeo_filtrado[cuantitativas]
-```
-
-<!-- #region id="f076865e" -->
-Imports para armar la red
-<!-- #endregion -->
-
-```python id="22bb34c5" vscode={"languageId": "python"}
-import tensorflow as tf
-from tensorflow import keras
-from keras.utils.vis_utils import plot_model
-# import visualkeras
-
-np.random.seed(9)
-tf.random.set_seed(9) 
-
-import warnings
-warnings.filterwarnings("ignore", category=DeprecationWarning) 
+```python
+#Le asignamos los nuevos valores escalados y mantenemos los valores del one hot encoding
+for i in range(len(valoresNoBinarios)):
+    x_train_escalado[valoresNoBinarios[i]]=x_train_transform_1[:,i]
+    x_test_escalado[valoresNoBinarios[i]]=x_test_transform_1[:,i]
+    hotelsdf_testeo_filtrado[valoresNoBinarios[i]] = hotelsdf_testeo_transform[:,i]
 ```
 
 ### RED 1
@@ -231,11 +190,14 @@ Creamos una red muy simple con una unica capa oculta y funcion de activacion rel
 ```python colab={"base_uri": "https://localhost:8080/"} id="60da0c2b" outputId="c3379a9e-f818-40ee-b033-2a56c767619b" vscode={"languageId": "python"}
 cant_clases = 1
 
-d_in=len(x_train.columns)
+
+#d_in=len(y_train)
+d_in=len(x_train_escalado.columns)
 
 modelo_hotels_1 = keras.Sequential([
     keras.layers.Dense(8,input_shape=(d_in,),activation ='relu'),
-    keras.layers.Dense(cant_clases, activation='sigmoid'),])
+    keras.layers.Dense(cant_clases, activation='sigmoid'),
+])
 
 
 modelo_hotels_1.summary()
@@ -253,7 +215,13 @@ modelo_hotels_1.compile(
 
 cant_epochs=80
 
-historia_modelo_hotels_1=modelo_hotels_1.fit(x_train,y_train,epochs=cant_epochs,batch_size=16,verbose=False)
+historia_modelo_hotel_1=modelo_hotels_1.fit(x_train_escalado,y_train,epochs=cant_epochs,batch_size=16,verbose=False)
+```
+
+```python
+y_pred = modelo_hotels_1.predict(x_test_escalado)
+y_predic_cat_ej1 = np.where(y_pred>0.7,1,0)
+historia_modelo_hotels_1=modelo_hotels_1.fit(x_train_escalado,y_train,epochs=cant_epochs,batch_size=16,verbose=False)
 ```
 
 Miramos la metrica AUC en funcion de la cantidad de epocas para enocntrar un valor aceptable
@@ -270,7 +238,7 @@ plt.legend()
 Predecimos
 
 ```python vscode={"languageId": "python"}
-y_pred_modelo_1 = modelo_hotels_1.predict(x_test)
+y_pred_modelo_1 = modelo_hotels_1.predict(x_test_escalado)
 y_predic_cat_modelo_1 = np.where(y_pred_modelo_1>0.50,1,0)
 ```
 
@@ -293,7 +261,7 @@ Los resultados son relativamente buenos y no se ve que el modelo este muy sesgad
 ```python vscode={"languageId": "python"}
 cant_clases = 1
 
-d_in=len(x_train.columns)
+d_in=len(x_train_escalado.columns)
 
 modelo_hotels_2= keras.Sequential([
     keras.layers.Dense(8,input_shape=(d_in,),activation ='relu'),
@@ -311,7 +279,7 @@ modelo_hotels_2.compile(
 
 cant_epochs=80
 
-historia_modelo_hotels_2=modelo_hotels_2.fit(x_train,y_train,epochs=cant_epochs,batch_size=16,verbose=False)
+historia_modelo_hotels_2=modelo_hotels_2.fit(x_train_escalado,y_train,epochs=cant_epochs,batch_size=16,verbose=False)
 ```
 
 ```python vscode={"languageId": "python"}
@@ -324,7 +292,7 @@ plt.legend()
 ```
 
 ```python colab={"base_uri": "https://localhost:8080/", "height": 1000} id="4ab27167" outputId="c6e52f3c-6c96-47c1-ac4b-d14b378ff8d9" vscode={"languageId": "python"}
-y_pred_modelo_2 = modelo_hotels_2.predict(x_test)
+y_pred_modelo_2 = modelo_hotels_2.predict(x_test_escalado)
 y_pred_modelo_2
 ```
 
@@ -351,7 +319,7 @@ El f1_score practicamente no mejoro con el aumnento de neruronas y capas. Sin em
 ```python vscode={"languageId": "python"}
 cant_clases = 1
 
-d_in=len(x_train.columns)
+d_in=len(x_train_escalado.columns)
 
 modelo_hotels_3= keras.Sequential([
     keras.layers.Dense(8,input_shape=(d_in,),activation ='relu'),
@@ -367,7 +335,7 @@ modelo_hotels_3.compile(
 
 cant_epochs=40
 
-historia_modelo_hotels_3=modelo_hotels_3.fit(x_train,y_train,epochs=cant_epochs,batch_size=16,verbose=False)
+historia_modelo_hotels_3=modelo_hotels_3.fit(x_train_escalado,y_train,epochs=cant_epochs,batch_size=16,verbose=False)
 ```
 
 Vemos el AUC contra la cantidad de epocas
@@ -382,7 +350,7 @@ plt.legend()
 ```
 
 ```python vscode={"languageId": "python"}
-y_pred_modelo_3 = modelo_hotels_3.predict(x_test)
+y_pred_modelo_3 = modelo_hotels_3.predict(x_test_escalado)
 y_pred_modelo_3
 ```
 
@@ -408,11 +376,10 @@ Con la mitad de epocas y menor cantidad de capas y neuronas el valor del f1_scor
 
 ```python vscode={"languageId": "python"}
 dump(modelo_hotels_3, 'modelos/red_neuronal_3.joblib')
-
 ```
 
 ```python id="a82b6519" vscode={"languageId": "python"}
-y_pred_testeo = modelo_hotels_2.predict(hotelsdf_testeo_filtrado)
+y_pred_testeo = modelo_hotels_3.predict(hotelsdf_testeo_filtrado)
 y_pred_testeo
 ```
 
@@ -429,5 +396,130 @@ df_resultados_pred
 df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': df_resultados_pred["resultado"]})
 df_submission.to_csv('submissions/red_neuronal_3.csv', index=False)
 df_submission
+df_submission.head()
+```
+
+# Validacion cruzada
+
+
+En esta etapa vamos a realizar unas series de validaciones cruzadas en la busqueda de encontrar el mejor resultado
+
+
+Para usar la libreria Keras Classifier necesitamos crear una funcion que cree una modelo.
+
+```python
+loss='binary_crossentropy'
+metrics=['AUC']
+optimizer="adam"
+
+def creador_modelo(learning_rate = 0.1, 
+                   activation = 'sigmoid', 
+                   output = 2, 
+                  hidden_layers = 2
+                  ):
+    model = keras.Sequential()
+    model.add(keras.layers.Dense(5, activation=activation, input_shape=(d_in,)))
+    
+    for i in range(hidden_layers):
+        model.add(keras.layers.Dense(output, activation=activation))
+
+    model.add(keras.layers.Dense(1, activation=activation))
+    
+    model.compile(
+      optimizer=optimizer,
+      loss=loss, 
+      metrics=metrics, 
+    )
+    return model
+```
+
+Vamos a empezar con una baja cantidad de epochs y batch_size
+
+```python
+model = KerasClassifier(build_fn=creador_modelo, 
+                        verbose=1)
+```
+
+```python
+param_grid = { 
+                  "hidden_layers" : [1, 5, 10, 15, 20], 
+                    "output" : [1, 2, 4, 8, 32, 64], 
+                    "batch_size" : [5, 10, 20],
+                    "epochs" : [50, 100, 150],
+                   "activation": ["sigmoid", "relu", "softmax", "softplus", "elu", ]
+             } 
+```
+
+```python
+rs = RandomizedSearchCV(estimator=model, param_distributions=param_grid,n_jobs=JOBS, cv=3,n_iter=10)
+```
+
+```python
+if exists('modelos/rs_fit.joblib') == False:
+    rs_fit = rs.fit(X = x_train_escalado, y = y_train)
+    dump(rs_fit, 'modelos/rs_fit.joblib')
+else:
+    rs_fit = load('modelos/rs_fit.joblib')
+```
+
+```python
+rs_fit.best_params_
+```
+
+```python
+modelo_rs = keras.Sequential()
+modelo_rs.add(keras.layers.Dense(5, activation=rs_fit.best_params_["activation"], input_shape=(d_in,)))
+    
+for i in range(rs_fit.best_params_["hidden_layers"]):
+        # Add one hidden layer
+    modelo_rs.add(keras.layers.Dense(rs_fit.best_params_["output"], activation=rs_fit.best_params_["activation"]))
+
+modelo_rs.add(keras.layers.Dense(1, activation="sigmoid"))
+
+    
+modelo_rs.compile(
+    optimizer=optimizer,
+    loss=loss, 
+    metrics=metrics, 
+    )
+```
+
+```python
+cant_epochs=rs_fit.best_params_["epochs"]
+batch_size=rs_fit.best_params_["batch_size"]
+
+historia_modelo_hotel_4=modelo_rs.fit(x_train_escalado,y_train,
+                                      epochs=cant_epochs,
+                                      batch_size=batch_size,verbose=False)
+
+```
+
+```python
+epochs = range(cant_epochs)
+
+plt.plot(epochs, historia_modelo_hotel_4.history['auc'], color='orange', label='AUC')
+plt.xlabel("epochs")
+plt.ylabel("AUC")
+plt.legend()
+```
+
+```python
+y_pred = modelo_rs.predict(x_test_escalado)
+y_predic_cat_modelo4 = np.where(y_pred>0.5,1,0)
+
+print(classification_report(y_test,y_predic_cat_modelo_1))
+print('F1-Score: {}'.format(f1_score(y_test, y_predic_cat_modelo4, average='binary'))) 
+cm = confusion_matrix(y_test,y_predic_cat_modelo_1)
+sns.heatmap(cm, cmap='Blues',annot=True,fmt='g')
+plt.xlabel('predecido')
+plt.ylabel('verdadero')
+```
+
+```python
+y_pred_testeo = modelo_rs.predict(hotelsdf_testeo_filtrado)
+y_pred_testeo_cat = np.where(y_pred_testeo>0.5,1,0)
+df_resultados_pred = pd.DataFrame.from_records(y_pred_testeo_cat,columns = ["resultado"])
+df_submission = pd.DataFrame({'id': hotelsdf_pruebasOriginal['id'], 'is_canceled': df_resultados_pred["resultado"]})
+df_submission.to_csv('submissions/red_neuronal_rs.csv', index=False)
 df_submission.head()
 ```
