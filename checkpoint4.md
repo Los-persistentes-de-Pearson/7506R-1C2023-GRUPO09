@@ -389,8 +389,8 @@ for i in range(rs_fit.best_params_["hidden_layers"]):
 modelo_rs.add(keras.layers.Dense(1, activation=rs_fit.best_params_["activation"]))
     
 modelo_rs.compile(
-    optimizer=keras.optimizers.SGD(learning_rate=rs_fit.best_params_["learning_rate"]), 
-#     optimizer=optimizer,
+#     optimizer=keras.optimizers.SGD(learning_rate=rs_fit.best_params_["learning_rate"]), 
+    optimizer=optimizer,
     loss=loss, 
     metrics=metrics, 
     )
