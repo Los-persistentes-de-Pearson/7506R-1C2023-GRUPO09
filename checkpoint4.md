@@ -401,12 +401,15 @@ modelo_rs.compile(
 cant_epochs=rs_fit.best_params_["epochs"]
 batch_size=rs_fit.best_params_["batch_size"]
 
-historia_modelo_hotel_1=modelo_rs.fit(x_train_escalado,y_train,epochs=cant_epochs,batch_size=16,verbose=False)
+historia_modelo_hotel_1=modelo_rs.fit(x_train_escalado,y_train,
+                                      epochs=cant_epochs,
+                                      batch_size=batch_size,verbose=False)
+
 ```
 
 ```python
 y_pred = modelo_rs.predict(x_test_escalado)
-y_predic_cat_ej1 = np.where(y_pred>0.7,1,0)
+y_predic_cat_ej1 = np.where(y_pred>0.5,1,0)
 
 ds_validacion=pd.DataFrame(y_predic_cat_ej1,y_test).reset_index()
 ds_validacion.columns=['y_pred','y_real']
