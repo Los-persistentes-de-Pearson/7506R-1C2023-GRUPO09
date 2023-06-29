@@ -12,9 +12,19 @@ Notebook:
 
 
 
+**TUDU**:
+- [ ] Bayes Naive
+    - [ ] Busqueda de hiper parametros
 
+- [ ] Random Forest
+    - [X] Busqueda de hiper parametros
+    - [ ] Correrlo con el dataset el que tiene stopwords (filtrado)
+    - [ ] Correrlo con el dataset el que no tiene stopwords (filtrado)
 
+- [X] XG Boost
 
+- [ ] Redes Neuonales
+    - [ ] Busqueda de hiper parametros
+    - [ ] Correrlo con el dataset con stopwords
 
-
-
+- [ ] Ensamble
