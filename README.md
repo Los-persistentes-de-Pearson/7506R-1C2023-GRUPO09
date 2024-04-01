@@ -14,12 +14,16 @@
 
 ## Informes
 Informe:
+- [Informe checkpoint TP1 - Chapter 1](informe/7506R_TP1_GRUPO09_CHP1_REPORTE.pdf)
+- [Informe checkpoint TP1 - Chapter 2](informe/7506R_TP1_GRUPO09_CHP2_REPORTE.pdf)
+- [Informe checkpoint TP1 - Chapter 3](informe/7506R_TP1_GRUPO09_CHP3_REPORTE.pdf)
+- [Informe checkpoint TP1 - Chapter 4](informe/7506R_TP1_GRUPO09_CHP4_REPORTE.pdf)
 - [Informe checkpoint TP2](informe/7506R_TP2_GRUPO09_CHP1_REPORTE.pdf)
 
 ## Ayudanos
-Si este repositorio te sirvio de alguna manera, te pedimos dos cositas:
+Si este repositorio te sirvio de alguna manera, te pedimos tres cositas:
 - Completa este [Google Form](https://forms.gle/9uuK4sWutATCBNXh7). Nos sirve para saber quien esta usando el repo! 
 - Dale una estrella al repositorio en Github (Protip: Dasela **DESPUES** de aprobar, así nadie va a saber que estuviste aca. Va a ser nuestro pequeño secreto ;) ) 
-
+- Si encontraste algun error, hace un PR! 
 
 ![Karl Pearson](informe/images/Karl_Pearson.jpg) 
