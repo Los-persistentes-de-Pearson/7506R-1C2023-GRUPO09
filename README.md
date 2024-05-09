@@ -22,7 +22,7 @@ Informe:
 
 ## Ayudanos
 Si este repositorio te sirvio de alguna manera, te pedimos tres cositas:
-- Completa este [Google Form](https://forms.gle/9uuK4sWutATCBNXh7). Nos sirve para saber quien esta usando el repo! 
+- Completa este [Google Form](https://forms.gle/9uuK4sWutATCBNXh7). **Es totalmente anonimo**. Nos sirve para saber quien esta usando el repo! 
 - Dale una estrella al repositorio en Github (Protip: Dasela **DESPUES** de aprobar, así nadie va a saber que estuviste aca. Va a ser nuestro pequeño secreto ;) ) 
 - Si encontraste algun error, hace un PR! 
 
